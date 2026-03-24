@@ -53,12 +53,7 @@ public:
 	/// <returns>ノックバック力</returns>
 	virtual float GetKnockbackPower() const = 0;
 
-	/// <summary>
-	/// ノックバックの強さを手動で設定
-	/// </summary>
-	/// <param name="power">設定するノックバック力</param>
-	void SetKnockbackPower(float power) { m_knockbackPower = power; }
-
+	
 	/// <summary>
 	/// 攻撃の当たり判定オブジェクトを取得
 	/// </summary>

@@ -40,9 +40,83 @@ public:
         Idle,            //通常
         Attack,          //近距離攻撃
         Shoot,           //遠距離攻撃
-        Rush             //突進
+        Rush,            //突進
+        Dizzy            //攻撃後のふらつき
     };
 
+private:
+
+    //定数系
+    
+    //------------------------------------------------------
+    //移動関連
+    //------------------------------------------------------
+    
+    //通常の移動速度
+    static constexpr float MOVE_SPEED = 5.0f;
+    //ダッシュ時の速度
+    static constexpr float DASH_SPEED = 30.0f;
+    //動きだしの加速
+    static constexpr float ACCELERATION_FORCE = 10.0f;
+    //加速から停止したときの摩擦
+    static constexpr float FRICTION_FORCE = 1.0f;
+    //カメラへの追従する速度
+    static constexpr float TURN_SPEED = 10.0f;
+
+    //------------------------------------------------------
+    //攻撃＆スタミナ関連
+    //------------------------------------------------------
+
+    //近距離攻撃のスタミナ消費量
+    static constexpr float STAMINA_COST_ATTACK = 15.0f;
+    //遠距離攻撃のスタミナ消費量
+    static constexpr float STAMINA_COST_SHOOT = 10.0f;
+    //突進攻撃（ダッシュ）中のフレームあたりのスタミナ消費量　
+    static constexpr float STAMINA_COST_DASH = 0.5f;
+    //突進攻撃（ダッシュ）中の継続スタミナ消費量
+    static constexpr float STAMINA_COST_RUSH = 0.05f;
+
+    //近距離攻撃で必要な最低スタミナ量
+    static constexpr float STAMINA_REQ_ATTACK = 10.0f;
+    //遠距離攻撃で必要な最低スタミナ量
+    static constexpr float STAMINA_REQ_SHOOT = 5.0f;
+    //突進攻撃で必要な最低スタミナ量
+    static constexpr float STAMINA_REQ_RUSH = 30.0f;
+
+    //攻撃のクールダウン
+    static constexpr float ATTACK_COOLDOWN = 0.5f;
+    //攻撃モーションの維持時間
+    static constexpr float STATE_TIMER_ATTACK = 0.3f;
+    //射撃モーションの維持時間
+    static constexpr float STATE_TIMER_SHOOT = 0.2f;
+    
+
+    //------------------------------------------------------
+    //システム＆物理関連
+    //------------------------------------------------------
+
+    //海へ落下したときのダメージ量
+    static constexpr float FALL_DAMAGE = 50.0f;
+    //落下する判定の高さ
+    static constexpr float RESPAWN_THRESHOLD_Y = -5.0f;
+    //足場補正の高さ
+    static constexpr float STAGE_BOUNDARY_Y = -4.9f;
+    //接地のめり込み補正
+    static constexpr float GROUND_OFFSET_Y = 0.5f;
+
+    //水しぶきの数
+    static constexpr int SPLASH_OF_WATER = 30;
+    
+    //ふらつきの状態の継続時間
+    static constexpr float STATE_TIMER_DIZZY = 2.0f;
+    //ふらつきエフェクトの高さ
+    static constexpr float DIZZY_EFFECT_OFFSET_Y = 2.5f;
+    //ふらつきエフェクトの回転速度
+    static constexpr float DIZZY_EFFECT_ROT_SPEED = 5.0f;
+    //ふらつき時の揺れる速度
+    static constexpr float DIZZY_SWAY_SPEED = 2.0f;
+    //ふらつき時の揺れる最大角度
+    static constexpr float DIZZY_SWAY_ANGLE = 0.26f;
 
 public:
 
@@ -98,8 +172,8 @@ public:
     /// <param name="proj"></param>
     /// <param name="shadowRenderer">影のポインタ</param>
     void Render(ID3D11DeviceContext* context,
-        DirectX::SimpleMath::Matrix view,
-        DirectX::SimpleMath::Matrix proj,
+        DirectX::SimpleMath::Matrix& view,
+        DirectX::SimpleMath::Matrix& proj,
         ShadowRenderer* shadowRenderer
     );
 
@@ -283,6 +357,11 @@ public:
     /// <param name="elapsedTime">前フレームからの経過時間</param>
     void UpdateStamina(float elapsedTime);
     
+    /// <summary>
+    /// ふらつき状態にする
+    /// </summary>
+    void ApplyDizzy();
+
 private:
 
     DX::DeviceResources* m_deviceResources;
@@ -309,7 +388,7 @@ private:
     
     DirectX::SimpleMath::Vector3 m_velocity = { 0,0,0 };
     
-    //float m_gravity = -9.8f;
+    //重力
     float m_gravity = -100.8f;
 
     // Optional: スライド移動用
@@ -344,8 +423,14 @@ private:
     std::shared_ptr<DirectX::Model> m_modelShoot;
     std::shared_ptr<DirectX::Model> m_modelRush;
 
+    //ふらついているときの素材
+    std::shared_ptr<DirectX::Model> m_materialDizzy;
+
     //現在の描画に使うモデルを指すポインタ
     DirectX::Model* m_currentModel = nullptr;
+
+    //ふらつきエフェクトの現在の回転角度
+    float m_dizzyRotationY = 0.0f;
 
 private:
 
@@ -365,4 +450,6 @@ private:
     //std::unique_ptr<ShadowRenderer> m_shadowRenderer;
 
     Stage* m_stage = nullptr;
+
+
 };

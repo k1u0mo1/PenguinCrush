@@ -19,6 +19,19 @@ class Player;
 /// </summary>
 class RushP : public AttackBase
 {
+private:
+
+    //------------------------------------------------------
+    //定数関連
+    //------------------------------------------------------
+
+    //攻撃したときのダメージ量
+    static constexpr float ATTACK_DAMAGE = 25.0f;
+    //敵を吹き飛ばすノックバック力
+    static constexpr float KNOCKBACK_POWER = 30.0f;
+    //攻撃判定が消えるまでの時間
+    static constexpr float MAX_LIFETIME = 0.5f;
+
 public:
 
     /// <summary>
@@ -67,7 +80,7 @@ public:
     /// 敵にヒットした際に与えるノックバックの強さを取得
     /// </summary>
     /// <returns></returns>
-    float GetKnockbackPower() const override;
+    float GetKnockbackPower() const { return KNOCKBACK_POWER; }
 
     /// <summary>
     /// 攻撃の当たり判定オブジェクトを取得
@@ -96,9 +109,16 @@ public:
     /// <summary>
     /// 突進攻撃のダメージ量
     /// </summary>
-    /// <returns>{ return 25.0f; }ここでダメージ量を設定</returns>
-    float GetDamage() const override { return 25.0f; }
+    /// <returns>ダメージ量</returns>
+    float GetDamage() const override { return ATTACK_DAMAGE; }
     
+    /// <summary>
+    /// 攻撃を撃ったプレイヤーを取得
+    /// 突進後のデメリットを作るため用
+    /// </summary>
+    /// <returns>m_player</returns>
+    Player* GetPlayer() const { return m_player; }
+
 private:
 
     DX::DeviceResources* m_deviceResources;
@@ -115,8 +135,7 @@ private:
 
     //長さ
     float m_lifetime;
-    //○秒だけ判定させる
-    static constexpr float MAX_LIFETIME = 0.5f;
+    
 
     std::unique_ptr<ModelCollisionOrientedBox> m_collision;
 

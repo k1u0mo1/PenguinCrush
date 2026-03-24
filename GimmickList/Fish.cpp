@@ -236,16 +236,16 @@ void Fish::Render(
 
     // スケールと移動行列 0.4f, 0.3f, 0.3f
     DirectX::SimpleMath::Matrix scale = 
-        DirectX::SimpleMath::Matrix::CreateScale(0.6f, 0.5f, 0.5f);
+        DirectX::SimpleMath::Matrix::CreateScale(FISH_SCALE_X, FISH_SCALE_Y, FISH_SCALE_Z);
 
     //回転
     SimpleMath::Matrix initRotX = SimpleMath::Matrix::CreateRotationZ(XMConvertToRadians(270.0f));
-    SimpleMath::Matrix initRotY = SimpleMath::Matrix::CreateRotationY(XMConvertToRadians(90.0f));
+    SimpleMath::Matrix initRotY = SimpleMath::Matrix::CreateRotationY(XMConvertToRadians(MODEL_ROTATION_OFFSET));
 
     //ピチピチ動くアニメーション
     //sin波で時間経過でZ軸を振動させる
-    //m_lifetime＊20.0fで高速に振動
-    float flopAngle = sinf(m_lifetime * 20.0f) * XMConvertToRadians(15.0f);
+    //m_lifetime＊FLOP_SPEEDで高速に振動
+    float flopAngle = sinf(m_lifetime * FLOP_SPEED) * XMConvertToRadians(15.0f);
 
     //揺れ 
     SimpleMath::Matrix flopRot = SimpleMath::Matrix::CreateRotationX(flopAngle);

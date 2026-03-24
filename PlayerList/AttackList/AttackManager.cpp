@@ -30,7 +30,10 @@ void AttackManager::Bullet(Player* player)
 	dir.Normalize();
 
 	//弾の生成位置
-	Vector3 spawnPos = player->GetPosition() + dir * 1.5f + Vector3(0, 1.5f, 0);
+	Vector3 spawnPos =
+		player->GetPosition() 
+		+ dir * SPAWN_FORWARD_DIST
+		+ Vector3(0, SPAWN_HEIGHT_OFFSET, 0);
 
 	auto bullet = std::make_shared<BulletP>(
 		spawnPos,
@@ -40,8 +43,6 @@ void AttackManager::Bullet(Player* player)
 		player->GetStage(),
 		player->GetDisplayCollision()
 	);
-
-	bullet->SetKnockbackPower(10.0f);
 
 	AddAttack(bullet);
 
@@ -82,9 +83,6 @@ void AttackManager::Rush(Player* player)
 		dir,                           // forward
 		m_displayCollision  // displayCollision
 	);
-
-	//ノックバックパワーの設定を追加
-	rushAttack->SetKnockbackPower(30.0f);
 
 	AddAttack(rushAttack);
 
@@ -164,9 +162,6 @@ void AttackManager::Update(
 					//種類
 					type = BossEnemy::PlayerAttackType::Shoot;
 
-					//ダメージを変更
-					//damage = 50.0;
-
 					//音
 					AudioManager::GetInstance()->Play("Dash");
 				}
@@ -180,17 +175,27 @@ void AttackManager::Update(
 					AudioManager::GetInstance()->Play("Attack");
 				}
 				// ラッシュ（RushP）だった場合
-				else if (dynamic_cast<RushP*>(atk.get()))
+				else if (RushP* rushAtk = dynamic_cast<RushP*>(atk.get()))
 				{
 					//種類
 					type = BossEnemy::PlayerAttackType::Rush;
 
-					//ダメージ
-					//damage = 150.0f;
-
 					//音
 					AudioManager::GetInstance()->Play("Dash");
+
+					//敵に攻撃が当たったらプレイヤーにも与える
+					Player* hitPlayer = rushAtk->GetPlayer();
+
+					if (hitPlayer != nullptr)
+					{
+						//プレイヤーの向いている方向とは逆のベクトルを計算
+						DirectX::SimpleMath::Vector3 bounceDir = -hitPlayer->GetForward();
+
+						//プレイヤーにノックバックを与える
+						hitPlayer->ApplyKnockback(bounceDir, 2.0f);
+					}
 				}
+
 
 				//判別した種類で攻撃
 				enemy->TakeDamage(damage, type);

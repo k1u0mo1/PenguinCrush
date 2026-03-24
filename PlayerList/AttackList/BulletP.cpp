@@ -36,7 +36,7 @@ BulletP::BulletP(
     {
         m_collision = std::make_unique<ModelCollisionOrientedBox>(m_model.get());
         m_collision->SetCenter(m_pos);
-        m_collision->SetExtents(Vector3(0.25f, 0.25f, 0.25f)); // 当たり判定のサイズ
+        m_collision->SetExtents(Vector3(COLLISION_SIZE, COLLISION_SIZE, COLLISION_SIZE)); // 当たり判定のサイズ
     }
 }
 

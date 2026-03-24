@@ -23,7 +23,7 @@ FishManager::FishManager(
 void FishManager::Update(float dt, Player* player)
 {
     m_spawnTimer += dt;
-    if (m_spawnTimer >= 5.0f)
+    if (m_spawnTimer >= FISH_SPAWN_INTERVAL)
     {
         m_spawnTimer = 0.0f;
         SpawnFish();
@@ -52,7 +52,7 @@ void FishManager::Update(float dt, Player* player)
                     player->AddAmmo(fish->GetAmmoValue());
                     
                     //HPを回復
-                    player->Heal(5.0f);
+                    player->Heal(FISH_HEAL_AMOUNT);
 
                     //弾を消す
                     fish->BulletKill();
@@ -91,11 +91,11 @@ void FishManager::SpawnRandomFish(int count)
 void FishManager::SpawnFish()
 {
     // ランダム座標
-    float x = static_cast<float>(rand() % 100 - 50);
-    float z = static_cast<float>(rand() % 100 - 50);
+    float x = static_cast<float>(rand() % SPAWN_AREA_SIZE - SPAWN_AREA_OFFSET);
+    float z = static_cast<float>(rand() % SPAWN_AREA_SIZE - SPAWN_AREA_OFFSET);
 
     // ステージの高さ
-    float y = m_stage->GetGroundHeight(x, z) + 5.0f;
+    float y = m_stage->GetGroundHeight(x, z) + SPAWN_HEIGHT_OFFSET;
 
     auto fish = std::make_unique<Fish>(
         m_deviceResources,

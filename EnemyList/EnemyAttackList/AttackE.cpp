@@ -11,9 +11,6 @@ using namespace DirectX;
 
 using Microsoft::WRL::ComPtr;
 
-
-using namespace DirectX;
-
 AttackE::AttackE(
 	DX::DeviceResources* deviceResources,
 	const DirectX::SimpleMath::Vector3& playerPos, 
@@ -36,16 +33,13 @@ AttackE::AttackE(
 			fx
 	);
 
-	//プレイヤーの前方に出す位置 
-	//m_position = playerPos + forward * 2.0f;//数字は腕の長さ
-
 	//高さと距離調整
 	DirectX::SimpleMath::Vector3 startPos = playerPos;
 
 	//高さを上げる
-	startPos.y += 0.5f;
+	startPos.y += SPAWN_HEIGHT_OFFSET;
 
-	m_position = startPos + forward * 1.0f;
+	m_position = startPos + forward * SPAWN_DISTANCE;
 
 
 	//OBB （幅 高さ 奥行き）
@@ -69,7 +63,7 @@ void AttackE::Update(float deltaTime)
 	m_lifetime += deltaTime;
 
 	// 弾の移動
-	m_position += m_forward * deltaTime * 10.0f; 
+	m_position += m_forward * deltaTime * ATTACK_SPEED;
 
 	if (m_collision)
 	{
@@ -124,7 +118,7 @@ DirectX::BoundingBox AttackE::GetBoundingBox() const
 	{
 		//デフォルト小さい箱
 		box.Center = m_position;
-		box.Extents = DirectX::SimpleMath::Vector3(0.3f, 0.3f, 0.3f);
+		box.Extents = DirectX::SimpleMath::Vector3(DEFAULT_BOUNDING_SIZE, DEFAULT_BOUNDING_SIZE, DEFAULT_BOUNDING_SIZE);
 	}
 	return box;
 }

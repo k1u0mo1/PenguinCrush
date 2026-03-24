@@ -16,6 +16,31 @@
 
 class AttackE : public EnemyAttackBase
 {
+private:
+
+    //------------------------------------------------------
+    //攻撃関連
+    //------------------------------------------------------
+
+    //近距離攻撃のダメージ量
+    static constexpr float ATTACK_DAMAGE = 20.0f;
+    //ノックバックの力
+    static constexpr float KNOCKBACK_POWER = 20.0f;
+    //判定の移動速度
+    static constexpr float ATTACK_SPEED = 10.0f;
+
+    //------------------------------------------------------
+    //座標＆サイズ関連
+    //------------------------------------------------------
+
+    //発生位置の高さ
+    static constexpr float SPAWN_HEIGHT_OFFSET = 0.5f;
+    //プレイヤーとの発生距離
+    static constexpr float SPAWN_DISTANCE = 1.0f;
+    //当たり判定のサイズ
+    static constexpr float DEFAULT_BOUNDING_SIZE = 0.3f;
+
+
 public:
 
     /// <summary>
@@ -64,7 +89,7 @@ public:
     /// 敵ー＞プレイヤー
     /// </summary>
     /// <returns>ノックバック力</returns>
-    float GetKnockbackPower() const override { return 20.0f; } 
+    float GetKnockbackPower() const override { return KNOCKBACK_POWER; }
 
     /// <summary>
     /// 当たり判定を取得
@@ -87,8 +112,8 @@ public:
     /// <summary>
     /// 近距離攻撃のダメージ量を取得
     /// </summary>
-    /// <returns>ダメージ量　{ return 20.0f; }</returns>
-    float GetDamage() const override { return 20.0f; }
+    /// <returns>ダメージ量</returns>
+    float GetDamage() const override { return ATTACK_DAMAGE; }
 
 private:
 

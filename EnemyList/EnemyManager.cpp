@@ -242,14 +242,12 @@ void EnemyManager::Render(
 )
 {
     //âeÇïtÇØÇÈ
-    if (m_boss && shadowRenderer)
+    if (m_boss && !m_boss->IsDead() && shadowRenderer)
     {
         //É{ÉXÇÃåªç›à íuÇéÊìæ
         DirectX::SimpleMath::Vector3 shadowPos = m_boss->GetPosition();
 
-        //âeÇÃëÂÇ´Ç≥
-        float shadowScale = 3.0f;
-
+        
         //ÉXÉeÅ[ÉWÇÃåXÇ´ÇéÊìæ
         float rotX = m_stage->GetRotateX();
         float rotZ = m_stage->GetRotateZ();
@@ -261,14 +259,14 @@ void EnemyManager::Render(
             view,
             proj,
             shadowPos,
-            shadowScale,
+            SHADOW_SCALE,
             rotX,
             rotZ
         );
     }
 
     //ìGÇÃï`âÊ
-    if (m_boss)
+    if (m_boss && !m_boss->IsDead())
     {
         m_boss->Render(context, view, proj);
     }
@@ -322,7 +320,7 @@ void EnemyManager::DoBossAttack(
     //-------------------------------
     // çUåÇéÌóﬁÇÃêUÇËï™ÇØ
     //-------------------------------
-    if (dist < 10.0f)
+    if (dist < ATTACK_SWITCH_DISTANCE)
     {
         // ãﬂê⁄çUåÇ
         m_attacks.push_back(std::make_unique<AttackE>(
@@ -333,11 +331,11 @@ void EnemyManager::DoBossAttack(
         )
         );
         //ÉÇÉfÉã
-        m_boss->SetState(BossEnemy::EnemyState::Attack, 0.5f);
+        m_boss->SetState(BossEnemy::EnemyState::Attack, ATTACK_STATE_DURATION);
 
-        m_attackCoolTimer = 1.5f;
+        m_attackCoolTimer = ATTACK_COOLDOWN;
     }
-    else if (dist < 30.0f)
+    else if (dist < DASH_SWITCH_DISTANCE)
     {
         //ìÀêi
         m_rushs.push_back(std::make_unique<RushE>(
@@ -348,15 +346,15 @@ void EnemyManager::DoBossAttack(
         )
         );
         //ÉÇÉfÉã
-        m_boss->SetState(BossEnemy::EnemyState::Rush, 1.0f);
+        m_boss->SetState(BossEnemy::EnemyState::Rush, RUSH_STATE_DURATION);
 
-        m_attackCoolTimer = 7.0f;
+        m_attackCoolTimer = RUSH_COOLDOWN;
 
     }
     else
     {
         //íe
-        auto spawnPos = pos + forward * 5.0f + DirectX::SimpleMath::Vector3(0, 1.5f, 0);
+        auto spawnPos = pos + forward * BULLET_SPAWN_DISTANCE + DirectX::SimpleMath::Vector3(0, BULLET_SPAWN_HEIGHT, 0);
 
         auto bullet = std::make_unique<BulletE>(
             m_deviceResources,
@@ -367,10 +365,10 @@ void EnemyManager::DoBossAttack(
         );
 
         //ÉÇÉfÉã
-        m_boss->SetState(BossEnemy::EnemyState::Shoot, 1.0f);
+        m_boss->SetState(BossEnemy::EnemyState::Shoot, SHOOT_STATE_DURATION);
 
         m_bullets.push_back(std::move(bullet));
-        m_attackCoolTimer = 5.2f;
+        m_attackCoolTimer = SHOOT_COOLDOWN;
 
         //å¯â âπ
         AudioManager::GetInstance()->Play("BulletE");

@@ -20,6 +20,61 @@
 
 class BossEnemy
 {
+private:
+
+    //------------------------------------------------------
+    //物理＆移動関連
+    //------------------------------------------------------
+
+    //重力加速度
+    static constexpr float GRAVITY_FORCE = -100.8f;
+    //ノックバックの速度減衰率
+    static constexpr float KNOCKBACK_DRAG = 10.0f;
+    //復活する時の判定の高さ
+    static constexpr float FALL_LIMIT_Y = -5.0f;
+    //接地する足場の位置の高さ
+    static constexpr float STAGE_BOUNDARY_Y = -4.9f;
+    //接地時の埋まり防止の高さ
+    static constexpr float GROUND_HEIGHT_OFFSET = 0.5f;
+    //落下からの復帰高度
+    static constexpr float RESPAWN_HEIGHT = 10.0f;
+    //プレイヤーを追尾を開始する距離
+    static constexpr float PLAYER_DISTANCE_THRESHOLD = 2.0f;
+
+    //------------------------------------------------------
+    //ダメージ＆戦闘関連
+    //------------------------------------------------------
+
+    //海に落ちたときに受けるダメージ量
+    static constexpr float FALL_DAMAGE = 250.0f;
+    //回避が発動する連続被弾回数
+    static constexpr int EVADE_HIT_THRESHOLD = 3;
+    //回避状態の持続時間
+    static constexpr float EVADE_DURATION = 0.5f;
+    //プレイヤーからの攻撃のノックバックの力
+    static constexpr float KNOCKBACK_POWER_SCALE = 10.0f;
+    //ノックバックの持続時間
+    static constexpr float KNOCKBACK_DURATION = 0.15f;
+
+    //------------------------------------------------------
+    //描画＆エフェクト関連
+    //------------------------------------------------------
+
+    //モデルの描画サイズ
+    static constexpr float MODEL_RENDER_SCALE = 1.7f;
+    //着地煙の持続時間
+    static constexpr float SMOKE_DURATION = 1.0f;
+    //煙の初期サイズ
+    static constexpr float SMOKE_BASE_SCALE = 3.0f;
+    //煙の拡大速度
+    static constexpr float SMOKE_GROWTH_RATE = 100.0f;
+    //煙の発生位置
+    static constexpr float SMOKE_Y_OFFSET = 0.5f;
+    //落下したときの水しぶきの粒子数
+    static constexpr float SPLASH_PARTICLE_COUNT = 50.0f;
+    //接地エフェクト判定の高さ
+    static constexpr float GROUND_LEVEL_THRESHOLD = 7.0f;
+
 public:
 
     /// <summary>
@@ -196,19 +251,17 @@ private:
     std::unique_ptr<DirectX::Model> m_model;
     std::unique_ptr<DirectX::CommonStates> m_states;
 
-  
-
     //重力
     DirectX::SimpleMath::Vector3 m_velocity = DirectX::SimpleMath::Vector3::Zero;
     float m_gravity = -100.8f;
 
     //ノックバック用
     DirectX::SimpleMath::Vector3 m_knockbackVelocity = { 0, 0, 0 };
+
     //ノックバック持続タイマー
     float m_knockbackTimer = 0.0f;
-    //速度減衰率
-    const float KNOCKBACK_DRAG = 10.0f;
 
+   
 private:
 
     //プレイヤーの原因の状態
@@ -238,6 +291,7 @@ private:
 
 
 private:
+
     //着地したら煙を出す
     //エフェクト
     std::unique_ptr<Smoke> m_smokeEffect;
@@ -251,6 +305,7 @@ private:
 
     //着地を覚える
     bool m_isGroundPrev;
+
     //着地を判定する
     bool m_isGroundNow;
 

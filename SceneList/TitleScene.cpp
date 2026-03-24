@@ -40,8 +40,7 @@ void TitleScene::Initialize()
 //更新
 void TitleScene::Update(float elapsedTime)
 {
-	elapsedTime;
-
+	
 	auto input = GetUserResources()->GetInputManager();
 
 	////エンターキーを押すとシーンが変わる
@@ -53,11 +52,17 @@ void TitleScene::Update(float elapsedTime)
 	// --- カーソル移動 ---
 	if (input->kbTracker.pressed.Up || input->kbTracker.pressed.W)
 	{
+		//移動音
+		AudioManager::GetInstance()->Play("SE_Move");
+
 		m_currentCursor--;
 		if (m_currentCursor < 0) m_currentCursor = 1;
 	}
 	if (input->kbTracker.pressed.Down || input->kbTracker.pressed.S)
 	{
+		//移動音
+		AudioManager::GetInstance()->Play("SE_Move");
+
 		m_currentCursor++;
 		if (m_currentCursor > 1) m_currentCursor = 0;
 	}
@@ -350,17 +355,19 @@ void TitleScene::CreateDeviceDependentResources()
 	//音関連
 	//---------------------------------------------------
 
-
 	AudioManager* audio = AudioManager::GetInstance();
 	audio->Initialize();
-	audio->LoadSound("Title", L"Resources/Sounds/あわ雪村.wav");
+	audio->LoadSound("Title", L"Resources/Sounds/BGM_Title.wav");
 	audio->SetBGMVolume(0.2f);
 	audio->PlayBGM("Title");
 
 	//SE 決定音
 	audio->SetSEVolume(1.0f);
-	audio->LoadSound("SE_Click", L"Resources/Sounds/決定ボタンを押す44.wav");
+	audio->LoadSound("SE_Click", L"Resources/Sounds/SE_Click.wav");
 
+	//SE 移動音
+	audio->SetSEVolume(0.2f);
+	audio->LoadSound("SE_Move", L"Resources/Sounds/SE_MoveCursor.wav");
 }
 
 void TitleScene::CreateWindowSizeDependentResources()

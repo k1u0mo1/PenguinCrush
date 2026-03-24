@@ -25,6 +25,46 @@ class Particle;
 
 class EnemyManager
 {
+private:
+
+    //------------------------------------------------------
+    //攻撃＆ステート関連
+    //------------------------------------------------------
+
+    //突進攻撃のクールタイム
+    static constexpr float RUSH_COOLDOWN = 7.0f;
+    //近距離攻撃のクールタイム
+    static constexpr float ATTACK_COOLDOWN = 1.5f;
+    //遠距離攻撃のクールタイム
+    static constexpr float SHOOT_COOLDOWN = 5.2f;
+    //突進ステートの持続の時間
+    static constexpr float RUSH_STATE_DURATION = 1.0f;
+    //近距離ステートの持続の時間
+    static constexpr float ATTACK_STATE_DURATION = 1.0f;
+    //遠距離ステートの持続の時間
+    static constexpr float SHOOT_STATE_DURATION = 1.0f;
+
+    //近距離攻撃と突進攻撃の切り替え　
+    static constexpr float ATTACK_SWITCH_DISTANCE = 10.0f;
+    //突進攻撃と遠距離攻撃の切り替え　
+    static constexpr float DASH_SWITCH_DISTANCE = 30.0f;
+
+    //------------------------------------------------------
+    //弾の生成位置関連
+    //------------------------------------------------------
+
+    //前方への生成距離
+    static constexpr float BULLET_SPAWN_DISTANCE = 5.0f;
+    //生成位置の高さ
+    static constexpr float BULLET_SPAWN_HEIGHT = 1.5f;
+
+    //------------------------------------------------------
+    //その他のシステム関連
+    //------------------------------------------------------
+    
+    //影の大きさ
+    static constexpr float SHADOW_SCALE = 3.0f;
+
 public:
 
 	EnemyManager();

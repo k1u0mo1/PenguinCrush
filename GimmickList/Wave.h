@@ -21,6 +21,23 @@ class Wave : public IGimmick, public DX::IDeviceNotify
 {
 private:
 
+    //------------------------------------------------------
+    //波の描画スケール＆位置関連
+    //------------------------------------------------------
+
+    //波のX軸スケール
+    static constexpr float WAVE_SCALE_X = 10.0f;
+    //波のY軸スケール
+    static constexpr float WAVE_SCALE_Y = 1.0f;
+    //波のZ軸スケール
+    static constexpr float WAVE_SCALE_Z = 10.0f;
+    //波の描画位置 （Y軸高さ）
+    static constexpr float WAVE_OFFSET_Y = -1.0f;
+
+
+
+private:
+
     /// <summary>
     /// 波を構成する頂点構造体
     /// </summary>
@@ -35,29 +52,26 @@ private:
 
     };
 
-    //形状と解像度に関する定数
+    //形状と解像度に関する定数-------------
     //高さ
     static constexpr int GRID_WIDTH = 100;
     static constexpr int GRID_HEIGHT = 100;
-
     //間隔
     static constexpr float GRID_SPACING = 0.5f;
 
-    //波の物理挙動に関する定数
+    //波の物理挙動に関する定数-------------
     //波の細かさ
-    static constexpr float WAVE_FREQUENCY = 0.4f;
+    static constexpr float WAVE_FREQUENCY = 0.2f;
     //時間経過の速さ
     static constexpr float WAVE_SPEED = 0.02f;
     //波の高さ tukawanaikamo
     static constexpr float WAVE_AMPLIYUDE = 0.5f;
-
     //波を配置する高さ
     static constexpr float WORLD_Y = -2.0f;
     //波のスケール
     static constexpr float WORLD_SCALE = 10.0f;
 
-    //ヘルパー関数
-
+    
     /// <summary>
     /// 波の高さ Y を計算
     /// UpdateWaveVerticesとGetHeightで使用
@@ -65,13 +79,14 @@ private:
     /// <param name="x">座標X</param>
     /// <param name="z">座標Y</param>
     /// <param name="time">時間</param>
-    /// <param name="individualAmp"></param>
-    /// <returns></returns>
+    /// <param name="individualAmp">頂点固有の振幅倍率</param>
+    /// <returns>計算されたY座標</returns>
     float CalculateHeight(
         float x, float z,
         float time,
         float individualAmp)const 
     {
+        //波
         float wave =
             sinf(x * WAVE_FREQUENCY + time)
             + cosf(z * WAVE_FREQUENCY + time);
@@ -82,8 +97,8 @@ private:
     /// <summary>
     /// 高さから色を計算
     /// </summary>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <param name="y">現在の波の高さ</param>
+    /// <returns>高さに応じたRGBAカラー</returns>
     DirectX::XMVECTOR CalculateColor(float y)const 
     {
         float t = (y + 1.0f) / 2.0f;
@@ -199,10 +214,6 @@ private:
     std::unique_ptr<DirectX::BasicEffect> m_effect;
 
     Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
-    
-private:
 
     
-
-
 };

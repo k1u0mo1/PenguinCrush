@@ -41,6 +41,12 @@ private:
 	//------------------------------------------------
 	TransitionMask* m_transitionMask;
 	
+	//------------------------------------------------
+	//Ÿ”sŒ‹‰Ê
+	//------------------------------------------------
+
+	//Ÿ”sŒ‹‰Ê‚ğ•Û‘¶
+	bool m_isGameClear = false;
 
 public:
 
@@ -137,6 +143,17 @@ public:
 	//‰æ–Ê‘JˆÚƒ}ƒXƒN‚ğæ“¾‚·‚éŠÖ”
 	TransitionMask* GetTransitionMask() { return m_transitionMask; }
 
+	/// <summary>
+	/// Ÿ”sŒ‹‰Ê‚ğƒZƒbƒg‚·‚éŠÖ”
+	/// </summary>
+	/// <param name="isClear">Ÿ”sŒ‹‰Ê trueŸ‚¿@false•‰‚¯</param>
+	void SetGameClear(bool isClear) { m_isGameClear = isClear; }
+
+	/// <summary>
+	/// Ÿ”sŒ‹‰Ê‚ğæ“¾‚·‚éŠÖ”
+	/// </summary>
+	/// <returns>Ÿ”sŒ‹‰Ê</returns>
+	bool IsGameClear() const { return m_isGameClear; }
 
 };
 

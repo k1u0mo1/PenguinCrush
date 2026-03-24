@@ -12,6 +12,29 @@ class ShadowRenderer;
 
 class FishManager
 {
+private:
+
+    //------------------------------------------------------
+    //スポーン＆回復関連
+    //------------------------------------------------------
+
+    //魚がスポーンする間隔
+    static constexpr float FISH_SPAWN_INTERVAL = 5.0f;
+    //魚を取得した際のプレイヤーのHP回復量
+    static constexpr float FISH_HEAL_AMOUNT = 5.0f;
+
+    //------------------------------------------------------
+    //スポーン範囲関連
+    //------------------------------------------------------
+
+    //スポーン範囲のサイズ
+    static constexpr int SPAWN_AREA_SIZE = 100;
+    //スポーン範囲　中心
+    static constexpr int SPAWN_AREA_OFFSET = 50;
+    //スポーン時の高さ
+    static constexpr float SPAWN_HEIGHT_OFFSET = 5.0f;
+
+
 public:
 
     /// <summary>
@@ -58,6 +81,9 @@ public:
 
 private:
 
+    /// <summary>
+    /// 魚のスポーン
+    /// </summary>
     void SpawnFish();
 
 private:

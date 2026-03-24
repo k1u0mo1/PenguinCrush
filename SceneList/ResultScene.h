@@ -71,11 +71,11 @@ public:
 	/// </summary>
 	void OnDeviceLost() override;
 
-	/// <summary>
+	/*/// <summary>
 	/// 勝敗結果を保持するフラグ
 	/// trueならクリア画面とBGM、falseならゲームオーバー画面
 	/// </summary>
-	static bool isClear;
+	static bool isClear;*/
 
 
 private:

@@ -11,9 +11,9 @@
 #include "SelectScene.h"
 
 //BGM
-#include <SoundList/AudioManager.h>
+#include "SoundList/AudioManager.h"
 
-bool ResultScene::isClear = false;
+//bool ResultScene::isClear = false;
 
 using namespace DirectX;
 
@@ -48,36 +48,7 @@ void ResultScene::Initialize()
 	GetUserResources()->GetTransitionMask()->Open();
 	
 
-	////---------------------------------------------------
-	////勝敗でBGMの違う再生
-	////---------------------------------------------------
-	//AudioManager* audio = AudioManager::GetInstance();
-	//audio->Initialize();
-
-	////勝ち
-	//if (isClear)
-	//{
-	//	// 勝った時のBGM 
-	//	audio->LoadSound("Result_Clear", L"Resources/Sounds/Light-Steps.wav");
-	//	//音量
-	//	audio->SetBGMVolume(0.2f);
-	//	audio->PlayBGM("Result_Clear");
-	//}
-	////負け
-	//else
-	//{
-	//	// 負けた時のBGM
-	//	audio->LoadSound("Result_Over", L"Resources/Sounds/Tristesse.wav");
-	//	//音量
-	//	audio->SetBGMVolume(0.2f);
-	//	audio->PlayBGM("Result_Over");
-	//}
-
-
-	////SE 決定音
-	//audio->SetSEVolume(1.0f);
-	//audio->LoadSound("SE_Click", L"Resources/Sounds/決定ボタンを押す44.wav");
-
+	
 }
 
 //-----------------------------------------------------------------
@@ -119,6 +90,9 @@ void ResultScene::Update(float elapsedTime)
 	// --- カーソル移動 ---
 	if (input->kbTracker.pressed.Up || input->kbTracker.pressed.W)
 	{
+		//移動音
+		AudioManager::GetInstance()->Play("SE_Move");
+
 		m_currentCursor--;
 
 		if (m_currentCursor < 0)
@@ -127,6 +101,9 @@ void ResultScene::Update(float elapsedTime)
 
 	if (input->kbTracker.pressed.Down || input->kbTracker.pressed.S)
 	{
+		//移動音
+		AudioManager::GetInstance()->Play("SE_Move");
+
 		m_currentCursor++;
 
 		if (m_currentCursor >= MENU_COUNT)
@@ -188,7 +165,7 @@ void ResultScene::Render()
 	SimpleMath::Vector3 position(0.0f, 0.0f, 0.0f);//座標
 
 	//勝った時
-	if (isClear)
+	if (GetUserResources()->IsGameClear())
 	{
 		float jumpSpeed = 10.0f;//速さ
 		float jnmpHeight =1.0f;//高さ
@@ -238,7 +215,7 @@ void ResultScene::Render()
 	m_spriteBatch->Begin(SpriteSortMode_Deferred, m_states->NonPremultiplied());
 
 	//勝敗　勝ち
-	if (isClear)
+	if (GetUserResources()->IsGameClear())
 	{
 		if (m_textureClear)
 		{
@@ -503,16 +480,18 @@ void ResultScene::CreateDeviceDependentResources()
 	audio->Initialize();
 
 	//勝敗判定でBGM切り替え
-	if (isClear)
+	//勝ち
+	if (GetUserResources()->IsGameClear())
 	{
-		audio->LoadSound("Result_Clear", L"Resources/Sounds/Light-Steps.wav");
+		audio->LoadSound("Result_Clear", L"Resources/Sounds/BGM_Clear.wav");
 		//音量
 		audio->SetBGMVolume(0.2f);
 		audio->PlayBGM("Result_Clear");
 	}
+	//負け
 	else
 	{
-		audio->LoadSound("Result_Over", L"Resources/Sounds/Tristesse.wav");
+		audio->LoadSound("Result_Over", L"Resources/Sounds/BGM_Over.wav");
 		//音量
 		audio->SetBGMVolume(0.2f);
 		audio->PlayBGM("Result_Over");
@@ -520,8 +499,11 @@ void ResultScene::CreateDeviceDependentResources()
 
 	//SE 決定音
 	audio->SetSEVolume(1.0f);
-	audio->LoadSound("SE_Click", L"Resources/Sounds/決定ボタンを押す44.wav");
+	audio->LoadSound("SE_Click", L"Resources/Sounds/SE_Click.wav");
 
+	//SE 移動音
+	audio->SetSEVolume(0.2f);
+	audio->LoadSound("SE_Move", L"Resources/Sounds/SE_MoveCursor.wav");
 }
 
 //-----------------------------------------------------------------

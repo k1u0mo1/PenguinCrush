@@ -43,7 +43,7 @@ AttackP::AttackP(
 
 
 	//プレイヤーの前方に出す位置 
-	m_position = playerPos + forward * 2.0f;//数字は腕の長さ
+	m_position = playerPos + forward * SPAWN_OFFSET_FRONT;
 
 	//OBB （幅 高さ 奥行き）
 	if (m_attackModel)
@@ -64,7 +64,7 @@ void AttackP::Update(float deltaTime)
 	m_lifetime += deltaTime;
 
 	// 弾の移動
-	m_position += m_forward *0.1f ; 
+	m_position += m_forward * 0.1f;
 
 	if (m_collision)
 	{

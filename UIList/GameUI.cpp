@@ -143,7 +143,8 @@ void GameUI::Render(Player* player, BossEnemy* boss)
     //---------------------------------------------------
     if (boss && !boss->IsDead())
     {
-        float bossMaxHP = boss->GetMaxHP(); // ボスの最大HPに合わせてください
+        //ボスの最大HPを渡す
+        float bossMaxHP = boss->GetMaxHP(); 
 
         // 画面中央計算
         RECT size = m_deviceResources->GetOutputSize();

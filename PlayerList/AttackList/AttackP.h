@@ -18,6 +18,21 @@
 /// </summary>
 class AttackP:public AttackBase
 {
+private:
+
+    //------------------------------------------------------
+    //定数関連
+    //------------------------------------------------------
+    
+    //攻撃したときのダメージ量
+    static constexpr float ATTACK_DAMAGE = 15.0f;
+    //敵を弾き飛ばすノックバック力
+    static constexpr float KNOCKBACK_POWER = 15.0f;
+    //攻撃判定が消えるまでの時間
+    static constexpr float MAX_LIFETIME = 0.3f;
+    //攻撃の判定がプレイヤーの前に出すか
+    static constexpr float SPAWN_OFFSET_FRONT = 2.0f;
+
 public:
 
     /// <summary>
@@ -72,7 +87,7 @@ public:
     /// 敵にヒットした際に与えるノックバックの強さを取得
     /// </summary>
     /// <returns>ノックバック力</returns>
-    virtual float GetKnockbackPower() const override { return 15.0f; }
+    virtual float GetKnockbackPower() const override { return KNOCKBACK_POWER; }
 
     /// <summary>
     /// 攻撃の当たり判定オブジェクトを取得
@@ -104,8 +119,8 @@ public:
     /// <summary>
     /// 近距離攻撃のダメージ量
     /// </summary>
-    /// <returns>{ return 15.0f; }ここでダメージ量を設定</returns>
-    float GetDamage() const override { return 15.0f; }
+    /// <returns>ダメージ量</returns>
+    float GetDamage() const override { return ATTACK_DAMAGE; }
 
 private:
 
@@ -121,18 +136,10 @@ private:
 
     //長さ
     float m_lifetime;
-    //○秒だけ判定させる
-    static constexpr float MAX_LIFETIME = 0.1f;
-
+    
     bool m_isDead = false;
 
-    //当たり判定用　
-    //std::shared_ptr<CollisionAABB> m_collision;
-
-    //std::unique_ptr<Ito::ModelCollision> m_collision;
     std::unique_ptr<ModelCollisionOrientedBox> m_collision;
-
-    //Ito::DisplayCollision* m_displayCollision = nullptr;
 
     std::shared_ptr<DisplayCollision> m_displayCollision;
 

@@ -13,8 +13,6 @@ using namespace DirectX;
 
 using Microsoft::WRL::ComPtr;
 
-using namespace DirectX;
-
 RushE::RushE(
 	DX::DeviceResources* deviceResources,
 	/*const DirectX::SimpleMath::Vector3& playerPos, */
@@ -27,20 +25,9 @@ RushE::RushE(
 	, m_displayCollision(displayCollision)
 	, m_boss(boss)
 {
-	//auto device = m_deviceResources->GetD3DDevice();
+	
 
-	//// モデル読み込み（Cube を流用）
-	//EffectFactory fx(device);
-	//fx.SetDirectory(L"Resources\\Models");
-	//m_rushModel = 
-	//	Model::CreateFromSDKMESH(device,
-	//		L"Resources\\Models\\Cube.sdkmesh",
-	//		fx
-	//);
-
-	//プレイヤーの前方に出す位置 
-	//m_position = /*playerPos*/ + forward * 10.0f;//数字は長さ
-
+	
 	//ボスの位置に当たり判定を作る
 	m_position = m_boss->GetPosition();
 
@@ -49,8 +36,6 @@ RushE::RushE(
 	m_collision->SetCenter(m_position);
 	m_collision->SetExtents(SimpleMath::Vector3(1.0f, 1.5f, 1.0f));
 
-	//回転
-	//float angle = atan2(m_forward.x, m_forward.z);
 	
 	////OBB （幅 高さ 奥行き）
 	//if (m_rushModel)
@@ -70,17 +55,15 @@ void RushE::Update(float deltaTime)
 {
 	m_lifetime += deltaTime;
 
-	//// 移動
-	//m_position += m_forward * deltaTime * 10.0f;
-
+	
 	//ボスの向きを進行方向に向ける
 	float angle = atan2(m_forward.x, m_forward.z);
 	m_boss->SetRotationY(angle);
 
 	//ボスを滑らせる(移動)
-	float speed = 20.0f;
 	SimpleMath::Vector3 currentPos = m_boss->GetPosition();
-	SimpleMath::Vector3 nextPos = currentPos + m_forward * speed * deltaTime;
+	
+	SimpleMath::Vector3 nextPos = currentPos + m_forward * RUSH_SPEED * deltaTime;
 
 	//ボスの位置を更新
 	m_boss->SetPosition(nextPos);
@@ -149,7 +132,7 @@ DirectX::BoundingBox RushE::GetBoundingBox() const
 	{
 		// デフォルト小さい箱
 		box.Center = m_position;
-		box.Extents = DirectX::SimpleMath::Vector3(0.3f, 0.3f, 0.3f);
+		box.Extents = DirectX::SimpleMath::Vector3(DEFAULT_BOUNDING_SIZE, DEFAULT_BOUNDING_SIZE, DEFAULT_BOUNDING_SIZE);
 	}
 	return box;
 }

@@ -45,12 +45,7 @@ void Stage::Initialize(HWND /*window*/, int width, int height)
     CreateWindowSizeResources(width, height);
 
     //ステージ大きさに合わせて範囲を指定させる
-    float halfSize = 30.0f;
-
-    //const float STAGE_SCALE_XZ = 10.0f; // Render() で使われているスケール
-    //const float OBB_HALF_SIZE_XZ = 10.0f; // m_localOBB で使われているサイズ
-
-    //float halfSize = OBB_HALF_SIZE_XZ * STAGE_SCALE_XZ; // 15.0f * 10.0f = 150.0f
+    float halfSize = STAGE_HALF_SIZE;
 
     //幅
     m_minX = -halfSize;
@@ -212,14 +207,15 @@ void Stage::CreateDeviceResources()
         device,
         L"Resources\\Models\\ICENew.sdkmesh",
         *m_effectFactory.get()
-    ); //StageS //Stageoo7 //ICENew
+    );
 }
 
 void Stage::CreateWindowSizeResources(int /*width*/, int /*height*/)
 {
     // Optional: implement view-dependent resources
-    // // 画面サイズの取得
+    // 画面サイズの取得
     RECT rect = m_deviceResources->GetOutputSize();
+
     // 射影行列の作成
     m_proj = SimpleMath::Matrix::CreatePerspectiveFieldOfView(
         XMConvertToRadians(45.0f)
@@ -266,7 +262,7 @@ void Stage::Render(
 
     
      //スケール//10.0f, 0.5f, 10.0f
-    SimpleMath::Matrix scale = SimpleMath::Matrix::CreateScale(6.0f, 5.0f, 6.0f);//<-ここでサイズ
+    SimpleMath::Matrix scale = SimpleMath::Matrix::CreateScale(STAGE_SCALE_X, STAGE_SCALE_Y, STAGE_SCALE_Z);//<-ここでサイズ
     
     SimpleMath::Matrix rotX = SimpleMath::Matrix::CreateRotationX(m_rotateX);//上下
     SimpleMath::Matrix rotZ = SimpleMath::Matrix::CreateRotationZ(m_rotateZ);//左右

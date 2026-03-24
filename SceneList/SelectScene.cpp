@@ -49,6 +49,9 @@ void SelectScene::Update(float elapsedTime)
     // ----------------------------------------------------
     if (input->kbTracker.pressed.Up || input->kbTracker.pressed.W)
     {
+        //移動音
+        AudioManager::GetInstance()->Play("SE_Move");
+
         m_currentCursor--;
 
         if (m_currentCursor < 0)
@@ -57,6 +60,9 @@ void SelectScene::Update(float elapsedTime)
 
     if (input->kbTracker.pressed.Down || input->kbTracker.pressed.S)
     {
+        //移動音
+        AudioManager::GetInstance()->Play("SE_Move");
+
         m_currentCursor++;
 
         if (m_currentCursor >= MENU_COUNT)
@@ -93,6 +99,7 @@ void SelectScene::Update(float elapsedTime)
     // ----------------------------------------------------
     if (input->kbTracker.pressed.Enter || input->kbTracker.pressed.Space)
     {
+
         //決定音
         AudioManager::GetInstance()->Play("SE_Click");
 
@@ -463,13 +470,19 @@ void SelectScene::CreateDeviceDependentResources()
         m_textureCursor.GetAddressOf());
 
     
-    //音関連
     AudioManager* audio = AudioManager::GetInstance();
     audio->Initialize();
-    audio->LoadSound("Select", L"Resources/Sounds/Select.wav");
+    audio->LoadSound("Select", L"Resources/Sounds/BGM_Title.wav");
     audio->SetBGMVolume(0.2f);
     audio->PlayBGM("Select");
 
+    //SE 決定音
+    audio->SetSEVolume(1.0f);
+    audio->LoadSound("SE_Click", L"Resources/Sounds/SE_Click.wav");
+
+    //SE 移動音
+    audio->SetSEVolume(0.2f);
+    audio->LoadSound("SE_Move", L"Resources/Sounds/SE_MoveCursor.wav");
 }
 
 void SelectScene::CreateWindowSizeDependentResources()

@@ -95,6 +95,12 @@ void Player::Update(
         }
     }
 
+    //ふらつき中ならエフェクトを回転させる
+    if (m_state == PlayerState::Dizzy)
+    {
+        m_dizzyRotationY += DIZZY_EFFECT_ROT_SPEED * elapsedTime;
+    }
+
     //クールタイムを減らす
     if (m_attackCoolTime > 0.0f)
     {
@@ -136,17 +142,17 @@ void Player::Update(
     UpdateStamina(elapsedTime);
 
     //落下して波の下に到達した場合のリスポーン処理
-    if (wave && m_position.y < -5.0f) // -5.0f は波の平均高さ(-4.0f)より少し下
+    if (wave && m_position.y < RESPAWN_THRESHOLD_Y) 
     {
 
         //水しぶきエフェクト発生
         if (particle)
         {
-            // 水面の高さ（例: -4.0f）に合わせて発生位置を調整しても良い
+            // 水面の高さに合わせて発生位置
             SimpleMath::Vector3 splashPos = m_position;
             splashPos.y = 0.0f;
             //水しぶき
-            particle->Spawn(Particle::Type::Splash,splashPos, 30); // 30個飛ばす
+            particle->Spawn(Particle::Type::Splash,splashPos, SPLASH_OF_WATER);
 
             AudioManager::GetInstance()->Play("Fall");
         }
@@ -158,7 +164,7 @@ void Player::Update(
         m_knockbackTimer = 0.0f;
 
         //HPを減らすなどのペナルティ処理
-        m_stats.TakeDamage(50.0f); 
+        m_stats.TakeDamage(FALL_DAMAGE); 
     }
 
     // コリジョン情報の更新を追加
@@ -178,8 +184,8 @@ void Player::Update(
 //描画関連
 //-----------------------------------------------------------------
 void Player::Render(ID3D11DeviceContext* context,
-    DirectX::SimpleMath::Matrix view, 
-    DirectX::SimpleMath::Matrix proj,
+    DirectX::SimpleMath::Matrix& view, 
+    DirectX::SimpleMath::Matrix& proj,
     ShadowRenderer* shadowRenderer)
 {
     auto kb = DirectX::Keyboard::Get().GetState();
@@ -208,11 +214,25 @@ void Player::Render(ID3D11DeviceContext* context,
         rotX = SimpleMath::Matrix::Identity;
     }
 
+    //---------------------------------------------------
+    //ふらつき時　プレイヤーを揺らす  
+    //---------------------------------------------------
+
+    SimpleMath::Matrix dizzySway = SimpleMath::Matrix::Identity;
+    if (m_state == PlayerState::Dizzy)
+    {
+        //揺れを計算
+        float swayAngle = sinf(m_dizzyRotationY * DIZZY_SWAY_SPEED) * DIZZY_SWAY_ANGLE;
+        
+        dizzySway = SimpleMath::Matrix::CreateRotationZ(swayAngle);
+    }
+
+
     DirectX::SimpleMath::Matrix world =
-        rotX*rot * DirectX::SimpleMath::Matrix::CreateTranslation(m_position);
+        rotX * dizzySway * rot * DirectX::SimpleMath::Matrix::CreateTranslation(m_position);
 
     //---------------------------------------------------
-    //影の描画  途中
+    //影の描画  
     //---------------------------------------------------
     if (m_stage && shadowRenderer)
     {
@@ -239,11 +259,33 @@ void Player::Render(ID3D11DeviceContext* context,
         );
     }
 
-    //モデルの描画
-    //m_model->Draw(context, *m_states, world, view, proj);
-
+    //プレイヤーの描画
     m_currentModel->Draw(context, *m_states, world, view, proj);
     
+    //ふらつき状態ならプレイヤーの上に描画
+    if (m_state == PlayerState::Dizzy && m_materialDizzy)
+    {
+        
+        SimpleMath::Matrix birdTrans = SimpleMath::Matrix::CreateTranslation(
+            m_position.x,
+            m_position.y + DIZZY_EFFECT_OFFSET_Y,
+            m_position.z
+        );
+
+        //スケール
+        SimpleMath::Matrix birdScale = SimpleMath::Matrix::CreateScale(0.5f);
+        //回転の行列
+        SimpleMath::Matrix birdRot = SimpleMath::Matrix::CreateRotationY(m_dizzyRotationY);
+
+        //掛け合わせる
+        SimpleMath::Matrix birdWorld = birdScale * birdRot * birdTrans;
+
+        //ふらつきを描画
+        m_materialDizzy->Draw(context, *m_states, birdWorld, view, proj);
+    }
+
+
+    //当たり判定
     if (m_displayCollision && m_collision) 
     {
         //DisplayCollision に現在のコリジョン情報を登録 
@@ -281,6 +323,13 @@ void Player::ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float
     // ノックバック中はダッシュを解除
     m_isDashing = false; 
 
+    //突進中に敵に当たったか？
+    if (m_state == PlayerState::Rush)
+    {
+        //ふらつき状態を呼び出す
+        ApplyDizzy();
+    }
+
 }
 
 //-----------------------------------------------------------------
@@ -288,16 +337,15 @@ void Player::ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float
 //-----------------------------------------------------------------
 float Player::GetMoveSpeed() const
 {
-    // Player::HandleMovement で定義されている速度定数
-    const float moveSpeed = 5.0f;
-    const float dashSpeed = 30.0f;
-
+    
+    //ダッシュ中の速度
     if (m_isDashing)
     {
-        return moveSpeed + dashSpeed; // 5.0f + 30.0f = 35.0f
+        return MOVE_SPEED + DASH_SPEED; // 5.0f + 30.0f = 35.0f
     }
 
-    return moveSpeed; // 通常速度
+    // 通常速度
+    return MOVE_SPEED; 
 }
 
 //-----------------------------------------------------------------
@@ -310,11 +358,6 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
     // ダッシュ判定（スペースキー）
     auto kb = DirectX::Keyboard::Get().GetState();
     
-    //通常速度
-    const float moveSpeed = 5.0f;
-    //ダッシュ速度
-    const float dashSpeed = 30.0f;
-
     //ノックバック中は移動入力を無視
     if (m_knockbackTimer > 0.0f)
     {
@@ -322,6 +365,27 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
         return;
     }
 
+    //ふらつき状態は移動入力を無視
+    if (m_state == PlayerState::Dizzy)
+    {
+        //突進を解除
+        m_isDashing = false;
+
+        m_slidingInertia = DirectX::SimpleMath::Vector3::Lerp(
+            m_slidingInertia,
+            Vector3::Zero,
+            FRICTION_FORCE * elapsedTime
+        );
+        //滑る慣性はそのまま
+        m_position += m_slidingInertia * elapsedTime;
+
+        float stageY = stage->GetGroundHeight(m_position.x, m_position.z);
+        if (m_position.y < stageY && stageY > STAGE_BOUNDARY_Y) {
+            m_position.y = stageY - GROUND_OFFSET_Y;
+            m_velocity.y = 0.0f;
+        }
+        return;
+    }
 
     //カメラ方向の取得
     DirectX::SimpleMath::Vector3 camForward = m_camera->GetTargetPosition() - m_camera->GetEyePosition();
@@ -329,8 +393,7 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
     camForward.Normalize();
 
     //プレイヤーの forward をカメラ方向に更新
-    float turnSpeed = 5.0f; // 追従スピード
-    m_forward = m_forward + (camForward - m_forward) * turnSpeed * elapsedTime;
+    m_forward = m_forward + (camForward - m_forward) * TURN_SPEED * elapsedTime;
     m_forward.Normalize();
 
     DirectX::SimpleMath::Vector3 forwardVector = m_forward;
@@ -352,17 +415,17 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
     // 入力に基づく「出したい速度」を計算
     Vector3 targetVelocity = Vector3::Zero;
 
-    if (kb.W/* ||kb.A || kb.D*/)
+    if (kb.W /*||kb.A || kb.D*/)
     {
         //走っているか？
-        float currentSpeed = m_isDashing ? dashSpeed : moveSpeed;
+        float currentSpeed = m_isDashing ? DASH_SPEED : MOVE_SPEED;
         //移動計算 あとで合わせる
         targetVelocity = forwardVector * currentSpeed;
 
         if (m_isDashing )
         {
             //消費するスタミナ量
-            m_stats.UseStamina(0.5f);
+            m_stats.UseStamina(STAMINA_COST_DASH);
 
             // ダッシュ中のエフェクト発生
             if (particle)
@@ -378,24 +441,18 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
     else if (kb.S)
     {
         // 後退
-        targetVelocity = -forwardVector * moveSpeed * 0.75f;
+        targetVelocity = -forwardVector * MOVE_SPEED * 0.75f;
     }
 
-    ////重力
-    //m_velocity.y += m_gravity * elapsedTime;
-    //m_position.y += m_velocity.y * elapsedTime;
-
+    
     //----------------------------------------------------
     //滑る慣性を選ぶ
     //----------------------------------------------------
-    //最初の動き始め（加速）
-    float acceleration = 10.0f;
-    //滑る慣性（減速）
-    float friction = 1.0f;
+    
 
     //入力があるときは加速に、加速がないときは
     float lerpFactor = 
-        (targetVelocity.LengthSquared() > 0.01f) ? acceleration : friction;
+        (targetVelocity.LengthSquared() > 0.01f) ? ACCELERATION_FORCE : FRICTION_FORCE;
 
     //「ダッシュ」 ⇔ 「止まる」時の変化を緩やかにする
     m_slidingInertia = DirectX::SimpleMath::Vector3::Lerp(
@@ -416,20 +473,15 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
     //慣性を座標に合わせる
     m_position += m_slidingInertia * elapsedTime;
 
-
     // ステージの高さで補正
     float stageY = stage->GetGroundHeight(m_position.x, m_position.z);
-
-    // 波のリスポーン判定ライン（-5.0f）と合わせて、ステージ上の有効な地面のY座標の最低値を定義
-    // この値より stageY が低い場合、ステージ外（奈落）と見なして高さ補正を行わない。
-    const float STAGE_BOUNDARY_Y = -4.9f;
 
     // プレイヤーがステージの地面より下におり、かつ、その地面がステージ上の有効な高さ（STAGE_BOUNDARY_Yより高い）である場合のみ補正を行う
     if (m_position.y < stageY && stageY > STAGE_BOUNDARY_Y)
     {
-        float heightOffset = 0.5f;
+        //プレイヤーの高さは足場より少し下へ
+        m_position.y = stageY - GROUND_OFFSET_Y;
 
-        m_position.y = stageY-heightOffset;
         m_velocity.y = 0.0f;
     }
 
@@ -448,39 +500,42 @@ void Player::HandleAttack(
     const DirectX::Mouse::ButtonStateTracker& mouseTracker,
     const DirectX::Keyboard::State& kb)
 {
+    //ふらつき中は攻撃できない
+    if (m_state == PlayerState::Dizzy) return;
+
     //------------------------------------------------------
     //攻撃系
     //------------------------------------------------------
     
     // 近距離攻撃（左クリック）
     if (mouseTracker.leftButton == Mouse::ButtonStateTracker::PRESSED &&
-        m_stats.stamina >= 10.0f)
+        m_stats.stamina >= STAMINA_REQ_ATTACK)
     {
         //モデル
         m_state = PlayerState::Attack;
         m_currentModel = m_modelAttack.get();
-        m_stateTimer = 0.3f;
+        m_stateTimer = STATE_TIMER_ATTACK;
 
         if (m_attackManager)
             m_attackManager->Attack(this);
 
-        m_stats.UseStamina(15.0f);
+        m_stats.UseStamina(STAMINA_COST_ATTACK);
     }
 
     // 遠距離攻撃（右クリック）
     if (mouseTracker.rightButton == Mouse::ButtonStateTracker::PRESSED &&
-        m_stats.stamina >= 5.0f &&
+        m_stats.stamina >= STAMINA_REQ_SHOOT &&
         m_stats.ammo > 0)
     {
         //モデル
         m_state = PlayerState::Shoot;
         m_currentModel = m_modelShoot.get();
-        m_stateTimer = 0.2f;
+        m_stateTimer = STATE_TIMER_SHOOT;
 
         if (m_attackManager)
             m_attackManager->Bullet(this);
 
-        m_stats.UseStamina(10.0f);
+        m_stats.UseStamina(STAMINA_COST_SHOOT);
 
         m_stats.UseAmmo();
     }
@@ -492,17 +547,19 @@ void Player::HandleAttack(
         if (!kb.Space || m_stats.stamina <= 0.0f)
         {
             m_state = PlayerState::Idle;
+
             m_currentModel = m_modelIdle.get();
-            m_attackCoolTime = 0.5f;
+            m_attackCoolTime = ATTACK_COOLDOWN;
             return;
         }
         // Rush継続中の処理
-        m_stats.UseStamina(0.05f * elapsedTime);
+        m_stats.UseStamina(STAMINA_COST_RUSH * elapsedTime);
         return;
     }
     
     //ダッシュ
-    if (m_isDashing && kb.Space && m_stats.stamina >= 30.0f&&m_attackCoolTime<=0.0f)
+    if (m_isDashing && kb.Space && m_stats.stamina >= STAMINA_REQ_RUSH 
+        && m_attackCoolTime<=0.0f)
     {
         m_state = PlayerState::Rush;
         m_currentModel = m_modelRush.get();
@@ -511,7 +568,7 @@ void Player::HandleAttack(
         if (m_attackManager)
             m_attackManager->Rush(this);
         {
-            m_stats.UseStamina(0.05f);
+            m_stats.UseStamina(STAMINA_COST_RUSH);
             //攻撃のクールタイマー
            // m_attackCoolTime = 0.5f;
         }
@@ -525,6 +582,35 @@ void Player::UpdateStamina(float elapsedTime)
 {
     // スタミナ自然回復
     m_stats.RecoverStamina(elapsedTime);
+}
+
+//-----------------------------------------------------------------
+//ふらつき状態の適用
+//-----------------------------------------------------------------
+void Player::ApplyDizzy()
+{
+    //すでにふらつき状態ならそのまま
+    if (m_state == PlayerState::Dizzy) return;
+
+    m_state = PlayerState::Dizzy;
+
+    if (m_modelIdle) 
+    {
+        m_currentModel = m_modelIdle.get();
+    }
+    else
+    {
+        m_currentModel = m_modelIdle.get();
+    }
+
+    m_stateTimer = STATE_TIMER_DIZZY;
+
+    //ダッシュなどの状態を強制解除
+    m_isDashing = false;
+
+    //慣性を少し残し、入力の速度をゼロにする
+    m_attackCoolTime = 0.0f;
+
 }
 
 //-----------------------------------------------------------------
@@ -565,6 +651,10 @@ void Player::CreateDeviceResources()
     m_modelShoot = Model::CreateFromSDKMESH(device, L"Resources\\Models\\Pen_Shoot.sdkmesh", fx);
     m_modelRush = Model::CreateFromSDKMESH(device, L"Resources\\Models\\Pen_Rush.sdkmesh", fx);
 
+    //ふらつき 素材
+    m_materialDizzy = Model::CreateFromSDKMESH(device, L"Resources\\Models\\Fainting.sdkmesh", fx);
+
+
     m_model = m_modelIdle;
 
     //------------------------------------------------------
@@ -588,13 +678,13 @@ void Player::CreateDeviceResources()
     //AudioManager* audio = AudioManager::GetInstance();
 
     //攻撃関連
-    AudioManager::GetInstance()->LoadSound("Attack", L"Resources/Sounds/平手打ち1.wav");
-    AudioManager::GetInstance()->LoadSound("Dash", L"Resources/Sounds/打撃1.wav");
-    AudioManager::GetInstance()->LoadSound("Bullet", L"Resources/Sounds/銃を撃つ（パーン）.wav");
+    AudioManager::GetInstance()->LoadSound("Attack", L"Resources/Sounds/P_近距離攻撃.wav");
+    AudioManager::GetInstance()->LoadSound("Dash", L"Resources/Sounds/P_突進攻撃.wav");
+    AudioManager::GetInstance()->LoadSound("Bullet", L"Resources/Sounds/P_E_遠距離攻撃.wav");
 
     //その他
-    AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/水・ざぶーん04.wav");
-    AudioManager::GetInstance()->LoadSound("Reload", L"Resources/Sounds/弾丸を装填.wav");
+    AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/P_E_落水.wav");
+    AudioManager::GetInstance()->LoadSound("Reload", L"Resources/Sounds/P_弾丸を装填.wav");
 
 }
 

@@ -56,7 +56,7 @@ private:
 	DirectX::SimpleMath::Vector3 m_position;
 
 	//ÉTÉCÉY
-	float m_scale =100.0f;
+	float m_scale =250.0f;
 	//float m_scale =100.0f;
 
 };

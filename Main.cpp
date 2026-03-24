@@ -60,7 +60,15 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     static bool s_fullscreen = false;
 
     //画面モード選択
-    if (MessageBox(NULL, L"フルスクリーンにしますか？", L"画面モード設定", MB_YESNO) == IDYES)
+    int result = MessageBox(NULL, L"フルスクリーンにしますか？", L"画面モード設定", MB_YESNOCANCEL);
+    
+    //?ボタンが押された、または「キャンセル」が押された場合はプログラム自体を終了
+    if (result == IDCANCEL)
+    {
+        return 0;
+    }
+    //フルスクリーン
+    else if (result == IDYES)
     {
         s_fullscreen = true;
     }
@@ -245,6 +253,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
 
+        //右上の?が押されたとき
+    case WM_CLOSE:
+
+        DestroyWindow(hWnd);
+        return 0;
+
+        //ウィンドウが破棄されるときの処理
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        return 0;
+
     case WM_ACTIVATEAPP:
         //キーボード//////////////////////////////////////////////
         Keyboard::ProcessMessage(message, wParam, lParam);
@@ -288,9 +307,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
 
-    case WM_DESTROY:
+    /*case WM_DESTROY:
         PostQuitMessage(0);
-        break;
+        break;*/
 
     //case WM_SYSKEYDOWN:
     //    if (wParam == VK_RETURN && (lParam & 0x60000000) == 0x20000000)

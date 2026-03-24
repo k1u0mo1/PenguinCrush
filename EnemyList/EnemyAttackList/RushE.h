@@ -18,6 +18,26 @@ class BossEnemy;
 
 class RushE : public EnemyAttackBase
 {
+private:
+
+    //------------------------------------------------------
+    //攻撃関連
+    //------------------------------------------------------
+
+    //突進攻撃のダメージ量
+    static constexpr float ATTACK_DAMAGE = 30.0f;
+    //ノックバックの力
+    static constexpr float KNOCKBACK_POWER = 25.0f;
+    //移動速度
+    static constexpr float RUSH_SPEED = 20.0f;
+
+    //------------------------------------------------------
+    //サイズ関連
+    //------------------------------------------------------
+
+    //当たり判定のサイズ
+    static constexpr float DEFAULT_BOUNDING_SIZE = 0.3f;
+
 public:
 
     /// <summary>
@@ -67,7 +87,7 @@ public:
     /// 敵ー＞プレイヤー
     /// </summary>
     /// <returns>ノックバック力</returns>
-    float GetKnockbackPower() const override { return 25.0f; } 
+    float GetKnockbackPower() const override { return KNOCKBACK_POWER; }
     
     /// <summary>
     /// 当たり判定を取得
@@ -90,8 +110,8 @@ public:
     /// <summary>
     /// 突進攻撃のダメージ量を取得
     /// </summary>
-    /// <returns>ダメージ量　{ return 30.0f; }</returns>
-    float GetDamage() const override { return 30.0f; }
+    /// <returns>ダメージ量</returns>
+    float GetDamage() const override { return ATTACK_DAMAGE; }
 
 private:
 

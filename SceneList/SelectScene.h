@@ -77,7 +77,7 @@ private:
 		//３Dモデル
 		std::unique_ptr<DirectX::Model> model;
 		//ステージタイプ
-		GamePlayScene::StageType type;
+		GamePlayScene::StageType type = GamePlayScene::StageType::Stage1;
 	};
 
 	std::vector<StageData> m_stageList;

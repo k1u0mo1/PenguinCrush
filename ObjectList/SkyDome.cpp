@@ -33,7 +33,6 @@ void SkyDome::Initialize()
 	//m_model->UpdateEffects([&](DirectX::IEffect* effect)
 	//	{
 	//		auto lights = dynamic_cast<DirectX::IEffectLights*>(effect);
-
 	//		if (lights)
 	//		{
 	//			lights->SetLightingEnabled(false);
@@ -52,15 +51,11 @@ void SkyDome::Render(
 {
 	if (!m_model) return;
 
-
 	//固定する
 	DirectX::SimpleMath::Matrix world
 		= DirectX::SimpleMath::Matrix::CreateScale(m_scale)
 		* DirectX::SimpleMath::Matrix::CreateTranslation(m_position);
-
 	
-
-
 	//ステートの設定
 	context->OMSetDepthStencilState(m_states->DepthNone(), 0);
 	//裏側カリングを無効
@@ -69,10 +64,8 @@ void SkyDome::Render(
 	//モデルの描画
 	m_model->Draw(context, *m_states, world, view, proj);
 
-
 	//ステートに戻す
 	context->OMSetDepthStencilState(m_states->DepthDefault(), 0);
 	context->RSSetState(m_states->CullCounterClockwise());
-
 
 }

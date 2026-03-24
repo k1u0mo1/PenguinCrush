@@ -17,6 +17,21 @@
 /// </summary>
 class BulletP : public AttackBase
 {
+private:
+
+    //------------------------------------------------------
+    //定数関連
+    //------------------------------------------------------
+
+    //攻撃したときのダメージ量
+    static constexpr float BULLET_DAMAGE = 10.0f;
+    //敵を弾き飛ばすノックバック力
+    static constexpr float KNOCKBACK_POWER = 10.0f;
+    //攻撃判定が消えるまでの時間
+    static constexpr float MAX_LIFETIME = 3.0f;
+    //当たり判定の大きさ
+    static constexpr float COLLISION_SIZE = 0.25f;
+
 public:
 
     /// <summary>
@@ -73,7 +88,7 @@ public:
     /// 敵にヒットした際に与えるノックバックの強さを取得
     /// </summary>
     /// <returns>ノックバック力</returns>
-    float GetKnockbackPower() const override { return 10.0f; }
+    float GetKnockbackPower() const override { return KNOCKBACK_POWER; }
     
     /// <summary>
     /// 攻撃の当たり判定オブジェクトを取得
@@ -88,10 +103,10 @@ public:
     DirectX::SimpleMath::Vector3 GetPosition() const override { return m_pos; }
     
     /// <summary>
-    /// 近距離攻撃のダメージ量
+    /// 遠距離攻撃のダメージ量
     /// </summary>
-    /// <returns>{ return 10.0f; }ここでダメージ量を設定</returns>
-    float GetDamage() const override { return 10.0f; }
+    /// <returns>ダメージ量</returns>
+    float GetDamage() const override { return BULLET_DAMAGE; }
     
 
 private:
@@ -107,9 +122,7 @@ private:
 
     bool m_isDead;
 
-    //寿命
-    static constexpr float MAX_LIFETIME = 3.0f;
-
+    
     std::shared_ptr<DirectX::Model> m_model;
     
     DirectX::CommonStates* m_states;

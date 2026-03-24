@@ -21,6 +21,46 @@
 /// </summary>
 class Fish 
 {
+private:
+
+    //------------------------------------------------------
+    //生存時間関連
+    //------------------------------------------------------
+
+    //魚が消滅するまでの時間
+    static constexpr float MAX_LIFETIME = 13.0f;
+
+    //------------------------------------------------------
+    //描画＆スケール関連
+    //------------------------------------------------------
+
+    //魚モデルのX軸スケール
+    static constexpr float FISH_SCALE_X = 0.6f;
+    //魚モデルのY軸スケール
+    static constexpr float FISH_SCALE_Y = 0.5f;
+    //魚モデルのZ軸スケール
+    static constexpr float FISH_SCALE_Z = 0.5f;
+    //モデルの初期向き補正
+    static constexpr float MODEL_ROTATION_OFFSET = 90.0f;
+
+    //------------------------------------------------------
+    //当たり判定関連
+    //------------------------------------------------------
+
+    //箱型当たり判定のサイズ
+    static constexpr float BOUNDING_BOX_SIZE = 1.0f;
+    //円型当たり判定の半径
+    static constexpr float BOUNDING_SPHERE_RADIUS = 1.5f;
+
+    //------------------------------------------------------
+    //アニメーション関連
+    //------------------------------------------------------
+
+    //跳ねるアニメーションの速度
+    static constexpr float FLOP_SPEED = 20.0f;
+    //跳ねる高さの最大値
+    static constexpr float FLOP_HEIGHT = 2.0f;
+
 public:
 
     //コンストラクタ
@@ -114,8 +154,7 @@ private:
     
     float m_lifetime;
 
-    static constexpr float MAX_LIFETIME = 13.0f;
-
+    
     DX::DeviceResources* m_deviceResources;
 
     //  射影行列

@@ -23,7 +23,7 @@
 //波
 #include "GimmickList/Wave.h"
 //魚
-#include <GimmickList/FishManager.h>
+#include "GimmickList/FishManager.h"
 
 //オブジェクト------------------
 //スカイドーム
@@ -62,6 +62,11 @@ class GamePlayScene : public Scene<UserResources>
 		Debug,
 		Player
 	};
+
+private:
+
+	//敵の登場時間
+	static constexpr float OPENING_DURATION = 3.0f;
 
 public:
 	//ステージの種類

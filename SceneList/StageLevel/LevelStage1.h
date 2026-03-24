@@ -33,7 +33,7 @@ public:
         );
 
         //ボスを出す　hp設定
-        enemyManager->SpawnBoss(1500.0f);
+        enemyManager->SpawnBoss(2000.0f);
 
         //---------------------------------------
         // 魚（ギミック）の配置

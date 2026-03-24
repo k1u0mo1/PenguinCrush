@@ -19,6 +19,21 @@
 /// </summary>
 class Stage : public DX::IDeviceNotify
 {
+private:
+
+    //------------------------------------------------------
+    //ステージのサイズ関連
+    //------------------------------------------------------
+
+    //ステージの半分のサイズ
+    static constexpr float STAGE_HALF_SIZE = 30.0f;
+    //ステージのX軸スケール
+    static constexpr float STAGE_SCALE_X = 6.0f;
+    //ステージのY軸スケール
+    static constexpr float STAGE_SCALE_Y = 5.0f;
+    //ステージのZ軸スケール
+    static constexpr float STAGE_SCALE_Z = 6.0f;
+
 public:
 
     Stage(DX::DeviceResources* deviceResources);

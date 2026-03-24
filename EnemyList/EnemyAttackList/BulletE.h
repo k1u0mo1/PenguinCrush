@@ -19,6 +19,26 @@ class ShadowRenderer;
 
 class BulletE : public EnemyAttackBase
 {
+private:
+
+    //------------------------------------------------------
+    //攻撃関連
+    //------------------------------------------------------
+
+    //遠距離攻撃のダメージ量
+    static constexpr float ATTACK_DAMAGE = 10.0f;
+    //ノックバックの力
+    static constexpr float KNOCKBACK_POWER = 10.0f;
+    //移動速度
+    static constexpr float SPEED_MULTIPLIER = 20.0f;
+
+    //------------------------------------------------------
+    //描画＆サイズ関連
+    //------------------------------------------------------
+
+    //モデルのY軸の初期回転角
+    static constexpr float MODEL_ROTATION_Y = 180.0f;
+
 public:
 
     /// <summary>
@@ -98,7 +118,7 @@ public:
     /// 敵ー＞プレイヤー
     /// </summary>
     /// <returns>ノックバック力</returns>
-    float GetKnockbackPower() const override { return 10.0f; }
+    float GetKnockbackPower() const override { return KNOCKBACK_POWER; }
 
     /// <summary>
     /// 当たり判定を取得
@@ -121,8 +141,8 @@ public:
     /// <summary>
     /// 遠距離攻撃のダメージ量を取得
     /// </summary>
-    /// <returns>ダメージ量　{ return 10.0f; }</returns>
-    float GetDamage()const override { return 10.0f; }
+    /// <returns>ダメージ量</returns>
+    float GetDamage()const override { return ATTACK_DAMAGE; }
 
 private:
 

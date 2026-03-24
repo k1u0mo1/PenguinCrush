@@ -13,8 +13,6 @@ using namespace DirectX;
 
 using Microsoft::WRL::ComPtr;
 
-using namespace DirectX;
-
 BulletE::BulletE(
     DX::DeviceResources* deviceResources,
     const DirectX::SimpleMath::Vector3& pos,
@@ -52,7 +50,8 @@ BulletE::BulletE(
 void BulletE::Update(float deltaTime)
 {
     // 通常の移動処理のみを行う 
-    m_position += m_direction * m_speed * 20 * deltaTime;
+    m_position += m_direction * m_speed * SPEED_MULTIPLIER * deltaTime;
+   
     m_lifetime += deltaTime;
 
     if (m_collision)
@@ -68,8 +67,10 @@ void BulletE::Update(
    
     //直線移動
     DirectX::SimpleMath::Vector3 oldPos = m_position;
-	m_position += m_direction * m_speed *20* deltaTime;
-	m_lifetime += deltaTime;
+	
+    m_position += m_direction * m_speed * SPEED_MULTIPLIER * deltaTime;
+	
+    m_lifetime += deltaTime;
 
     //移動後の位置の地形の高さ
     float stageY_old = stage->GetGroundHeight(oldPos.x, oldPos.z);
@@ -100,22 +101,19 @@ void BulletE::Render(
     const DirectX::SimpleMath::Matrix& proj
     )
 {
-    
-
 
     if (!m_bulletModel) return; // 安全チェック
-
-	/*auto device = m_deviceResources->GetD3DDevice();*/
-
-	//device;
 
     //正規化
     SimpleMath::Vector3 forward = m_direction;
     forward.Normalize();
     
     SimpleMath::Vector3 up = SimpleMath::Vector3(0, 1, 0);
+    
     SimpleMath::Vector3 right = up.Cross(forward);
+    
     right.Normalize();
+    
     SimpleMath::Vector3 actualUp = forward.Cross(right);
 
     SimpleMath::Matrix orientation = SimpleMath::Matrix(
@@ -128,8 +126,9 @@ void BulletE::Render(
     // スケールと移動行列
     DirectX::SimpleMath::Matrix scale = 
         DirectX::SimpleMath::Matrix::CreateScale(0.4f, 0.3f, 0.3f);
+    
     //回転
-    SimpleMath::Matrix initRotY = SimpleMath::Matrix::CreateRotationY(XMConvertToRadians(180.0f));
+    SimpleMath::Matrix initRotY = SimpleMath::Matrix::CreateRotationY(XMConvertToRadians(MODEL_ROTATION_Y));
 
     DirectX::SimpleMath::Matrix trans =
         DirectX::SimpleMath::Matrix::CreateTranslation(m_position);

@@ -21,7 +21,7 @@
 #include <iomanip>
 #include <WeatherList/Rain.h>
 #include <WeatherList/Snow.h>
-#include <SoundList/AudioManager.h>
+#include "SoundList/AudioManager.h"
 
 using namespace DirectX;
 
@@ -91,11 +91,11 @@ void GamePlayScene::Initialize()
 //-----------------------------------------------------------------
 void GamePlayScene::Update(float elapsedTime)
 {
-	elapsedTime;
 
 	//ボタン
 	auto input = GetUserResources()->GetInputManager();
 
+	//フェード
 	auto transitionMask = GetUserResources()->GetTransitionMask();
 
 	//BGMの更新
@@ -109,6 +109,7 @@ void GamePlayScene::Update(float elapsedTime)
 	{
 		m_isPaused = !m_isPaused;
 	}
+
 	//一時停止
 	if (m_isPaused)
 	{
@@ -128,7 +129,7 @@ void GamePlayScene::Update(float elapsedTime)
 	{
 		m_openingTimer += elapsedTime;
 
-		if (m_openingTimer >= 3.0f)
+		if (m_openingTimer >= OPENING_DURATION)
 		{
 			m_isOpening = false;
 
@@ -170,8 +171,10 @@ void GamePlayScene::Update(float elapsedTime)
 		//終了フラグ
 		m_isFinished = true;
 		//「負け」
-		ResultScene::isClear = false;
+		GetUserResources()->SetGameClear(false);
+
 		m_isChangingScene = true;
+		//フェード演出
 		transitionMask->Close();
 		return;
 	}
@@ -186,9 +189,10 @@ void GamePlayScene::Update(float elapsedTime)
 			//終了フラグ
 			m_isFinished = true;
 			//「勝ち」
-			ResultScene::isClear = true;
+			GetUserResources()->SetGameClear(true);
 
 			m_isChangingScene = true;
+			//フェード演出
 			transitionMask->Close();
 			return;
 		}
@@ -555,7 +559,7 @@ void GamePlayScene::CreateDeviceDependentResources()
 		//晴れ
 		m_weather = nullptr;
 		//BGM
-		audio->LoadSound("Stage1_BGM", L"Resources/Sounds/流麗たるアクア・マテリア.wav");
+		audio->LoadSound("Stage1_BGM", L"Resources/Sounds/BGM_Game.wav");
 		//音量
 		audio->SetBGMVolume(0.2f);
 
@@ -567,7 +571,7 @@ void GamePlayScene::CreateDeviceDependentResources()
 		//雨
 		m_weather = nullptr;
 		//BGM
-		audio->LoadSound("Stage1_BGM", L"Resources/Sounds/流麗たるアクア・マテリア.wav");
+		audio->LoadSound("Stage1_BGM", L"Resources/Sounds/BGM_Game.wav");
 
 		//音量
 		audio->SetBGMVolume(0.2f); audio->PlayBGM("Stage1_BGM");
@@ -588,7 +592,7 @@ void GamePlayScene::CreateDeviceDependentResources()
 		}
 
 		//BGM
-		audio->LoadSound("Stage1_BGM", L"Resources/Sounds/流麗たるアクア・マテリア.wav");
+		audio->LoadSound("Stage1_BGM", L"Resources/Sounds/BGM_Game.wav");
 		//音量
 		audio->SetBGMVolume(0.2f);
 		audio->PlayBGM("Stage1_BGM");

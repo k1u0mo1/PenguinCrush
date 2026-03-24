@@ -97,19 +97,7 @@ void RushP::Render(
 		SimpleMath::Matrix::CreateScale(1.0f) *
 		SimpleMath::Matrix::CreateTranslation(m_position);
 
-	
-	//m_attackModel->Draw(context, *m_states, world, view, proj);
-
-	//// デバッグ描画 OBB → BoundingBox
-	//if (m_collision && m_displayCollision)
-	//{
-	//	DirectX::BoundingBox box;
-	//	box.Center = m_collision->GetCenter();
-	//	box.Extents = m_collision->GetExtents();
-
-	//	m_displayCollision->AddBoundingBox(box, DirectX::Colors::White);
-	//}
-
+	//当たり判定
 	if (m_collision&&m_displayCollision)
 	{
 		// 攻撃オブジェクトのコリジョンを DisplayCollision に登録
@@ -134,10 +122,7 @@ void RushP::SetDead()
 	m_isDead = true;
 }
 
-float RushP::GetKnockbackPower() const
-{
-	return m_knockbackPower;
-}
+
 
 DirectX::BoundingBox RushP::GetBoundingBox() const
 {

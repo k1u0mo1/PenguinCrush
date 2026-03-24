@@ -65,11 +65,11 @@ void BossEnemy::Initialize()
 
 
     //音の読み込み
-    AudioManager::GetInstance()->LoadSound("AttackE", L"Resources/Sounds/軽いパンチ1.wav");
-    AudioManager::GetInstance()->LoadSound("DashE", L"Resources/Sounds/重いパンチ2.wav");
-    AudioManager::GetInstance()->LoadSound("BulletE", L"Resources/Sounds/銃を撃つ（パーン）.wav");
+    AudioManager::GetInstance()->LoadSound("AttackE", L"Resources/Sounds/E_近距離攻撃.wav");
+    AudioManager::GetInstance()->LoadSound("DashE", L"Resources/Sounds/E_突進攻撃.wav");
+    AudioManager::GetInstance()->LoadSound("BulletE", L"Resources/Sounds/P_E_遠距離攻撃.wav");
 
-    AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/水・ざぶーん04.wav");
+    AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/P_E_落水.wav");
 
     //エフェクト系
     //煙の生成と初期化
@@ -82,7 +82,6 @@ void BossEnemy::Initialize()
     //着地している
     m_isGroundPrev = true;
 
-    
 }
 
 void BossEnemy::Update(float deltaTime,
@@ -158,7 +157,7 @@ void BossEnemy::Update(float deltaTime,
             moveDir.y = 0.0f;
 
             // プレイヤーとの距離チェック
-            if (moveDir.LengthSquared() > 2.0f)
+            if (moveDir.LengthSquared() > PLAYER_DISTANCE_THRESHOLD)
             {
                 moveDir.Normalize();
 
@@ -190,15 +189,13 @@ void BossEnemy::Update(float deltaTime,
 
     // ステージの高さに合わせる
     float groundY = stage->GetGroundHeight(m_position.x, m_position.z);
-    //境界
-    const float STAGE_BOUNDARY_Y = -4.9f;
 
     if (m_position.y < groundY && groundY > STAGE_BOUNDARY_Y)
     {
        
-        float heightOffset = 0.5f;
+        
+        m_position.y = groundY - GROUND_HEIGHT_OFFSET;
 
-        m_position.y = groundY - heightOffset;
        //落下速度リセット
        m_velocity.y = 0.0f;
        // ノックバック中に地面に衝突したらY方向のノックバックを停止
@@ -210,14 +207,11 @@ void BossEnemy::Update(float deltaTime,
            //ステートを変更
            m_state = EnemyState::Loading;
            m_currentModel = m_modelIdle.get();
-
-          
        }
-       
     }
 
     //着地判定
-    m_isGroundNow = (m_position.y <= 7.0f);
+    m_isGroundNow = (m_position.y <= GROUND_LEVEL_THRESHOLD);
 
     //空中ー＞着地
     if (m_isGroundNow && !m_isGroundPrev&&!m_isLandingEffectDone)
@@ -246,8 +240,7 @@ void BossEnemy::Update(float deltaTime,
     }
 
     //落下リスポーン処理
-    const float FALL_LIMIT = -5.0f;
-    if (m_position.y < FALL_LIMIT)
+    if (m_position.y < FALL_LIMIT_Y)
     {
 
         // 水しぶき
@@ -256,32 +249,30 @@ void BossEnemy::Update(float deltaTime,
             SimpleMath::Vector3 splashPos = m_position;
             splashPos.y = 0.0f;
             
-            particle->Spawn(Particle::Type::Splash, m_position, 50);
+            particle->Spawn(Particle::Type::Splash, m_position, static_cast<int>(SPLASH_PARTICLE_COUNT));
             
         }
 
         //復帰座標を設定
-        m_position = SimpleMath::Vector3(0.0f, 10.0f, 0.0f);
+        m_position = SimpleMath::Vector3(0.0f, RESPAWN_HEIGHT, 0.0f);
 
         //挙動をリセット
         m_velocity = SimpleMath::Vector3::Zero;
         m_knockbackVelocity = SimpleMath::Vector3::Zero;
         m_knockbackTimer = 0.0f;
 
-        TakeDamage(400.0f,PlayerAttackType::Attack);
+        TakeDamage(FALL_DAMAGE, PlayerAttackType::Attack);
 
         //効果音
         AudioManager::GetInstance()->Play("Fall");
 
     }
 
-    
-
     // OBB 更新
     if (m_collision)
     {
         SimpleMath::Matrix world =
-            SimpleMath::Matrix::CreateScale(1.7f)
+            SimpleMath::Matrix::CreateScale(MODEL_RENDER_SCALE)
             * SimpleMath::Matrix::CreateTranslation(m_position);
 
         m_collision->UpdateBoundingInfo(world);
@@ -312,35 +303,12 @@ void BossEnemy::Render(
 
     // ワールド行列の作成: スケール -> 回転 -> 平行移動
     SimpleMath::Matrix world =
-        SimpleMath::Matrix::CreateScale(1.7f) *
+        SimpleMath::Matrix::CreateScale(MODEL_RENDER_SCALE) *
         rotX *
         rotation *
         SimpleMath::Matrix::CreateTranslation(m_position);
-
-    ////--------------------------------------------
-    ////影の描画
-    ////--------------------------------------------
-    //if (shadowRenderer)
-    //{
-    //    //影の位置
-    //    DirectX::SimpleMath::Vector3 shadowPos = m_position;
-    //    //高さをY軸に合わせる
-    //    shadowPos.y = 0.0f;
-    //    //影の大きさ
-    //    float shadowScale = 2.5f;
-    //    // 丸影の描画実行
-    //    shadowRenderer->Render(
-    //        context,
-    //        m_states.get(),
-    //        view,
-    //        proj,
-    //        shadowPos,   
-    //        shadowScale 
-    //    );
-    //}
-
-    //m_model->Draw(context, *m_states, world, view, proj);
-
+    
+    //モデルの描画
     m_currentModel->Draw(context, *m_states, world, view, proj);
 
     m_displayCollision->DrawCollision(
@@ -349,7 +317,7 @@ void BossEnemy::Render(
     );
 
     //回避時　限定
-    if (m_consecutiveHitCount >= 3)
+    if (m_consecutiveHitCount >= EVADE_HIT_THRESHOLD)
     {
         m_modelAwakening->Draw(context, *m_states, world, view, proj);
     }
@@ -358,14 +326,14 @@ void BossEnemy::Render(
     if (m_isSmokeActive)
     {
         // 時間経過に合わせて大きくする 
-        float scale = 3.0f + m_smokeTimer * 100.0f;
+        float scale = 3.0f + m_smokeTimer * SMOKE_GROWTH_RATE;
 
         // 時間経過に合わせて透明にする 
-        float alpha = 1.0f - (m_smokeTimer / 1.0f); 
+        float alpha = 1.0f - (m_smokeTimer / SMOKE_DURATION);
 
         // 煙の描画実行
         DirectX::SimpleMath::Vector3 drawPos = m_position;
-        drawPos.y += 0.5f; 
+        drawPos.y += SMOKE_Y_OFFSET;
 
         m_smokeEffect->Render(view, proj, drawPos, scale, alpha);
 
@@ -376,7 +344,7 @@ void BossEnemy::Render(
     if (m_collision)
     {
         //敵のコリジョンを描画 
-        m_collision->AddDisplayCollision(m_displayCollision.get()); // この行を追加する!
+        m_collision->AddDisplayCollision(m_displayCollision.get()); 
 
         m_displayCollision->DrawCollision(
             context, m_states.get(), view, proj,
@@ -403,11 +371,9 @@ void BossEnemy::TakeDamage(float amount, PlayerAttackType type)
     //回避発動 3回連続で同じ攻撃だったら
     if (m_consecutiveHitCount >= 3)
     {
-        //カウントをリセット
-        //m_consecutiveHitCount = 0;
-
+        
         //回避状態へ
-        SetState(EnemyState::Avoid, 0.5f);
+        SetState(EnemyState::Avoid, EVADE_DURATION);
 
         return;
     }
@@ -422,10 +388,10 @@ void BossEnemy::TakeDamage(float amount, PlayerAttackType type)
 //攻撃を受けたときにノックバック
 void BossEnemy::ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float power)
 {
-    // 敵へのノックバックは軽めに設定 
-    m_knockbackVelocity = direction * (power * 10.0f);
-    // 0.15秒間ノックバックを適用
-    m_knockbackTimer = 0.15f; 
+    //敵へのノックバックは軽めに設定 
+    m_knockbackVelocity = direction * (power * KNOCKBACK_POWER_SCALE);
+    //ノックバック持続時間を適用
+    m_knockbackTimer = KNOCKBACK_DURATION;
 
 }
 

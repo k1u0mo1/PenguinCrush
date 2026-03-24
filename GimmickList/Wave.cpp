@@ -41,9 +41,8 @@ void Wave::Render(ID3D11DeviceContext* context, const SimpleMath::Matrix& view, 
 {
     //波のサイズと座標
     SimpleMath::Matrix world =
-        SimpleMath::Matrix::CreateScale(10.0f, 1.0f, 10.0f) *
-        SimpleMath::Matrix::CreateTranslation(0.0f, -2.0f, 0.0f);
-        //SimpleMath::Matrix::CreateTranslation(0.0f, -4.0f, 0.0f);
+        SimpleMath::Matrix::CreateScale(WAVE_SCALE_X, WAVE_SCALE_Y, WAVE_SCALE_Z) *
+        SimpleMath::Matrix::CreateTranslation(0.0f, WAVE_OFFSET_Y, 0.0f);
 
 
     //波の描画処理
@@ -64,20 +63,15 @@ void Wave::Render(ID3D11DeviceContext* context, const SimpleMath::Matrix& view, 
 
     m_batch->Begin();
 
-    //大きさ
-    const int width = 100;
-    const int height = 100;
-
-
     //波の作成
-    for (int z = 0; z < height - 1; z++)
+    for (int z = 0; z < GRID_HEIGHT - 1; z++)
     {
-        for (int x = 0; x < width - 1; x++)
+        for (int x = 0; x < GRID_WIDTH - 1; x++)
         {
-            int i0 = z * width + x;
-            int i1 = z * width + (x + 1);
-            int i2 = (z + 1) * width + x;
-            int i3 = (z + 1) * width + (x + 1);
+            int i0 = z * GRID_WIDTH + x;
+            int i1 = z * GRID_WIDTH + (x + 1);
+            int i2 = (z + 1) * GRID_WIDTH + x;
+            int i3 = (z + 1) * GRID_WIDTH + (x + 1);
 
             m_batch->DrawTriangle(
                 { m_waveVertices[i0].position,m_waveVertices[i0].color },
@@ -188,51 +182,7 @@ void Wave::CreateWindowSizeResources(int /*width*/, int /*height*/)
 //波を座標０を中心にするためのやつ 高さ計算修正
 void Wave::UpdateWaveVertices()
 {
-    //const int width = 100;
-    //const int height = 100;
-
-    ////波の細かさ
-    //float frequency = 0.4f;
-
-    ////波の動く速さ
-    //float speed = 0.05f;
-
-    ////波の高さの最大値 (振幅)
-    ////float amplitude = 0.3f;
-
-    ////時間更新
-    //m_time += speed * 0.012f;
-
-    //float spacing = 0.2f;
-    //float offsetX = (width - 1) * spacing * 0.5f;
-    //float offsetZ = (height - 1) * spacing * 0.5f;
-
-    //for (int z = 0; z < height; z++)
-    //{
-    //    for (int x = 0; x < width; x++)
-    //    {
-    //        float fx = static_cast<float>(x);
-    //        float fz = static_cast<float>(z);
-
-    //        float wave =
-    //            sinf(fx * frequency + m_time) +
-    //            cosf(fz * frequency + m_time);
-
-    //        //中心が０になるようにする
-    //        float y = wave * 0.5f * m_waveVertices[static_cast<std::vector<Wave::WaveVertex, std::allocator<Wave::WaveVertex>>::size_type>(z) * width + x].amplitude;
-
-    //        m_waveVertices[static_cast<std::vector<Wave::WaveVertex, std::allocator<Wave::WaveVertex>>::size_type>(z) * width + x].position =
-    //            SimpleMath::Vector3(
-    //                fx * spacing - offsetX,//X間隔の調整
-    //                y,//波の高さ
-    //                fz * spacing - offsetZ//Z間隔の調整
-    //            );
-    //        m_waveVertices[static_cast<std::vector<Wave::WaveVertex, std::allocator<Wave::WaveVertex>>::size_type>(z) * width + x].color = Colors::Blue;
-    //    }
-    //}
-
-    //m_time += WAVE_SPEED;
-
+ 
     const float offsetX = (GRID_WIDTH - 1) * GRID_SPACING * 0.5f;
     const float offsetZ = (GRID_WIDTH - 1) * GRID_SPACING * 0.5f;
 
@@ -274,22 +224,7 @@ DirectX::SimpleMath::Vector3 Wave::GetPosition() const
 //波の揺れ角度をステージと共有
 DirectX::SimpleMath::Vector2 Wave::GetWaveAngle(float x, float z) const
 {
-    //float frequency = 0.2f;
-    //float fx = x;
-    //float fz = z;
-
-    ////勾配
-    //float dy_dx = cosf(fx * frequency + m_time) * frequency;
-    //float dy_dz = -sinf(fz * frequency * m_time) * frequency;
-
-    //////角度に変える
-    ////float angleX = atan(dy_dz); // X軸回転（前後）
-    ////float angleZ = -atan(dy_dx);// Z軸回転（左右）
-
-    ////atanしないで傾きのベクトルを渡す
-    //return { dy_dz,dy_dx };
-
-
+   
     float fx = x;
     float fz = z;
 
@@ -303,17 +238,6 @@ DirectX::SimpleMath::Vector2 Wave::GetWaveAngle(float x, float z) const
 //波の高さを取得
 float Wave::GetHeight(float x, float z) const
 {
-    //float frequency = 0.4f;
-
-    //float wave =
-    //    sinf(x * frequency + m_time) +
-    //    cosf(z * frequency * m_time);
-
-    //// 中心0、高さ調整
-    //float y = wave * 0.3f;
-
-    //return y;
-
     return CalculateHeight(x, z, m_time, 1.0f);
 }
 

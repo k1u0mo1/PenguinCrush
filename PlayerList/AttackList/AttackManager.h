@@ -17,6 +17,17 @@ class Particle;
 
 class AttackManager
 {
+private:
+
+	//------------------------------------------------------
+	//’è”ŠÖ˜A
+	//------------------------------------------------------
+
+	//’e‚Ì‘¬“x
+	static constexpr float SPAWN_FORWARD_DIST = 1.5f;
+	//’e‚Ì¶¬‚·‚é‚‚³
+	static constexpr float SPAWN_HEIGHT_OFFSET = 1.5f;
+
 public: 
 	
 	AttackManager() = default;
