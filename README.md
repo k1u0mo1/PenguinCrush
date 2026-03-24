@@ -36,3 +36,6 @@ C++　/　DirectX11　/　Visual Studio
 
 波の動きは「Wave.cpp」に記述しています。
 
+プログラム全体をご覧になる場合は　PenguinCrush.sln (ペンギンクラッシュ.sln)　からお願いします。
+
+
