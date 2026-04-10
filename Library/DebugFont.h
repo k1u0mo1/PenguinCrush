@@ -11,6 +11,9 @@
 #include "SpriteBatch.h"
 #include "SpriteFont.h"
 
+/// <summary>
+/// デバック用に２D画面に表示させるためのフォントクラス
+/// </summary>
 class DebugFont
 {
 private:
@@ -85,6 +88,9 @@ public:
 	float GetFontHeight() const { return m_fontHeight; }
 };
 
+/// <summary>
+/// デバック用に３D画面に表示させるためのフォントクラス
+/// </summary>
 class DebugFont3D : protected DebugFont
 {
 private:
@@ -148,7 +154,7 @@ public:
 	/// <summary>
 	/// 登録された文字列を3D空間で描画
 	/// </summary>
-	/// <param name="context">バイスコンテキスト</param>
+	/// <param name="context">デバイスコンテキスト</param>
 	/// <param name="states">レンダーステート</param>
 	/// <param name="view">ビュー行列</param>
 	/// <param name="proj">射影行列</param>

@@ -7,7 +7,10 @@
 #include <Keyboard.h>
 #include <Mouse.h>
 
-//ゲーム全体のキーボード＆マウスの入力を更新＆管理
+
+/// <summary>
+/// ゲーム全体のキーボード＆マウスの入力を更新・管理するマネージャークラス
+/// </summary>
 class InputManager
 {
 public:

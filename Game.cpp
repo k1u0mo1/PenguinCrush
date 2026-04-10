@@ -7,12 +7,12 @@
 
 //シーンクラスの一覧///////////////////////////////////////
 
-#include "SceneList/TitleScene.h"//タイトル
-#include "SceneList/SelectScene.h"//ゲームの選択
-#include "SceneList/GamePlayScene.h"//ゲームプレイ
-#include "SceneList/ResultScene.h"//リザルト
+#include "Game/SceneList/TitleScene.h"//タイトル
+#include "Game/SceneList/SelectScene.h"//ゲームの選択
+#include "Game/SceneList/GamePlayScene.h"//ゲームプレイ
+#include "Game/SceneList/ResultScene.h"//リザルト
 
-#include <SoundList/AudioManager.h>
+#include "Game/SoundList/AudioManager.h"
 
 ///////////////////////////////////////////////////////////
 

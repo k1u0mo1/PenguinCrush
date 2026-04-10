@@ -2,16 +2,23 @@
 //StageManeger.h
 //ステージを後々増やすために
 
-#include "GimmickList/Stage.h"
+#include "Game/GimmickList/Stage.h"
 #include <unordered_map>
 #include <string>
 
 #pragma once
+
+/// <summary>
+/// ステージを管理するマネージャー
+/// </summary>
 class StageManager
 {
 public:
 
-	//コンストラクタ
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="deviceResources">デバイスリソースへのポインタ</param>
 	StageManager(DX::DeviceResources* deviceResources);
 
 	/// <summary>
@@ -40,10 +47,10 @@ public:
 	/// <summary>
 	/// ステージの描画
 	/// </summary>
-	/// <param name="context"></param>
-	/// <param name="view"></param>
-	/// <param name="proj"></param>
-	/// <param name="displayCollision"></param>
+	/// <param name="context">デバイスコンテキスト</param>
+	/// <param name="view">ビュー行列</param>
+	/// <param name="proj">射影行列</param>
+	/// <param name="displayCollision">当たり判定の表示用オブジェクト</param>
 	void Render(ID3D11DeviceContext* context,
 		const DirectX::SimpleMath::Matrix& view,
 		const DirectX::SimpleMath::Matrix& proj,

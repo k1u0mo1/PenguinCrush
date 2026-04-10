@@ -2,13 +2,13 @@
 // シーンへ渡すユーザーリソースクラス（サンプル）
 #pragma once
 
-#include "Common/StepTimer.h"
-#include "Common/DeviceResources.h"
+#include "Game/Common/StepTimer.h"
+#include "Game/Common/DeviceResources.h"
 #include "Library/DebugFont.h"
 #include "Library/InputManager.h"
 
 //フェード
-#include "Common/TransitionMask.h"
+#include "Game/Common/TransitionMask.h"
 
 // 各シーンに渡す共通リソース
 class UserResources

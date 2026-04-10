@@ -4,14 +4,14 @@
 
 #pragma once
 
-#include "Common/DeviceResources.h"
-#include "Common/StepTimer.h"
+#include "Game/Common/DeviceResources.h"
+#include "Game/Common/StepTimer.h"
 
 #include "Library/DebugFont.h"
 #include "Library/SceneManager.h"
 #include "UserResources.h"
 
-#include "Common/TransitionMask.h"
+#include "Game/Common/TransitionMask.h"
 
 //入力のマネージャー
 #include "Library/InputManager.h"
@@ -65,6 +65,7 @@ private:
     void CreateWindowSizeDependentResources();
 
 private:
+
     //フルスクリーン用
     BOOL m_fullscreen;
 

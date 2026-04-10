@@ -8,7 +8,10 @@
 
 using namespace DirectX;
 
-//コンストラクタ
+//----------------------------------------------------------
+// コンストラクタ　２D
+//----------------------------------------------------------
+
 DebugFont::DebugFont(
 	ID3D11Device* device, 
 	ID3D11DeviceContext* context,
@@ -23,14 +26,20 @@ DebugFont::DebugFont(
 	m_fontHeight = textSize.y;
 }
 
-//デストラクタ
+//----------------------------------------------------------
+// デストラクタ
+//----------------------------------------------------------
+
 DebugFont::~DebugFont()
 {
 	m_spriteFont.reset();
 	m_spriteBatch.reset();
 }
 
-//描画する文字列を登録する関数
+//----------------------------------------------------------
+// 描画する2D文字列をキューに登録　２D
+//----------------------------------------------------------
+
 void DebugFont::AddString(
 	const wchar_t* string,
 	DirectX::SimpleMath::Vector2 pos,
@@ -47,7 +56,10 @@ void DebugFont::AddString(
 	m_strings.push_back(str);
 }
 
-//描画関数
+//----------------------------------------------------------
+// 登録された2D文字列を一括で描画
+//----------------------------------------------------------
+
 void DebugFont::Render(DirectX::CommonStates* states)
 {
 	m_spriteBatch->Begin(SpriteSortMode_Deferred, nullptr, nullptr, states->DepthNone(), states->CullCounterClockwise());
@@ -70,7 +82,10 @@ void DebugFont::Render(DirectX::CommonStates* states)
 	m_strings.clear();
 }
 
-//コンストラクタ
+//----------------------------------------------------------
+// コンストラクタ　３D
+//----------------------------------------------------------
+
 DebugFont3D::DebugFont3D(
 	ID3D11Device* device,
 	ID3D11DeviceContext* context,
@@ -94,14 +109,20 @@ DebugFont3D::DebugFont3D(
 	);
 }
 
-//デストラクタ
+//----------------------------------------------------------
+// デストラクタ
+//----------------------------------------------------------
+
 DebugFont3D::~DebugFont3D()
 {
 	m_inputLayout.Reset();
 	m_effect.reset();
 }
 
-//３Ⅾ用の描画する文字列を登録する関数
+//----------------------------------------------------------
+// 描画する3D文字列をキューに登録
+//----------------------------------------------------------
+
 void DebugFont3D::AddString(
 	const wchar_t* string, 
 	DirectX::SimpleMath::Vector3 pos,
@@ -120,7 +141,10 @@ void DebugFont3D::AddString(
 	m_strings.push_back(str);
 }
 
-//３Ⅾ描画関数
+//----------------------------------------------------------
+// 登録された文字列を3D空間で描画
+//----------------------------------------------------------
+
 void DebugFont3D::Render(
 	ID3D11DeviceContext* context, 
 	DirectX::CommonStates* states,

@@ -2,6 +2,10 @@
 //	バイナリーファイル
 
 #pragma once
+
+/// <summary>
+/// バイナリーデータの読み込みと保持を行うクラス
+/// </summary>
 class BinaryFile
 {
 protected:

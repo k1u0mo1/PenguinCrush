@@ -1,15 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Common">
-      <UniqueIdentifier>b8ccfe1c-ee1b-4576-843e-8bdeb5ece4b0</UniqueIdentifier>
-    </Filter>
     <Filter Include="Assets">
       <UniqueIdentifier>c21b0dc0-7c3c-45bf-ba1b-fe89444ff4d1</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dds;dlg;fbx;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tga;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="SceneList">
-      <UniqueIdentifier>{f7ad027c-44e0-4933-bd3e-97c6747371a3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Library">
       <UniqueIdentifier>{753517cc-d72a-4a58-9b75-ce0cb721f382}</UniqueIdentifier>
@@ -17,53 +11,62 @@
     <Filter Include="Resources">
       <UniqueIdentifier>{78ec4fe3-bafd-4a06-b222-7ac0d82ce3c9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GimmickList">
-      <UniqueIdentifier>{56cdf27b-e118-472c-b9d1-8bd31316f7fd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Collision">
-      <UniqueIdentifier>{0b6d5827-007a-4fbc-aeeb-ec37b733a46f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Camera">
-      <UniqueIdentifier>{55213b54-1334-4161-8643-cb117367dbe6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="PlayerList">
-      <UniqueIdentifier>{98ba1d51-edd1-4795-8864-d2ca87d1d36c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="EnemyList">
-      <UniqueIdentifier>{608da3a2-f5cf-4f94-82d9-f2c89de0a3f2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ObjectList">
-      <UniqueIdentifier>{e3269647-3a63-4db1-8081-8d39a2b24b03}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resources\Shaders">
       <UniqueIdentifier>{d29ba5fe-012c-4dc5-8af2-67c52729562f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="UIList">
-      <UniqueIdentifier>{d9aa3a2b-90cf-402a-9b68-462059d680e4}</UniqueIdentifier>
+    <Filter Include="Game">
+      <UniqueIdentifier>{7b657908-9688-45fe-aad8-c23682778e7e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SceneList\StageLevel">
-      <UniqueIdentifier>{02390355-cdd6-4a4f-8f66-0f8e4e0820fa}</UniqueIdentifier>
+    <Filter Include="Game\ObjectList">
+      <UniqueIdentifier>{e3269647-3a63-4db1-8081-8d39a2b24b03}</UniqueIdentifier>
     </Filter>
-    <Filter Include="WeatherList">
-      <UniqueIdentifier>{7bf9fe1c-0712-4e93-b891-e11f2d06175d}</UniqueIdentifier>
+    <Filter Include="Game\PlayerList">
+      <UniqueIdentifier>{98ba1d51-edd1-4795-8864-d2ca87d1d36c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SoundList">
-      <UniqueIdentifier>{dde9ea0f-c47b-4094-bd63-2742d832fe8a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="AnimatorList">
-      <UniqueIdentifier>{22157e64-d715-4e88-a6b3-e9c1745d9f2b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ShadowRenderer">
-      <UniqueIdentifier>{463edaf4-e3cf-4885-af7d-a174fd030b75}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Effects">
-      <UniqueIdentifier>{7866b0ee-29c8-4917-bad7-31f0def93db0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="PlayerList\AttackList">
+    <Filter Include="Game\PlayerList\AttackList">
       <UniqueIdentifier>{783a52ca-8853-40b6-8ba5-fa54c691258c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="EnemyList\EnemyAttackList">
+    <Filter Include="Game\SceneList">
+      <UniqueIdentifier>{f7ad027c-44e0-4933-bd3e-97c6747371a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\SceneList\StageLevel">
+      <UniqueIdentifier>{02390355-cdd6-4a4f-8f66-0f8e4e0820fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\ShadowRenderer">
+      <UniqueIdentifier>{463edaf4-e3cf-4885-af7d-a174fd030b75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\SoundList">
+      <UniqueIdentifier>{dde9ea0f-c47b-4094-bd63-2742d832fe8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\UIList">
+      <UniqueIdentifier>{d9aa3a2b-90cf-402a-9b68-462059d680e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\WeatherList">
+      <UniqueIdentifier>{7bf9fe1c-0712-4e93-b891-e11f2d06175d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\GimmickList">
+      <UniqueIdentifier>{56cdf27b-e118-472c-b9d1-8bd31316f7fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\EnemyList">
+      <UniqueIdentifier>{608da3a2-f5cf-4f94-82d9-f2c89de0a3f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\EnemyList\EnemyAttackList">
       <UniqueIdentifier>{ff37ec37-233b-44d3-a0a6-61ad69e76597}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Effects">
+      <UniqueIdentifier>{7866b0ee-29c8-4917-bad7-31f0def93db0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Collision">
+      <UniqueIdentifier>{0b6d5827-007a-4fbc-aeeb-ec37b733a46f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Camera">
+      <UniqueIdentifier>{55213b54-1334-4161-8643-cb117367dbe6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\AnimatorList">
+      <UniqueIdentifier>{22157e64-d715-4e88-a6b3-e9c1745d9f2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Common">
+      <UniqueIdentifier>b8ccfe1c-ee1b-4576-843e-8bdeb5ece4b0</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -75,153 +78,156 @@
     <ClInclude Include="Library\SceneManager.h">
       <Filter>Library</Filter>
     </ClInclude>
-    <ClInclude Include="SceneList\TitleScene.h">
-      <Filter>SceneList</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneList\GamePlayScene.h">
-      <Filter>SceneList</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneList\ResultScene.h">
-      <Filter>SceneList</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneList\SelectScene.h">
-      <Filter>SceneList</Filter>
-    </ClInclude>
     <ClInclude Include="UserResources.h" />
-    <ClInclude Include="GimmickList\Wave.h">
-      <Filter>GimmickList</Filter>
-    </ClInclude>
-    <ClInclude Include="Library\GimmickManager.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="Library\IGimmick.h">
-      <Filter>Library</Filter>
-    </ClInclude>
     <ClInclude Include="Library\InputManager.h">
       <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="Collision\DisplayCollision.h">
-      <Filter>Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="Collision\ModelCollision.h">
-      <Filter>Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="Collision\Object.h">
-      <Filter>Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="GimmickList\Stage.h">
-      <Filter>GimmickList</Filter>
     </ClInclude>
     <ClInclude Include="Library\StageManager.h">
       <Filter>Library</Filter>
     </ClInclude>
-    <ClInclude Include="Camera\PlayerCamera.h">
-      <Filter>Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="PlayerList\Player.h">
-      <Filter>PlayerList</Filter>
-    </ClInclude>
-    <ClInclude Include="PlayerList\PlayerStats.h">
-      <Filter>PlayerList</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera\DebugCamera.h">
-      <Filter>Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="EnemyList\BossEnemy.h">
-      <Filter>EnemyList</Filter>
-    </ClInclude>
-    <ClInclude Include="GimmickList\Fish.h">
-      <Filter>GimmickList</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectList\SkyDome.h">
-      <Filter>ObjectList</Filter>
-    </ClInclude>
-    <ClInclude Include="EnemyList\EnemyManager.h">
-      <Filter>EnemyList</Filter>
-    </ClInclude>
-    <ClInclude Include="UIList\GameUI.h">
-      <Filter>UIList</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneList\StageLevel\LevelBase.h">
-      <Filter>SceneList\StageLevel</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneList\StageLevel\LevelStage1.h">
-      <Filter>SceneList\StageLevel</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneList\StageLevel\LevelTutorial.h">
-      <Filter>SceneList\StageLevel</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneList\StageLevel\LevelStage2.h">
-      <Filter>SceneList\StageLevel</Filter>
-    </ClInclude>
-    <ClInclude Include="WeatherList\Rain.h">
-      <Filter>WeatherList</Filter>
-    </ClInclude>
-    <ClInclude Include="WeatherList\Snow.h">
-      <Filter>WeatherList</Filter>
-    </ClInclude>
-    <ClInclude Include="WeatherList\WeatherBase.h">
-      <Filter>WeatherList</Filter>
-    </ClInclude>
     <ClInclude Include="Library\BinaryFile.h">
       <Filter>Library</Filter>
     </ClInclude>
-    <ClInclude Include="SoundList\AudioManager.h">
-      <Filter>SoundList</Filter>
+    <ClInclude Include="Game\AnimatorList\Animator.h">
+      <Filter>Game\AnimatorList</Filter>
     </ClInclude>
-    <ClInclude Include="AnimatorList\Animator.h">
-      <Filter>AnimatorList</Filter>
+    <ClInclude Include="Game\Camera\DebugCamera.h">
+      <Filter>Game\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="ShadowRenderer\ShadowRenderer.h">
-      <Filter>ShadowRenderer</Filter>
+    <ClInclude Include="Game\Camera\PlayerCamera.h">
+      <Filter>Game\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="Common\DeviceResources.h">
-      <Filter>Common</Filter>
+    <ClInclude Include="Game\Collision\DisplayCollision.h">
+      <Filter>Game\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="Common\ReadData.h">
-      <Filter>Common</Filter>
+    <ClInclude Include="Game\Collision\ModelCollision.h">
+      <Filter>Game\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="Common\StepTimer.h">
-      <Filter>Common</Filter>
+    <ClInclude Include="Game\Collision\Object.h">
+      <Filter>Game\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="Common\TransitionMask.h">
-      <Filter>Common</Filter>
+    <ClInclude Include="Game\Common\DeviceResources.h">
+      <Filter>Game\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Effects\Particle.h">
-      <Filter>Effects</Filter>
+    <ClInclude Include="Game\Common\ReadData.h">
+      <Filter>Game\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Effects\Smoke.h">
-      <Filter>Effects</Filter>
+    <ClInclude Include="Game\Common\StepTimer.h">
+      <Filter>Game\Common</Filter>
     </ClInclude>
-    <ClInclude Include="GimmickList\FishManager.h">
-      <Filter>GimmickList</Filter>
+    <ClInclude Include="Game\Common\TransitionMask.h">
+      <Filter>Game\Common</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerList\AttackList\AttackBase.h">
-      <Filter>PlayerList\AttackList</Filter>
+    <ClInclude Include="Game\Effects\Particle.h">
+      <Filter>Game\Effects</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerList\AttackList\AttackManager.h">
-      <Filter>PlayerList\AttackList</Filter>
+    <ClInclude Include="Game\Effects\Smoke.h">
+      <Filter>Game\Effects</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerList\AttackList\AttackP.h">
-      <Filter>PlayerList\AttackList</Filter>
+    <ClInclude Include="Game\EnemyList\BossEnemy.h">
+      <Filter>Game\EnemyList</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerList\AttackList\BulletP.h">
-      <Filter>PlayerList\AttackList</Filter>
+    <ClInclude Include="Game\EnemyList\EnemyManager.h">
+      <Filter>Game\EnemyList</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerList\AttackList\RushP.h">
-      <Filter>PlayerList\AttackList</Filter>
+    <ClInclude Include="Game\EnemyList\EnemyAttackList\AttackE.h">
+      <Filter>Game\EnemyList\EnemyAttackList</Filter>
     </ClInclude>
-    <ClInclude Include="EnemyList\EnemyAttackList\AttackE.h">
-      <Filter>EnemyList\EnemyAttackList</Filter>
+    <ClInclude Include="Game\EnemyList\EnemyAttackList\BulletE.h">
+      <Filter>Game\EnemyList\EnemyAttackList</Filter>
     </ClInclude>
-    <ClInclude Include="EnemyList\EnemyAttackList\BulletE.h">
-      <Filter>EnemyList\EnemyAttackList</Filter>
+    <ClInclude Include="Game\EnemyList\EnemyAttackList\EnemyAttackBase.h">
+      <Filter>Game\EnemyList\EnemyAttackList</Filter>
     </ClInclude>
-    <ClInclude Include="EnemyList\EnemyAttackList\EnemyAttackBase.h">
-      <Filter>EnemyList\EnemyAttackList</Filter>
+    <ClInclude Include="Game\EnemyList\EnemyAttackList\RushE.h">
+      <Filter>Game\EnemyList\EnemyAttackList</Filter>
     </ClInclude>
-    <ClInclude Include="EnemyList\EnemyAttackList\RushE.h">
-      <Filter>EnemyList\EnemyAttackList</Filter>
+    <ClInclude Include="Game\GimmickList\Fish.h">
+      <Filter>Game\GimmickList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GimmickList\FishManager.h">
+      <Filter>Game\GimmickList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GimmickList\GimmickManager.h">
+      <Filter>Game\GimmickList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GimmickList\IGimmick.h">
+      <Filter>Game\GimmickList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GimmickList\Stage.h">
+      <Filter>Game\GimmickList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GimmickList\Wave.h">
+      <Filter>Game\GimmickList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\ObjectList\SkyDome.h">
+      <Filter>Game\ObjectList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\PlayerList\Player.h">
+      <Filter>Game\PlayerList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\PlayerList\PlayerStats.h">
+      <Filter>Game\PlayerList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\PlayerList\AttackList\AttackBase.h">
+      <Filter>Game\PlayerList\AttackList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\PlayerList\AttackList\AttackManager.h">
+      <Filter>Game\PlayerList\AttackList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\PlayerList\AttackList\AttackP.h">
+      <Filter>Game\PlayerList\AttackList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\PlayerList\AttackList\BulletP.h">
+      <Filter>Game\PlayerList\AttackList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\PlayerList\AttackList\RushP.h">
+      <Filter>Game\PlayerList\AttackList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SceneList\GamePlayScene.h">
+      <Filter>Game\SceneList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SceneList\ResultScene.h">
+      <Filter>Game\SceneList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SceneList\SelectScene.h">
+      <Filter>Game\SceneList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SceneList\TitleScene.h">
+      <Filter>Game\SceneList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SceneList\StageLevel\LevelBase.h">
+      <Filter>Game\SceneList\StageLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SceneList\StageLevel\LevelStage1.h">
+      <Filter>Game\SceneList\StageLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SceneList\StageLevel\LevelStage2.h">
+      <Filter>Game\SceneList\StageLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SceneList\StageLevel\LevelTutorial.h">
+      <Filter>Game\SceneList\StageLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\ShadowRenderer\ShadowRenderer.h">
+      <Filter>Game\ShadowRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SoundList\AudioManager.h">
+      <Filter>Game\SoundList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\UIList\GameUI.h">
+      <Filter>Game\UIList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\WeatherList\Rain.h">
+      <Filter>Game\WeatherList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\WeatherList\Snow.h">
+      <Filter>Game\WeatherList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\WeatherList\WeatherBase.h">
+      <Filter>Game\WeatherList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GimmickList\SlideBehavior.h">
+      <Filter>Game\GimmickList</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -231,113 +237,116 @@
     <ClCompile Include="Library\DebugFont.cpp">
       <Filter>Library</Filter>
     </ClCompile>
-    <ClCompile Include="SceneList\TitleScene.cpp">
-      <Filter>SceneList</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneList\GamePlayScene.cpp">
-      <Filter>SceneList</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneList\ResultScene.cpp">
-      <Filter>SceneList</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneList\SelectScene.cpp">
-      <Filter>SceneList</Filter>
-    </ClCompile>
-    <ClCompile Include="GimmickList\Wave.cpp">
-      <Filter>GimmickList</Filter>
-    </ClCompile>
-    <ClCompile Include="Collision\DisplayCollision.cpp">
-      <Filter>Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="Collision\ModelCollision.cpp">
-      <Filter>Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="GimmickList\Stage.cpp">
-      <Filter>GimmickList</Filter>
-    </ClCompile>
     <ClCompile Include="Library\StageManager.cpp">
       <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera\PlayerCamera.cpp">
-      <Filter>Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="PlayerList\Player.cpp">
-      <Filter>PlayerList</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera\DebugCamera.cpp">
-      <Filter>Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="EnemyList\BossEnemy.cpp">
-      <Filter>EnemyList</Filter>
-    </ClCompile>
-    <ClCompile Include="GimmickList\Fish.cpp">
-      <Filter>GimmickList</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjectList\SkyDome.cpp">
-      <Filter>ObjectList</Filter>
-    </ClCompile>
-    <ClCompile Include="EnemyList\EnemyManager.cpp">
-      <Filter>EnemyList</Filter>
-    </ClCompile>
-    <ClCompile Include="UIList\GameUI.cpp">
-      <Filter>UIList</Filter>
-    </ClCompile>
-    <ClCompile Include="WeatherList\Rain.cpp">
-      <Filter>WeatherList</Filter>
-    </ClCompile>
-    <ClCompile Include="WeatherList\Snow.cpp">
-      <Filter>WeatherList</Filter>
-    </ClCompile>
-    <ClCompile Include="WeatherList\WeatherBase.cpp">
-      <Filter>WeatherList</Filter>
     </ClCompile>
     <ClCompile Include="Library\BinaryFile.cpp">
       <Filter>Library</Filter>
     </ClCompile>
-    <ClCompile Include="SoundList\AudioManager.cpp">
-      <Filter>SoundList</Filter>
+    <ClCompile Include="Game\AnimatorList\Animator.cpp">
+      <Filter>Game\AnimatorList</Filter>
     </ClCompile>
-    <ClCompile Include="AnimatorList\Animator.cpp">
-      <Filter>AnimatorList</Filter>
+    <ClCompile Include="Game\Camera\DebugCamera.cpp">
+      <Filter>Game\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowRenderer\ShadowRenderer.cpp">
-      <Filter>ShadowRenderer</Filter>
+    <ClCompile Include="Game\Camera\PlayerCamera.cpp">
+      <Filter>Game\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="Common\DeviceResources.cpp">
-      <Filter>Common</Filter>
+    <ClCompile Include="Game\Collision\DisplayCollision.cpp">
+      <Filter>Game\Collision</Filter>
     </ClCompile>
-    <ClCompile Include="Common\TransitionMask.cpp">
-      <Filter>Common</Filter>
+    <ClCompile Include="Game\Collision\ModelCollision.cpp">
+      <Filter>Game\Collision</Filter>
     </ClCompile>
-    <ClCompile Include="Effects\Particle.cpp">
-      <Filter>Effects</Filter>
+    <ClCompile Include="Game\Common\DeviceResources.cpp">
+      <Filter>Game\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Effects\Smoke.cpp">
-      <Filter>Effects</Filter>
+    <ClCompile Include="Game\Common\TransitionMask.cpp">
+      <Filter>Game\Common</Filter>
     </ClCompile>
-    <ClCompile Include="GimmickList\FishManager.cpp">
-      <Filter>GimmickList</Filter>
+    <ClCompile Include="Game\Effects\Particle.cpp">
+      <Filter>Game\Effects</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerList\AttackList\AttackManager.cpp">
-      <Filter>PlayerList\AttackList</Filter>
+    <ClCompile Include="Game\Effects\Smoke.cpp">
+      <Filter>Game\Effects</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerList\AttackList\AttackP.cpp">
-      <Filter>PlayerList\AttackList</Filter>
+    <ClCompile Include="Game\EnemyList\BossEnemy.cpp">
+      <Filter>Game\EnemyList</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerList\AttackList\BulletP.cpp">
-      <Filter>PlayerList\AttackList</Filter>
+    <ClCompile Include="Game\EnemyList\EnemyManager.cpp">
+      <Filter>Game\EnemyList</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerList\AttackList\RushP.cpp">
-      <Filter>PlayerList\AttackList</Filter>
+    <ClCompile Include="Game\EnemyList\EnemyAttackList\AttackE.cpp">
+      <Filter>Game\EnemyList\EnemyAttackList</Filter>
     </ClCompile>
-    <ClCompile Include="EnemyList\EnemyAttackList\AttackE.cpp">
-      <Filter>EnemyList\EnemyAttackList</Filter>
+    <ClCompile Include="Game\EnemyList\EnemyAttackList\BulletE.cpp">
+      <Filter>Game\EnemyList\EnemyAttackList</Filter>
     </ClCompile>
-    <ClCompile Include="EnemyList\EnemyAttackList\BulletE.cpp">
-      <Filter>EnemyList\EnemyAttackList</Filter>
+    <ClCompile Include="Game\EnemyList\EnemyAttackList\RushE.cpp">
+      <Filter>Game\EnemyList\EnemyAttackList</Filter>
     </ClCompile>
-    <ClCompile Include="EnemyList\EnemyAttackList\RushE.cpp">
-      <Filter>EnemyList\EnemyAttackList</Filter>
+    <ClCompile Include="Game\GimmickList\Fish.cpp">
+      <Filter>Game\GimmickList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GimmickList\FishManager.cpp">
+      <Filter>Game\GimmickList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GimmickList\Stage.cpp">
+      <Filter>Game\GimmickList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GimmickList\Wave.cpp">
+      <Filter>Game\GimmickList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\ObjectList\SkyDome.cpp">
+      <Filter>Game\ObjectList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\PlayerList\Player.cpp">
+      <Filter>Game\PlayerList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\PlayerList\AttackList\AttackManager.cpp">
+      <Filter>Game\PlayerList\AttackList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\PlayerList\AttackList\AttackP.cpp">
+      <Filter>Game\PlayerList\AttackList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\PlayerList\AttackList\BulletP.cpp">
+      <Filter>Game\PlayerList\AttackList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\PlayerList\AttackList\RushP.cpp">
+      <Filter>Game\PlayerList\AttackList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\SceneList\GamePlayScene.cpp">
+      <Filter>Game\SceneList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\SceneList\ResultScene.cpp">
+      <Filter>Game\SceneList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\SceneList\SelectScene.cpp">
+      <Filter>Game\SceneList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\SceneList\TitleScene.cpp">
+      <Filter>Game\SceneList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\ShadowRenderer\ShadowRenderer.cpp">
+      <Filter>Game\ShadowRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\SoundList\AudioManager.cpp">
+      <Filter>Game\SoundList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\UIList\GameUI.cpp">
+      <Filter>Game\UIList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\WeatherList\Rain.cpp">
+      <Filter>Game\WeatherList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\WeatherList\Snow.cpp">
+      <Filter>Game\WeatherList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\WeatherList\WeatherBase.cpp">
+      <Filter>Game\WeatherList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GimmickList\SlideBehavior.cpp">
+      <Filter>Game\GimmickList</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

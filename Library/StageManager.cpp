@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "Library/StageManager.h"
 
+//----------------------------------------------------------
+// コンストラクタ
+//----------------------------------------------------------
 
 StageManager::StageManager(
     DX::DeviceResources* deviceResources)
@@ -8,6 +11,10 @@ StageManager::StageManager(
 {
 
 }
+
+//----------------------------------------------------------
+// 初期化
+//----------------------------------------------------------
 
 void StageManager::Initialize(HWND /*hwnd*/, int /*width*/, int /*height*/)
 {
@@ -29,6 +36,10 @@ void StageManager::Initialize(HWND /*hwnd*/, int /*width*/, int /*height*/)
     m_currentStage = nullptr;
 }
 
+//----------------------------------------------------------
+// 新しいステージを生成しリストに追加して登録
+//----------------------------------------------------------
+
 void StageManager::AddStage(const std::wstring& name, HWND hwnd, int width, int height)
 {
     auto stage = std::make_unique<Stage>(m_deviceResources);
@@ -40,6 +51,9 @@ void StageManager::AddStage(const std::wstring& name, HWND hwnd, int width, int 
     m_stages[name] = std::move(stage);
 }
 
+//----------------------------------------------------------
+// 指定した名前のステージに切り替える
+//----------------------------------------------------------
 
 void StageManager::ChangeStage(const std::wstring& name)
 {
@@ -53,11 +67,18 @@ void StageManager::ChangeStage(const std::wstring& name)
     }
 }
 
+//----------------------------------------------------------
+// 現在のステージを設定
+//----------------------------------------------------------
 
 void StageManager::SetCurrentStage(const std::wstring& name)
 {
     ChangeStage(name);
 }
+
+//----------------------------------------------------------
+// ステージの更新
+//----------------------------------------------------------
 
 void StageManager::Update(Wave* wave)
 {
@@ -66,6 +87,10 @@ void StageManager::Update(Wave* wave)
         m_currentStage->Update(wave);
     }
 }
+
+//----------------------------------------------------------
+// ステージの描画
+//----------------------------------------------------------
 
 void StageManager::Render(ID3D11DeviceContext* context,
     const DirectX::SimpleMath::Matrix& view,
