@@ -19,9 +19,9 @@ void AudioManager::Initialize()
 
 	AUDIO_ENGINE_FLAGS eflags = AudioEngine_Default;
 
-#ifdef  _DEBUD
+#ifdef  _DEBUG
 	eflags |= AudioEngine_Debug;
-#endif //  _DEBUD
+#endif //  _DEBUG
 
 	m_audioEngine = std::make_unique<AudioEngine>(eflags);
 }

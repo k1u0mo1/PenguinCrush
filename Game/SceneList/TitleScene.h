@@ -15,7 +15,7 @@
 //背景に置くステージ
 #include "Game/SceneList/StageLevel/LevelTutorial.h"
 //波
-#include "Game/GimmickList/Wave.h"
+#include "Game/GimmickList/WaveManager.h"
 
 /// <summary>
 /// タイトル画面の初期化・更新・描画を管理するシーンクラス
@@ -110,7 +110,7 @@ private:
 	//背景ステージ
 	std::unique_ptr<Stage> m_backgroundStage;
 	//波
-	std::unique_ptr<Wave> m_wave;
+	std::unique_ptr<WaveManager> m_waveManager;
 
 private:
 	//シーン移動中のフラグ

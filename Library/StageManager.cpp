@@ -80,11 +80,11 @@ void StageManager::SetCurrentStage(const std::wstring& name)
 // ステージの更新
 //----------------------------------------------------------
 
-void StageManager::Update(Wave* wave)
+void StageManager::Update(WaveManager* waveManager)
 {
     if (m_currentStage)
     {
-        m_currentStage->Update(wave);
+        m_currentStage->Update(waveManager);
     }
 }
 

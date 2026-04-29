@@ -98,7 +98,6 @@ void BossEnemy::Initialize()
 
 void BossEnemy::Update(float deltaTime,
     const SimpleMath::Vector3& playerPosition,
-    float playerSpeed,
     Stage* stage,
     Particle* particle)
 {

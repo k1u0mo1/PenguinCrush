@@ -139,7 +139,7 @@ public:
     /// </summary>
     /// <param name="dt">前フレームからの経過時間</param>
     /// <param name="playerPos">プレイヤーの現在の座標</param>
-    void DoBossAttack(float dt, const DirectX::SimpleMath::Vector3& playerPos);
+    void DoBossAttack(float deltaTime, const DirectX::SimpleMath::Vector3& playerPos);
 
     /// <summary>
     /// 指定したHPでボスをステージに出現

@@ -3,6 +3,7 @@
 
 #include "pch.h"
 #include "Game/GimmickList/FishManager.h"
+#include "Game/PlayerList/Player.h"
 
 #include "Game/ShadowRenderer/ShadowRenderer.h"
 

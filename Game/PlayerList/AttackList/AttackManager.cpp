@@ -1,7 +1,10 @@
 #include "pch.h"
+
 #include "Game/PlayerList/AttackList/AttackManager.h"
-#include "Game/PlayerList/AttackList/BulletP.h"
 #include "Game/PlayerList/Player.h"
+
+#include "Game/PlayerList/AttackList/BulletP.h"
+
 #include "Game/PlayerList/AttackList/AttackP.h"
 #include "Game/PlayerList/AttackList/RushP.h"
 

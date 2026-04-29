@@ -171,20 +171,15 @@ void Fish::Update(
     //if (slideDir.LengthSquared() > 0.0001f)
     //{
     //    slideDir.Normalize();
-
     //    //強さを設定
     //    //acos(normal.y)で水平から傾斜角度を出す
     //    float slopeAngle = acos(std::max(-1.0f, std::min(1.0f, normal.y)));
-
     //    //sinf(slopeAngle)はどれだけ横に滑るか？
     //    float slideStrength = sinf(slopeAngle) * 50.0f;//数値は大きめに
-
     //    //魚の位置を更新する
     //    //傾斜角に応じた速度で魚を滑らせる
     //    m_position += slideDir * slideStrength * deltaTime;
-
     //}
-
     ////OBB更新
     //if (m_collision)
     //{

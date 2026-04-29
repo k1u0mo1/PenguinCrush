@@ -19,7 +19,7 @@ private:
 	//--------------------------------
 	
 	//‰Á‘¬“x
-	static constexpr float ACCELERATION_FORCE = 1.0f;
+	static constexpr float ACCELERATION_FORCE = 0.5f;
 
 	//–€ŽC—Í
 	static constexpr float FRICTION_FORCE = 2.0f;

@@ -23,6 +23,7 @@
 #include "Game/WeatherList/Rain.h"
 #include "Game/WeatherList/Snow.h"
 #include "Game/SoundList/AudioManager.h"
+#include "Game/PlayerList/AttackList/AttackManager.h"
 
 using namespace DirectX;
 
@@ -39,6 +40,14 @@ GamePlayScene::GamePlayScene()
 	, m_finishTimer(3.0f)
 	, m_isDebugVisible(false)
 	, m_isPaused(false)
+{
+}
+
+//-----------------------------------------------------------------
+//	デストラクタ
+//-----------------------------------------------------------------
+
+GamePlayScene::~GamePlayScene()
 {
 }
 
@@ -65,7 +74,6 @@ void GamePlayScene::Initialize()
 
 	//現在、一時停止中か
 	m_isPaused = false;
-
 
 	m_isOpening = true;
 
@@ -119,6 +127,13 @@ void GamePlayScene::Update(float elapsedTime)
 	{
 		return;
 	}
+
+	////波を変更
+	//if (input->kbTracker.pressed.Tab)
+	//{
+	//	m_waveManager->ToggleMode();
+	//}
+
 
 	//-------------------------------------------------
 	//シーン
@@ -215,12 +230,11 @@ void GamePlayScene::Update(float elapsedTime)
 	//ステージの更新（波）
 	//-------------------------------------------------
 
-	//波を取得
-	auto wave = m_gimmickManager->Get<Wave>();
+	m_waveManager->Update(elapsedTime);
 
 	if (m_stageManager)
 	{
-		m_stageManager->Update(wave.get());
+		m_stageManager->Update(m_waveManager.get());
 	}
 	
 
@@ -250,7 +264,7 @@ void GamePlayScene::Update(float elapsedTime)
 			input->mouse,
 			input->mouseTracker,
 			m_stageManager->GetCurrentStage(),
-			wave.get(),
+			m_waveManager.get(),
 			m_particle.get()
 		);
 	}
@@ -284,26 +298,6 @@ void GamePlayScene::Update(float elapsedTime)
 	//敵の更新
 	//-------------------------------------------------
 	m_enemyManager->Update(elapsedTime, m_player.get(), m_particle.get());
-
-
-	//-------------------------------------------------
-	//Debugの更新
-	//-------------------------------------------------
-
-	////[2]でデバック切り替え
-	//if (input->kbTracker.pressed.D2)
-	//{
-	//	m_isDebugVisible = !m_isDebugVisible;
-
-	//	//コリジョンの連動して切り替える
-	//	if (m_displayCollision)
-	//	{
-	//		m_displayCollision->SetVisible(m_isDebugVisible);
-	//	}
-	//}
-
-	DebugUpdate(elapsedTime);
-
 }
 
 //-----------------------------------------------------------------
@@ -342,6 +336,12 @@ void GamePlayScene::Render()
 	if (m_skyDome)
 	{
 		m_skyDome->Render(context, view, m_proj);
+	}
+
+	//波
+	if (m_waveManager)
+	{
+		m_waveManager->Render(context, view, m_proj);
 	}
 
 	//-------------------------------------------------
@@ -406,15 +406,7 @@ void GamePlayScene::Render()
 		m_enemyManager->Render(context, view, m_proj, m_shadowRenderer.get());
 	}
 
-	//-------------------------------------------------
-	//Debugの描画
-	//-------------------------------------------------
-
-	if(m_isDebugVisible)
-	{
-		DebugRender();
-	}
-
+	
 	//-------------------------------------------------
 	//特定のステージの描画 
 	//-------------------------------------------------
@@ -658,14 +650,15 @@ void GamePlayScene::CreateWindowSizeDependentResources()
 	m_stageManager->AddStage(L"DefaultStage", hwnd, width, height);
 	m_stageManager->SetCurrentStage(L"DefaultStage");
 
-	//ギミックの初期化
-	auto wave = std::make_shared<Wave>(m_deviceResources);
-	m_gimmickManager->Add(wave);
-	m_gimmickManager->Initialize(hwnd, width, height);
+	
+	//波マネージャーの初期化
+	m_waveManager = std::make_unique<WaveManager>(m_deviceResources);
+	m_waveManager->Initialize(hwnd, width, height);
+
 
 	//プレイヤーの生成と初期化
 	m_player = std::make_unique<Player>(m_deviceResources, m_displayCollision, m_playerCamera.get());
-	m_player->Initalize(hwnd, width, height, m_stageManager->GetCurrentStage());
+	m_player->Initialize(hwnd, width, height, m_stageManager->GetCurrentStage());
 	m_player->SetAttackManager(m_attackManager.get());
 
 	//魚
@@ -725,8 +718,8 @@ void GamePlayScene::SceneChange()
 		}
 	}
 
-	//強制終了
-	if (input->kbTracker.pressed.Enter)
+	//[Enter]強制終了
+	if (input->IsSubmitAction())
 	{
 
 		ChangeScene<ResultScene>();
@@ -734,19 +727,19 @@ void GamePlayScene::SceneChange()
 	}
 
 	//[T]で戻る
-	if (input->kbTracker.pressed.T)
+	if (input->IsCancelAction())
 	{
 		ChangeScene<SelectScene>();
 	}
 
 	//[R]で戻る
-	if (input->kbTracker.pressed.R)
+	if (input->IsRetryAction())
 	{
 		ChangeScene<GamePlayScene>();
 	}
 
-	//[o]でタイトルへ強制戻る
-	if (input->kbTracker.pressed.O)
+	//[O]でタイトルへ強制戻る
+	if (input->IsForceQuitAction())
 	{
 		ChangeScene<TitleScene>();
 	}
@@ -801,140 +794,3 @@ void GamePlayScene::UpdateCamera()
 	}
 
 }
-
-//-----------------------------------------------------------------
-// デバックUP関連 　
-//-----------------------------------------------------------------
-
-void GamePlayScene::DebugUpdate(float /*timer*/)
-{
-	//プレイヤーの座標////////////////
-	auto pPos = m_player->GetPosition();
-	m_playerPos = pPos;
-
-	//敵の座標/////////////////////////
-	if (m_enemyManager) {
-		// GetBossEnemy() を呼び出して、BossEnemy のインスタンスから座標を取得する
-		BossEnemy* boss = m_enemyManager->GetBossEnemy();
-		if (boss) {
-			m_enemyPos = boss->GetPosition();
-		}
-		else
-		{
-			m_enemyPos = Vector3::Zero; // 敵がいない場合のデフォルト値
-		}
-	}
-
-	//ステージの座標/////////////////////////
-	Stage* currentStage = m_stageManager->GetCurrentStage();
-	if (currentStage)
-	{
-		auto sPos = currentStage->GetPosition();
-		m_stagePos = sPos;
-	}
-}
-
-//-----------------------------------------------------------------
-// デバック描画関連
-//-----------------------------------------------------------------
-
-void GamePlayScene::DebugRender()
-{
-	// DebugFont を取得
-	auto debugFont = GetUserResources()->GetDebugFont();
-	const float lineHeight = debugFont->GetFontHeight();
-	float y = 150.0f; // 既存のメッセージの下から描画を開始
-
-	
-	// プレイヤー情報 
-	debugFont->AddString(
-		L"--- Player Info ---",
-		SimpleMath::Vector2(0.0f, y)
-	);
-	y += lineHeight;
-
-	// プレイヤー座標 
-	{
-		std::wstringstream ss;
-		ss << L"Player Pos: X=" << std::fixed << std::setprecision(2) << m_playerPos.x
-			<< L", Y=" << std::fixed << std::setprecision(2) << m_playerPos.y
-			<< L", Z=" << std::fixed << std::setprecision(2) << m_playerPos.z;
-		debugFont->AddString(ss.str().c_str(), SimpleMath::Vector2(0.0f, y));
-	}
-	y += lineHeight;
-
-
-	if (m_player) {
-		// m_player->GetHP() が定義されている前提
-		float playerHP = m_player->GetHP();
-
-		// プレイヤー HP
-		{
-			std::wstringstream ss;
-			ss << L"Player HP: " << std::fixed << std::setprecision(0) << playerHP;
-			debugFont->AddString(ss.str().c_str(), SimpleMath::Vector2(0.0f, y)); 
-		}
-		y += lineHeight;
-	}
-
-	//敵情報 
-	debugFont->AddString(
-		L"--- Enemy Info ---",
-		SimpleMath::Vector2(0.0f, y)
-	);
-	y += lineHeight;
-
-	// 敵座標 
-	{
-		std::wstringstream ss;
-		ss << L"Enemy Pos: X=" << std::fixed << std::setprecision(2) << m_enemyPos.x
-			<< L", Y=" << std::fixed << std::setprecision(2) << m_enemyPos.y
-			<< L", Z=" << std::fixed << std::setprecision(2) << m_enemyPos.z;
-		debugFont->AddString(ss.str().c_str(), SimpleMath::Vector2(0.0f, y)); 
-	}
-	y += lineHeight;
-
-	// 敵のHP
-	if (m_enemyManager && m_enemyManager->GetBossEnemy()) {
-		float bossHP = m_enemyManager->GetBossEnemy()->GetHP();
-
-		// 敵 HP (C++14対応: wstringstreamで置き換え)
-		{
-			std::wstringstream ss;
-			ss << L"Boss HP: " << std::fixed << std::setprecision(0) << bossHP;
-			debugFont->AddString(ss.str().c_str(), SimpleMath::Vector2(0.0f, y));
-		}
-		y += lineHeight;
-	}
-
-	//  ステージ情報 ---
-	debugFont->AddString(
-		L"--- Stage Info ---",
-		SimpleMath::Vector2(0.0f, y)
-	);
-	y += lineHeight;
-
-	// ステージ座標 
-	{
-		std::wstringstream ss;
-		ss << L"Stage Pos: X=" << std::fixed << std::setprecision(2) << m_stagePos.x
-			<< L", Y=" << std::fixed << std::setprecision(2) << m_stagePos.y
-			<< L", Z=" << std::fixed << std::setprecision(2) << m_stagePos.z;
-		debugFont->AddString(ss.str().c_str(), SimpleMath::Vector2(0.0f, y)); 
-	}
-	y += lineHeight;
-
-	//スタミナ表示
-	float pSut = m_player->GetStamina();
-
-	{
-		std::wostringstream ss;
-		ss << L"Player Sutamina: "
-			<< std::fixed << std::setprecision(0)
-			<< pSut;
-		// デバッグ文字列として登録
-		debugFont->AddString(ss.str().c_str(), SimpleMath::Vector2(0.0f, y));
-	}
-	y += lineHeight;
-}
-

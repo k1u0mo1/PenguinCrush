@@ -161,13 +161,11 @@ public:
     /// </summary>
     /// <param name="deltaTime">前フレームからの経過時間</param>
     /// <param name="playerPosition">プレイヤーの現在座標</param>
-    /// <param name="playerSpeed">プレイヤーの現在の移動速度</param>
     /// <param name="stage">地形情報取得用のステージポインタ</param>
     /// <param name="particle">パーティクル発生用マネージャー</param>
     void Update(
         float deltaTime,
         const DirectX::SimpleMath::Vector3& playerPosition,
-        float playerSpeed,
         Stage* stage,
         Particle* particle
     );

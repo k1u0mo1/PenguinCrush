@@ -53,6 +53,13 @@ void SelectScene::Update(float elapsedTime)
 
 	auto input = GetUserResources()->GetInputManager();
 
+
+    //波を変更
+    if (input->kbTracker.pressed.Tab)
+    {
+        m_waveManager->ToggleMode();
+    }
+
     // ----------------------------------------------------
     // カーソル移動（上下キー）
     // ----------------------------------------------------
@@ -136,9 +143,9 @@ void SelectScene::Update(float elapsedTime)
     }
 
     //波の更新
-    if (m_wave)
+    if (m_waveManager)
     {
-        m_wave->Update(elapsedTime);
+        m_waveManager->Update(elapsedTime);
     }
 
     // ----------------------------------------------------
@@ -176,21 +183,13 @@ void SelectScene::Update(float elapsedTime)
 
 void SelectScene::Render()
 {
-	/*auto debugFont = GetUserResources()->GetDebugFont();*/
-
-	////どのシーンか描画する
-	//debugFont->AddString(L"SelectScene", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight()));
-	/*debugFont->AddString(L"ChangeScene: 1 true", SimpleMath::Vector2(0.0f, 60.0f));
-	debugFont->AddString(L"ChangeScene: 2 false", SimpleMath::Vector2(0.0f, 80.0f));
-	debugFont->AddString(L"ChangeScene: 3 false", SimpleMath::Vector2(0.0f, 100.0f));*/
-
+	//描画準備
 	auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
-	/*auto states = GetUserResources()->GetCommonStates();*/
 
     //波
-    if (m_wave)
+    if (m_waveManager)
     {
-        m_wave->Render(context, m_view, m_proj);
+        m_waveManager->Render(context, m_view, m_proj);
     }
 
     //円の半径
@@ -269,6 +268,11 @@ void SelectScene::Render()
         m_spriteBatch->Draw(m_textureButtonUI.Get(), SimpleMath::Vector2(0, 0));
     }
 
+    if (m_textureWaveUI)
+    {
+        //波UI
+		m_spriteBatch->Draw(m_textureWaveUI.Get(), SimpleMath::Vector2(0, 0));
+    }
     
     // ----------------------------------------------------
     // テクスチャの描画
@@ -488,6 +492,13 @@ void SelectScene::CreateDeviceDependentResources()
         nullptr,
         m_textureCursor.GetAddressOf());
 
+    //選択中の矢印テクスチャ読み込み
+    CreateWICTextureFromFile(
+        device,
+        L"Resources\\Textures\\WaveChange.png",
+        nullptr,
+        m_textureWaveUI.GetAddressOf());
+
     
     AudioManager* audio = AudioManager::GetInstance();
     audio->Initialize();
@@ -532,8 +543,8 @@ void SelectScene::CreateWindowSizeDependentResources()
     );
 
     //Waveの初期化
-    m_wave = std::make_unique<Wave>(m_deviceResources);
-    m_wave->Initialize(hwnd, width, height);
+    m_waveManager = std::make_unique<WaveManager>(m_deviceResources);
+    m_waveManager->Initialize(hwnd, width, height);
 
 }
 

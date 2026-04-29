@@ -11,8 +11,6 @@
 #include "Library/SceneManager.h"
 //ステージ管理
 #include "Library/StageManager.h"
-//アタック管理
-#include "Game/PlayerList/AttackList/AttackManager.h"
 
 //Player------------------------
 #include "Game/PlayerList/Player.h"
@@ -20,8 +18,10 @@
 //ギミック系のクラス------------
 
 #include "Game/GimmickList/GimmickManager.h"
+
 //波
-#include "Game/GimmickList/Wave.h"
+#include "Game/GimmickList/WaveManager.h"
+
 //魚
 #include "Game/GimmickList/FishManager.h"
 
@@ -52,6 +52,8 @@
 
 //影-----------------------------------------
 #include "Game/ShadowRenderer/ShadowRenderer.h"
+
+class AttackManager;
 
 /// <summary>
 /// ゲーム画面の初期化・更新・描画を管理するクラス
@@ -101,6 +103,11 @@ public:
 	/// コンストラクタ
 	/// </summary>
 	GamePlayScene();
+
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
+	~GamePlayScene();
 
 	/// <summary>
 	/// 初期化
@@ -160,14 +167,6 @@ private:
 	std::unique_ptr<DirectX::CommonStates> m_states;
 private:
 
-	//現在は使用していない///////////////////
-	//デバックUP関連
-	void DebugUpdate(float timer);
-
-	//デバック描画関連
-	void DebugRender();
-	/////////////////////////////////////////
-
 	//デバック描画用
 	DirectX::SimpleMath::Vector3 m_playerPos;
 	DirectX::SimpleMath::Vector3 m_enemyPos;
@@ -195,9 +194,10 @@ private:
 	//敵関連マネージャー
 	std::unique_ptr<EnemyManager> m_enemyManager;
 
-	//波
-	std::unique_ptr<Wave> m_wave;
+	//波のマネージャー
+	std::unique_ptr<WaveManager> m_waveManager;
 
+	
 	//魚
 	std::unique_ptr<FishManager> m_fishManager;
 

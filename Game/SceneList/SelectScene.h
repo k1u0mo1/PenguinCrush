@@ -11,7 +11,7 @@
 //--------------------------
 
 //波
-#include "Game/GimmickList/Wave.h"
+#include "Game/GimmickList/WaveManager.h"
 
 //モデル出すよう
 #include "Model.h"
@@ -104,7 +104,7 @@ private:
 	const int MENU_COUNT = 3;
 
 	//波
-	std::unique_ptr<Wave> m_wave;
+	std::unique_ptr<WaveManager> m_waveManager;
 
 private:
 	
@@ -121,21 +121,24 @@ private:
 
 	//std::unique_ptr<DirectX::Model> m_modelGame2;
 
-	// アニメーション用のタイマー
+	//アニメーション用のタイマー
 	float m_animationTimer = 0.0f;
 
 	//ステージ切り替え回転
 	float m_currentAngle = 0.0f;
 	float m_targetAngle = 0.0f;
 
-	// テクスチャ
+	//テクスチャ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_backgroundTexture;
 
-	// ボタンUIテクスチャ
+	//ボタンUIテクスチャ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureButtonUI;
 
-	// カーソルUIテクスチャ
+	//カーソルUIテクスチャ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureCursor;
+
+	//波のUIテクスチャ
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureWaveUI;
 
 private:
 	//シーン移動中のフラグ

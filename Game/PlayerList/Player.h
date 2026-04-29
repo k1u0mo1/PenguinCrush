@@ -1,33 +1,26 @@
 
 //プレイヤーのクラス
-
 #pragma once
+
 #include "pch.h"
 #include <DirectXMath.h>
 #include <memory>
 #include "Game/Common/DeviceResources.h"
 
-//プレイヤーのパラメータ管理
 #include "PlayerStats.h"
-//攻撃管理
-#include "AttackList/AttackManager.h"
-//衝突判定
 #include "Game/Collision/DisplayCollision.h"
-//ステージ
-#include "Game/GimmickList/Stage.h"
-//カメラ
-#include "Game/Camera/PlayerCamera.h"
-//エフェクト
-#include "Game/Effects/Particle.h"
-//音
-#include "Game/SoundList/AudioManager.h"
-//アニメーション
-#include "Game/AnimatorList/Animator.h"
-//影
-#include "Game/ShadowRenderer/ShadowRenderer.h"
-//滑る
 #include "Game/GimmickList/SlideBehavior.h"
 
+class PlayerRenderer;
+class Stage;
+class PlayerCamera;
+class Particle;
+class WaveManager;
+class ShadowRenderer;
+class AttackManager;
+class Animator;
+class ModelCollision;
+class ModelCollisionOrientedBox;
 
 class Player
 {
@@ -48,76 +41,59 @@ public:
 private:
 
     //定数系
-    
-    //------------------------------------------------------
+
     //移動関連
-    //------------------------------------------------------
-    
-    //通常の移動速度
+	//通常移動の速度
     static constexpr float MOVE_SPEED = 15.0f;
-    //ダッシュ時の速度
-    static constexpr float DASH_SPEED = 30.0f;
-    ////動きだしの加速
-    //static constexpr float ACCELERATION_FORCE = 10.0f;
-    ////加速から停止したときの摩擦
-    //static constexpr float FRICTION_FORCE = 1.0f;
-    //カメラへの追従する速度
+	//ダッシュの速度
+    static constexpr float DASH_SPEED = 20.0f;
+	//移動の減速率
     static constexpr float TURN_SPEED = 10.0f;
 
-    //------------------------------------------------------
-    //攻撃＆スタミナ関連
-    //------------------------------------------------------
-
-    //近距離攻撃のスタミナ消費量
-    static constexpr float STAMINA_COST_ATTACK = 15.0f;
-    //遠距離攻撃のスタミナ消費量
-    static constexpr float STAMINA_COST_SHOOT = 10.0f;
-    //突進攻撃（ダッシュ）中のフレームあたりのスタミナ消費量　
-    static constexpr float STAMINA_COST_DASH = 10.0f;
-    //突進攻撃（ダッシュ）中の継続スタミナ消費量
-    static constexpr float STAMINA_COST_RUSH = 10.0f;
-
-    //近距離攻撃で必要な最低スタミナ量
-    static constexpr float STAMINA_REQ_ATTACK = 10.0f;
-    //遠距離攻撃で必要な最低スタミナ量
-    static constexpr float STAMINA_REQ_SHOOT = 5.0f;
-    //突進攻撃で必要な最低スタミナ量
-    static constexpr float STAMINA_REQ_RUSH = 30.0f;
-
-    //攻撃のクールダウン
-    static constexpr float ATTACK_COOLDOWN = 0.5f;
-    //攻撃モーションの維持時間
-    static constexpr float STATE_TIMER_ATTACK = 0.3f;
-    //射撃モーションの維持時間
-    static constexpr float STATE_TIMER_SHOOT = 0.2f;
-    
-
-    //------------------------------------------------------
-    //システム＆物理関連
-    //------------------------------------------------------
-
-    //海へ落下したときのダメージ量
-    static constexpr float FALL_DAMAGE = 50.0f;
-    //落下する判定の高さ
-    static constexpr float RESPAWN_THRESHOLD_Y = -5.0f;
-    //足場補正の高さ
-    static constexpr float STAGE_BOUNDARY_Y = -4.9f;
-    //接地のめり込み補正
+    //地形関連
+	//地面からの高さのオフセット　
     static constexpr float GROUND_OFFSET_Y = 0.5f;
+	//落下しているとみなすY座標
+    static constexpr float STAGE_BOUNDARY_Y = -5.0f;
+	//リスポーンするY座標
+    static constexpr float RESPAWN_THRESHOLD_Y = -15.0f;
 
-    //水しぶきの数
-    static constexpr int SPLASH_OF_WATER = 30;
-    
-    //ふらつきの状態の継続時間
+    //ダメージ・効果
+	//落下ダメージ
+    static constexpr float FALL_DAMAGE = 20.0f;
+	//ダメージを受けたときの無敵時間
+    static constexpr float DIZZY_EFFECT_ROT_SPEED = 2.0f;
+	//水しぶきのエフェクトの高さ
+    static constexpr int SPLASH_OF_WATER = 50;
+
+    //状態タイマー・クールタイム
+	//攻撃後のふらつき時間
     static constexpr float STATE_TIMER_DIZZY = 2.0f;
-    //ふらつきエフェクトの高さ
-    static constexpr float DIZZY_EFFECT_OFFSET_Y = 2.5f;
-    //ふらつきエフェクトの回転速度
-    static constexpr float DIZZY_EFFECT_ROT_SPEED = 5.0f;
-    //ふらつき時の揺れる速度
-    static constexpr float DIZZY_SWAY_SPEED = 2.0f;
-    //ふらつき時の揺れる最大角度
-    static constexpr float DIZZY_SWAY_ANGLE = 0.26f;
+	//攻撃のモーション時間
+    static constexpr float STATE_TIMER_ATTACK = 0.4f;
+	//遠距離攻撃のモーション時間
+    static constexpr float STATE_TIMER_SHOOT = 0.5f;
+	//クールタイム
+    static constexpr float ATTACK_COOLDOWN = 0.5f;
+
+    //スタミナ関連
+	//近距離攻撃で必要な最低スタミナ量
+    static constexpr float STAMINA_REQ_ATTACK = 10.0f;
+	//遠距離攻撃で必要な最低スタミナ量
+    static constexpr float STAMINA_REQ_SHOOT = 15.0f;
+	//突進攻撃で必要な最低スタミナ量
+    static constexpr float STAMINA_REQ_RUSH = 20.0f;
+	//攻撃に必要なスタミナ
+    static constexpr float STAMINA_COST_ATTACK = 15.0f;
+	//遠距離攻撃に必要なスタミナ
+    static constexpr float STAMINA_COST_SHOOT = 5.0f;
+	//ダッシュに必要なスタミナ
+    static constexpr float STAMINA_COST_DASH = 5.0f;
+	//突進に必要なスタミナ
+    static constexpr float STAMINA_COST_RUSH = 5.0f;
+
+	//突進の角度
+    static constexpr float RUSH_ANGLE = -90.0f;
 
 public:
 
@@ -136,8 +112,8 @@ public:
     /// <summary>
     /// デストラクタ
     /// </summary>
-    ~Player() = default;
-    
+    ~Player();
+
     /// <summary>
     /// プレイヤーの初期化
     /// </summary>
@@ -145,7 +121,7 @@ public:
     /// <param name="width">画面の幅</param>
     /// <param name="height">画面の高さ</param>
     /// <param name="stage">足場のポインタ（傾きを渡す）</param>
-    void Initalize(
+    void Initialize(
         HWND hwnd, int width,
         int height,
         Stage* stage);
@@ -164,7 +140,7 @@ public:
         const DirectX::Mouse::State& mouse,
         const DirectX::Mouse::ButtonStateTracker& mouseTracker,
         Stage* stage,
-        Wave* wave,
+        WaveManager* waveManager,
         Particle* particle);
 
     /// <summary>
@@ -193,18 +169,18 @@ public:
     /// </summary>
     /// <returns>弾が撃てる状態なら true、撃てないなら false<</returns>
     bool CanShoot() const { return m_stats.ammo > 0; }
-    
+
     /// <summary>
     /// 弾の発射
     /// </summary>
     void ShootBullet() { m_stats.UseAmmo(); }
-    
+
     /// <summary>
     /// プレイヤーの座標を取得
     /// </summary>
     /// <returns>現在の座標</returns>
     DirectX::SimpleMath::Vector3 GetPosition() const { return m_position; }
-    
+
     /// <summary>
     /// ステージの情報を取得
     /// </summary>
@@ -218,12 +194,12 @@ public:
     bool IsDashing() const { return m_isDashing; }
 
     //-----------------------------------------------------------
-    
+
     /// <summary>
     /// リソース
     /// </summary>
     void CreateDeviceResources();
-    
+
     /// <summary>
     /// 画面リソース
     /// </summary>
@@ -289,7 +265,7 @@ public:
     /// </summary>
     /// <returns>現在の弾数</returns>
     int GetAmmo() const { return m_stats.ammo; }
-    
+
     /// <summary>
     /// 最大弾数を取得
     /// </summary>
@@ -304,13 +280,13 @@ public:
     /// <param name="amount">回復する量</param>
     void Heal(float amount) { m_stats.Heal(amount); }
 
-    
+
     /// <summary>
     /// 魚の当たり判定
     /// </summary>
     /// <returns>魚の当たり判定</returns>
-    ModelCollision* GetCollision() const { return m_collision.get(); }
-    
+    ModelCollision* GetCollision() const;
+
     /// <summary>
     /// 弾薬を補充
     /// </summary>
@@ -363,13 +339,13 @@ public:
         const DirectX::Mouse::ButtonStateTracker& mouseTracker,
         const DirectX::Keyboard::State& kb
     );
-    
+
     /// <summary>
     /// スタミナの自然回復処理
     /// </summary>
     /// <param name="elapsedTime">前フレームからの経過時間</param>
     void UpdateStamina(float elapsedTime);
-    
+
     /// <summary>
     /// ふらつき状態にする
     /// </summary>
@@ -389,7 +365,7 @@ private:
     PlayerStats m_stats;
 
     //カメラ
-    PlayerCamera* m_camera=nullptr;
+    PlayerCamera* m_camera = nullptr;
 
     std::unique_ptr<DirectX::CommonStates> m_states;
     std::shared_ptr<DirectX::Model> m_model;
@@ -398,18 +374,19 @@ private:
     DirectX::SimpleMath::Vector3 m_forward = { 0,0,1 };
 
     bool m_isDashing = false;
-    
+
     DirectX::SimpleMath::Vector3 m_velocity = { 0,0,0 };
-    
+
     //重力
     float m_gravity = -100.8f;
 
     // Optional: スライド移動用
     DirectX::SimpleMath::Vector3 m_slideVelocity = { 0,0,0 };
-    //滑る慣性(残り)
-    //DirectX::SimpleMath::Vector3 m_slidingInertia;
-     
+
     SlideBehavior m_slideBehavior;
+
+    //プレイヤーの現在の回転行列を保持する
+    DirectX::SimpleMath::Matrix m_rotationMatrix = DirectX::SimpleMath::Matrix::Identity;
 
     //ノックバック用
     DirectX::SimpleMath::Vector3 m_knockbackVelocity = { 0, 0, 0 };
@@ -426,23 +403,15 @@ private:
     //アニメーション　まだ実装未定
     std::unique_ptr<Animator> m_animator;
 
+	//プレイヤーの描画クラス
+    std::unique_ptr<PlayerRenderer> m_renderer;
+
     //プレイヤーの原因の状態
     PlayerState m_state = PlayerState::Idle;
     //モデルの切り替えている時間
     float m_stateTimer = 0.0f;
 
-    //モデルを複数保持する
-    std::shared_ptr<DirectX::Model> m_modelIdle;
-    std::shared_ptr<DirectX::Model> m_modelAttack;
-    std::shared_ptr<DirectX::Model> m_modelShoot;
-    std::shared_ptr<DirectX::Model> m_modelRush;
-
-    //ふらついているときの素材
-    std::shared_ptr<DirectX::Model> m_materialDizzy;
-
-    //現在の描画に使うモデルを指すポインタ
-    DirectX::Model* m_currentModel = nullptr;
-
+    
     //ふらつきエフェクトの現在の回転角度
     float m_dizzyRotationY = 0.0f;
 
@@ -465,5 +434,5 @@ private:
 
     Stage* m_stage = nullptr;
 
-
+    
 };

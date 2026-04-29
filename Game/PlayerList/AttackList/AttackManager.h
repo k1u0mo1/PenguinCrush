@@ -10,7 +10,6 @@
 
 #include "Game/Collision/DisplayCollision.h"
 
-
 class BossEnemy;
 class Player;
 class Particle;

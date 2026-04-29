@@ -58,6 +58,12 @@ void TitleScene::Update(float elapsedTime)
 	//	ChangeScene<SelectScene>();
 	//}
 	
+	//波を変更
+	if (input->kbTracker.pressed.Tab)
+	{
+		m_waveManager->ToggleMode();
+	}
+
 	// --- カーソル移動 ---
 	if (input->kbTracker.pressed.Up || input->kbTracker.pressed.W)
 	{
@@ -111,9 +117,9 @@ void TitleScene::Update(float elapsedTime)
 	}
 	
 	//背景の更新
-	if (m_wave)
+	if (m_waveManager)
 	{
-		m_wave->Update(elapsedTime);
+		m_waveManager->Update(elapsedTime);
 	}
 
 	if (m_snow)
@@ -124,7 +130,7 @@ void TitleScene::Update(float elapsedTime)
 	//波を揺らしたかったら
 	if (m_backgroundStage)
 	{
-		m_backgroundStage->Update(m_wave.get());
+		m_backgroundStage->Update(m_waveManager.get());
 	}
 
 }
@@ -152,9 +158,9 @@ void TitleScene::Render()
 	//----------------------------------------------
 
 	//波
-	if (m_wave)
+	if (m_waveManager)
 	{
-		m_wave->Render(context, m_view, m_proj);
+		m_waveManager->Render(context, m_view, m_proj);
 	}
 
 	//ステージ
@@ -428,8 +434,8 @@ void TitleScene::CreateWindowSizeDependentResources()
 	//飾り
 	//---------------------------------------
 	//波
-	m_wave = std::make_unique<Wave>(m_deviceResources);
-	m_wave->Initialize(hwnd, width, height);
+	m_waveManager = std::make_unique<WaveManager>(m_deviceResources);
+	m_waveManager->Initialize(hwnd, width, height);
 
 	//ステージ
 	m_backgroundStage = std::make_unique<Stage>(GetUserResources()->GetDeviceResources());

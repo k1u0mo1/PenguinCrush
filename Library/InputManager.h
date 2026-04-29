@@ -68,4 +68,47 @@ public:
 
 	}
 
+	//-----------------------------------------------------
+	//アクションの抽象化
+	//-----------------------------------------------------
+
+	/// <summary>
+	/// キャンセルアクションが入力されたか
+	/// </summary>
+	/// <returns>入力された場合は true、それ以外は false</returns>
+	bool IsCancelAction() const
+	{
+		//プレイヤーが戻るために押すキー
+		return kbTracker.pressed.T;
+	}
+
+	/// <summary>
+	/// リトライアクションが入力されたか
+	/// </summary>
+	/// <returns>入力された場合は true、それ以外は false</returns>
+	bool IsRetryAction() const
+	{
+		//プレイヤーがやり直すために押すキー
+		return kbTracker.pressed.R;
+	}
+
+	/// <summary>
+	/// タイトルへ強制的に戻るアクションが入力されたか
+	/// </summary>
+	/// <returns>入力された場合は true、それ以外は false</returns>
+	bool IsForceQuitAction() const
+	{
+		return kbTracker.pressed.O;
+	}
+
+	/// <summary>
+	/// 決定アクションが入力されたか
+	/// </summary>
+	/// <returns>入力された場合は true、それ以外は false</returns>
+	bool IsSubmitAction() const
+	{
+		return kbTracker.pressed.Enter;
+	}
+
+
 };

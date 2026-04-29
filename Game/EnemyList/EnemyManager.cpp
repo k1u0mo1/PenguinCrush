@@ -77,7 +77,6 @@ void EnemyManager::Update(
         m_boss->Update(
             dt,
             player->GetPosition(),
-            player->GetMoveSpeed(),
             m_stage,
             particle
         );

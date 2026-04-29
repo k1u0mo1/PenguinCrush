@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <string>
 
+#include "Game/GimmickList/WaveManager.h"
+
 #pragma once
 
 /// <summary>
@@ -42,7 +44,7 @@ public:
 	/// ステージの更新
 	/// </summary>
 	/// <param name="wave">波のポインタ</param>
-	void Update(Wave* wave);
+	void Update(WaveManager* waveManager);
 
 	/// <summary>
 	/// ステージの描画

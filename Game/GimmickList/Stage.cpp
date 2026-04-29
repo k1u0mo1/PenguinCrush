@@ -20,10 +20,7 @@ using Microsoft::WRL::ComPtr;
 Stage::Stage(DX::DeviceResources* deviceResources)
     : m_deviceResources(deviceResources)
     , m_position(0, 0, 0)
-    , m_rotation(0, 0, 0)
-
     , m_rotateX(0.0f)
-    , m_rotateY(0.0f)
     , m_rotateZ(0.0f)
     , m_minX()
     , m_maxX()
@@ -187,7 +184,7 @@ DirectX::SimpleMath::Vector3 Stage::GetSlideDirection() const
         float slopeAngle = acos(std::max(-1.0f, std::min(1.0f, normal.y)));
 
         // sinf(slopeAngle)はどれだけ横に滑るか？
-        float slideStrength = sinf(slopeAngle) * 500.0f; // プロトタイプの数値 (50.0f)
+        float slideStrength = sinf(slopeAngle) * STADE_ANGLE; 
 
         // 速度ベクトル（方向 * 強さ）を返す
         return slideDir * slideStrength;
@@ -261,9 +258,9 @@ void Stage::CreateWindowSizeResources(int /*width*/, int /*height*/)
 // 波の状態を基にステージの傾きなどを更新
 //----------------------------------------------------------
 
-void Stage::Update(Wave* wave)
+void Stage::Update(WaveManager* waveManager)
 {
-    if (!wave) return;
+    if (!waveManager) return;
 
     ////波の高さを加える
     //float waveY = wave->GetHeight(m_position.x, m_position.z);
@@ -295,13 +292,13 @@ void Stage::Update(Wave* wave)
     //---------------------------------------------------------
 
     //
-    float leftY  = wave->GetHeight(m_position.x - halfWidth, m_position.z);
+    float leftY  = waveManager->GetCurrentHeight(m_position.x - halfWidth, m_position.z);
     //
-    float rightY = wave->GetHeight(m_position.x + halfWidth, m_position.z);
+    float rightY = waveManager->GetCurrentHeight(m_position.x + halfWidth, m_position.z);
     //
-    float backY  = wave->GetHeight(m_position.x, m_position.z - halfDepth);
+    float backY  = waveManager->GetCurrentHeight(m_position.x, m_position.z - halfDepth);
     //
-    float frontY = wave->GetHeight(m_position.x, m_position.z + halfDepth);
+    float frontY = waveManager->GetCurrentHeight(m_position.x, m_position.z + halfDepth);
 
     //---------------------------------------------------------
     //両端の高低差から実際の傾き角度を出す

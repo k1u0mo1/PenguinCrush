@@ -229,6 +229,12 @@
     <ClInclude Include="Game\GimmickList\SlideBehavior.h">
       <Filter>Game\GimmickList</Filter>
     </ClInclude>
+    <ClInclude Include="Game\GimmickList\WaveManager.h">
+      <Filter>Game\GimmickList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\PlayerList\PlayerRenderer.h">
+      <Filter>Game\PlayerList</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -348,6 +354,12 @@
     <ClCompile Include="Game\GimmickList\SlideBehavior.cpp">
       <Filter>Game\GimmickList</Filter>
     </ClCompile>
+    <ClCompile Include="Game\GimmickList\WaveManager.cpp">
+      <Filter>Game\GimmickList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\PlayerList\PlayerRenderer.cpp">
+      <Filter>Game\PlayerList</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -374,6 +386,9 @@
       <Filter>Resources\Shaders</Filter>
     </None>
     <None Include="Resources\Shaders\Smoke.hlsli">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\Wave.hlsli">
       <Filter>Resources\Shaders</Filter>
     </None>
   </ItemGroup>
@@ -415,6 +430,12 @@
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\FadePS.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\WavePS.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\WaveVS.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

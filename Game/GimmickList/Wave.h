@@ -18,6 +18,25 @@
 //Wave（波）のクラス   [IGimmickに継承]
 
 /// <summary>
+/// GPUに送るデータ構造
+/// </summary>
+struct WaveConstantBuffer
+{
+    DirectX::SimpleMath::Matrix matWorld;
+
+    DirectX::SimpleMath::Matrix matView;
+
+    DirectX::SimpleMath::Matrix matProj;
+
+    float time;
+
+    int isCubeMode;
+
+    DirectX::SimpleMath::Vector2 padding;
+};
+
+
+/// <summary>
 /// 水面の波を動的に生成・描画し、物理的な高さや傾きを提供するギミッククラス
 /// </summary>
 class Wave : public IGimmick, public DX::IDeviceNotify
@@ -48,9 +67,7 @@ private:
         DirectX::SimpleMath::Vector3 position;
         //色
         DirectX::SimpleMath::Vector4 color;
-        //ランダム用(頂点の振幅)
-        float amplitude = 0.0f;
-
+        
     };
 
     //形状と解像度に関する定数-------------
@@ -62,11 +79,11 @@ private:
 
     //波の物理挙動に関する定数-------------
     //波の細かさ
-    static constexpr float WAVE_FREQUENCY = 0.2f;
+    static constexpr float WAVE_FREQUENCY = 0.15f;
     //時間経過の速さ
     static constexpr float WAVE_SPEED = 0.02f;
     //波の高さ 
-    static constexpr float WAVE_AMPLIYUDE = 0.5f;
+    static constexpr float WAVE_AMPLIYUDE = 1.5f;
     //波を配置する高さ
     static constexpr float WORLD_Y = -2.0f;
     //波のスケール
@@ -74,41 +91,44 @@ private:
 
     
     /// <summary>
-    /// 波の高さ Y を計算
-    /// UpdateWaveVerticesとGetHeightで使用
+    /// 波の高さ Y を計算 
+    /// UpdateWaveVerticesとGetHeightで使用 ゲームのギミック
     /// </summary>
     /// <param name="x">座標X</param>
     /// <param name="z">座標Y</param>
     /// <param name="time">時間</param>
-    /// <param name="individualAmp">頂点固有の振幅倍率</param>
     /// <returns>計算されたY座標</returns>
     float CalculateHeight(
         float x, float z,
-        float time,
-        float individualAmp)const 
+        float time
+        )const 
     {
+
+        //頂点のインデックスをワールド座標のスケールに合わせる
+        float localX = x * GRID_SPACING;
+        float localZ = z * GRID_SPACING;
+
         //-------------------------------------------
-        //通常の波の計算
+        //複数の波の計算を合成してリアルな波にする
         //-------------------------------------------
 
         //波１　ベースとなる揺れが大きくゆったり
-        float waveSlowly = sinf(x * WAVE_FREQUENCY + time * 1.0f);
+        float waveSlowly = sinf(localX * WAVE_FREQUENCY + time * 1.0f);
 
         //波２　少し細かく動きが速い
-        float waveQuick = cosf(z * WAVE_AMPLIYUDE * 1.5f + time * 1.2f) * 0.5f;
+        float waveQuick = cosf(localZ * WAVE_AMPLIYUDE * 1.5f + time * 1.2f) * 0.5f;
 
         //波３　斜めの方向へ細かい波
-        float waveSlanting = sinf((x + z) * WAVE_FREQUENCY * 2.0f + time * 0.8f) * 0.25f;
+        float waveSlanting = sinf((localX + localZ) * 1.0f + time * 1.0f) * 0.25f;
+
+        //波４　逆斜めの方向の細かい波
+        float waveReverse = cosf((localX - localZ)   * 0.25f + time * 0.5f) * 0.5f;
 
         //すべての波を合成
-        float wave = waveSlowly + waveQuick + waveSlanting;
+        float wave = waveSlowly + waveQuick + (waveSlanting - waveReverse);
 
-        ////波　旧式
-        //float wave =
-        //    sinf(x * WAVE_FREQUENCY + time)
-        //    + cosf(z * WAVE_FREQUENCY + time)/*+(rand()%3-1)*0.1f*/;
-
-        return wave * WAVE_AMPLIYUDE * individualAmp;
+        //波を返す
+        return wave * WAVE_AMPLIYUDE ;
         
     }
 
@@ -151,8 +171,8 @@ public:
     /// <summary>
     /// 波の更新　[継承]
     /// </summary>
-    /// <param name="elapsedTime">前フレームからの経過時間</param>
-    void Update(float elapsedTime) override;
+    /// <param name="deltaTime">前フレームからの経過時間</param>
+    void Update(float deltaTime) override;
 
     /// <summary>
     /// 波の描画　[継承]
@@ -198,6 +218,11 @@ public:
     /// </summary>
     void UpdateWaveVertices();
 
+    /// <summary>
+    /// モードを反転させる
+    /// </summary>
+    void ToggleDotMode() { m_isDotMode = !m_isDotMode; }
+
 private:
 
     /// <summary>
@@ -211,6 +236,11 @@ private:
     /// <param name="width">ウィンドウの幅</param>
     /// <param name="height">ウィンドウの高さ</param>
     void CreateWindowSizeResources(int width, int height);
+
+    /// <summary>
+    /// キューブのバッファを作る専用
+    /// </summary>
+    void CreateCubeBuffer();
 
 private:
 
@@ -236,9 +266,28 @@ private:
     //PrimitiveBatchで描画用で使うやつ
     std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> m_batch;
 
-    std::unique_ptr<DirectX::BasicEffect> m_effect;
-
     Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
 
+
+    //頂点バッファ
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
+    //インデックスバッファ
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;
+    //描画する頂点の総数
+    UINT m_indexCount = 0;
+
+    //キューブ用のバッファ
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_cubeVertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_cubeIndexBuffer;
+
+    //自作シェーダを扱うためのポインタ
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
+
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
+    //定数バッファ
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
     
+    //波の切り替え
+    bool m_isDotMode = false;
+
 };

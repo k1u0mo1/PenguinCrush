@@ -8,10 +8,12 @@
 
 #include "Effects.h"
 
-#include <Game/GimmickList/Wave.h>
+//#include <Game/GimmickList/Wave.h>
 
 #include "Game/Collision/ModelCollision.h"
 #include "Game/Collision/DisplayCollision.h"
+
+#include "Game/GimmickList/WaveManager.h"
 
 /// <summary>
 /// ゲームの足場（ステージ）を管理・描画するクラス
@@ -39,6 +41,9 @@ private:
     //ステージのY軸スケール 厚さと高さ
     static constexpr float STAGE_SCALE_Y = 5.0f;
 
+    //ステージの揺れの大きさ
+    static constexpr float STADE_ANGLE = 500.0f;
+
 public:
 
     /// <summary>
@@ -64,7 +69,7 @@ public:
     /// 波の状態を基にステージの傾きなどを更新
     /// </summary>
     /// <param name="wave">計算に利用する波オブジェクトのポインタ</param>
-    void Update(Wave* wave);
+    void Update(WaveManager* waveManager);
 
     /// <summary>
     /// 足場（ステージ）の描画
@@ -177,18 +182,9 @@ private:
     //std::unique_ptr<Imase::DebugCamera> m_camera;
 
     DirectX::SimpleMath::Vector3 m_position;
-    DirectX::SimpleMath::Vector3 m_rotation;
-
-    DirectX::SimpleMath::Vector3 m_anglePosition;
-
-    // 位置
-    DirectX::SimpleMath::Vector3 m_stageAngle;
 
     // X軸に対する回転角（ラジアン）
     float m_rotateX;
-
-    // Y軸に対する回転角（ラジアン）
-    float m_rotateY;
 
     // Z軸に対する回転角（ラジアン）
     float m_rotateZ;

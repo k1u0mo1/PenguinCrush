@@ -6,6 +6,7 @@
 #include "Game/Collision/DisplayCollision.h"
 #include <Model.h>
 
+class DisplayCollision; 
 class ModelCollisionSphere;
 class ModelCollisionBox;
 class ModelCollisionOrientedBox;

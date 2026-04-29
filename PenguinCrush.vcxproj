@@ -206,6 +206,7 @@
     <ClInclude Include="Game\GimmickList\SlideBehavior.h" />
     <ClInclude Include="Game\GimmickList\Stage.h" />
     <ClInclude Include="Game\GimmickList\Wave.h" />
+    <ClInclude Include="Game\GimmickList\WaveManager.h" />
     <ClInclude Include="Game\ObjectList\SkyDome.h" />
     <ClInclude Include="Game\PlayerList\AttackList\AttackBase.h" />
     <ClInclude Include="Game\PlayerList\AttackList\AttackManager.h" />
@@ -213,6 +214,7 @@
     <ClInclude Include="Game\PlayerList\AttackList\BulletP.h" />
     <ClInclude Include="Game\PlayerList\AttackList\RushP.h" />
     <ClInclude Include="Game\PlayerList\Player.h" />
+    <ClInclude Include="Game\PlayerList\PlayerRenderer.h" />
     <ClInclude Include="Game\PlayerList\PlayerStats.h" />
     <ClInclude Include="Game\SceneList\GamePlayScene.h" />
     <ClInclude Include="Game\SceneList\ResultScene.h" />
@@ -257,12 +259,14 @@
     <ClCompile Include="Game\GimmickList\SlideBehavior.cpp" />
     <ClCompile Include="Game\GimmickList\Stage.cpp" />
     <ClCompile Include="Game\GimmickList\Wave.cpp" />
+    <ClCompile Include="Game\GimmickList\WaveManager.cpp" />
     <ClCompile Include="Game\ObjectList\SkyDome.cpp" />
     <ClCompile Include="Game\PlayerList\AttackList\AttackManager.cpp" />
     <ClCompile Include="Game\PlayerList\AttackList\AttackP.cpp" />
     <ClCompile Include="Game\PlayerList\AttackList\BulletP.cpp" />
     <ClCompile Include="Game\PlayerList\AttackList\RushP.cpp" />
     <ClCompile Include="Game\PlayerList\Player.cpp" />
+    <ClCompile Include="Game\PlayerList\PlayerRenderer.cpp" />
     <ClCompile Include="Game\SceneList\GamePlayScene.cpp" />
     <ClCompile Include="Game\SceneList\ResultScene.cpp" />
     <ClCompile Include="Game\SceneList\SelectScene.cpp" />
@@ -299,6 +303,7 @@
     <None Include="Resources\Shaders\Rain.hlsli" />
     <None Include="Resources\Shaders\Smoke.hlsli" />
     <None Include="Resources\Shaders\Snow.hlsli" />
+    <None Include="Resources\Shaders\Wave.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\FadePS.hlsl">
@@ -388,6 +393,18 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)\Resources\Shaders\%(Filename).cso</ObjectFileOutput>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)\Resources\Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\WavePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)\Resources\Shaders\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)\Resources\Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\WaveVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)\Resources\Shaders\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)\Resources\Shaders\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

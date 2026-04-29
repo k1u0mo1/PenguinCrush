@@ -107,3 +107,5 @@ namespace DX
 
 #include "DDSTextureLoader.h"
 #include "WICTextureLoader.h"
+
+#include <DirectXMath.h>

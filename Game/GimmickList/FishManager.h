@@ -3,12 +3,13 @@
 #include "pch.h"
 #include <Game/Common/DeviceResources.h>
 #include <Game/Collision/DisplayCollision.h>
-#include <Game/PlayerList/Player.h>
 
 #include "Game/GimmickList/Stage.h"
 #include "Game/GimmickList/Fish.h"
 
 class ShadowRenderer;
+class Player;
+
 
 class FishManager
 {
