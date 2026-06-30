@@ -1,4 +1,10 @@
 
+/**
+ * @file   WeatherBase.cpp
+ * @brief  天候の親クラス
+ * @author 國田知睦
+ * @date   2026/06/17
+ */
 
 #include "pch.h"
 #include "WeatherBase.h"
@@ -29,24 +35,23 @@ void WeatherBase::Initialize(ID3D11Device* device)
 		SimpleMath::Vector2 Size;
 	};
 
-	//最大の数
-	int particleCount = 5000;
+	std::vector<Vertex> vertices(MAX_PARTICLES);
 
-	std::vector<Vertex> vertices(particleCount);
-
-	for (int i = 0; i < particleCount; i++)
+	for (int i = 0; i < MAX_PARTICLES; i++)
 	{
 		vertices[i].Pos = DirectX::SimpleMath::Vector3(
-			(rand() % 2000 - 1000) / 10.0f,
-			(rand() % 1000 ) / 10.0f,
-			(rand() % 2000 - 1000) / 10.0f
+			(rand() % SPAWN_RANGE_X) - (SPAWN_RANGE_X * 0.5f),
+			(rand() % SPAWN_RANGE_Y) / 10.0f,
+			(rand() % SPAWN_RANGE_Z) - (SPAWN_RANGE_Z * 0.5f)
 		);
-		//サイズ（仮）
-		vertices[i].Size = DirectX::SimpleMath::Vector2(1.0f, 1.0f);
+
+		//サイズ
+		vertices[i].Size = 
+			DirectX::SimpleMath::Vector2(DEFAULT_PARTICLE_SIZE, DEFAULT_PARTICLE_SIZE);
 	}
 
 	//頂点バッファの作成
-	D3D11_BUFFER_DESC bd = { sizeof(Vertex) * particleCount, D3D11_USAGE_IMMUTABLE, D3D11_BIND_VERTEX_BUFFER, 0, 0, 0 };
+	D3D11_BUFFER_DESC bd = { sizeof(Vertex) * MAX_PARTICLES, D3D11_USAGE_IMMUTABLE, D3D11_BIND_VERTEX_BUFFER, 0, 0, 0 };
 	
 	D3D11_SUBRESOURCE_DATA data = { vertices.data(), 0, 0 };
 	

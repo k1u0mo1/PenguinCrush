@@ -1,6 +1,9 @@
-//
-// Fish.cpp
-//
+/**
+ * @file   Fish.cpp
+ * @brief  魚オブジェクト
+ * @author 國田知睦
+ * @date   2026/06/17
+ */
 
 #include "pch.h"
 #include "Fish.h"
@@ -11,8 +14,6 @@ using namespace DirectX;
 
 using Microsoft::WRL::ComPtr;
 
-
-using namespace DirectX;
 
 //----------------------------------------------------------
 // コンストラクタ
@@ -103,7 +104,7 @@ void Fish::Update(
         //魚がステージよりも下に落ちたときに補正する
         if (m_position.y <= stageY - m_fishHeightOffset)
         {
-            m_position.y = stageY - m_fishHeightOffset;
+            m_position.y = stageY + m_fishHeightOffset;
 
             //落ちてきたとき
             if (m_velocity.y < 0)
@@ -150,8 +151,6 @@ void Fish::Update(
     //重力ベクトルを定義　常に（0,-1,0）
     SimpleMath::Vector3 gravity = SimpleMath::Vector3::Down;
 
-    
-
 
     //接している平面方向（重力を法線に投影して引く）
     //gravity.Dot(normal)で重力のうち法線方向の成分を計算する
@@ -167,24 +166,6 @@ void Fish::Update(
     );
 
 
-    ////十分に傾いている時に滑る
-    //if (slideDir.LengthSquared() > 0.0001f)
-    //{
-    //    slideDir.Normalize();
-    //    //強さを設定
-    //    //acos(normal.y)で水平から傾斜角度を出す
-    //    float slopeAngle = acos(std::max(-1.0f, std::min(1.0f, normal.y)));
-    //    //sinf(slopeAngle)はどれだけ横に滑るか？
-    //    float slideStrength = sinf(slopeAngle) * 50.0f;//数値は大きめに
-    //    //魚の位置を更新する
-    //    //傾斜角に応じた速度で魚を滑らせる
-    //    m_position += slideDir * slideStrength * deltaTime;
-    //}
-    ////OBB更新
-    //if (m_collision)
-    //{
-    //    //m_collision->SetCenter(m_position);
-    //}
 
     m_sphere.Center = m_position;
 }

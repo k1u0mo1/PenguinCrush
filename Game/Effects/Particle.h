@@ -1,6 +1,10 @@
 
-//Particle.h
-//シェーダ用のパーティクルクラス
+/**
+ * @file   Particle.h
+ * @brief  シェーダ用エフェクトのパーティクル管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
 
 #pragma once
 
@@ -67,50 +71,82 @@ public:
 		DirectX::SimpleMath::Vector4	time;
 	};
 
+	/// <summary>
+	/// パラメータの構造体
+	/// </summary>
+	struct EffectParam
+	{
+		//色
+		DirectX::SimpleMath::Vector4 color;
+		//座標
+		float posOffset;
+		//速度　最小
+		float speedMin;
+		//速度　最大
+		float speedMax;
+		//半径　最小
+		float radiusMin;
+		//半径　最大
+		float radiusMax;
+		//生存時間　最小
+		float lifetimeMin;
+		//生存時間　最大
+		float lifetimeMax;
+	};
+
 private:
 
-	//デバイスリソースへのポインタ
-	DX::DeviceResources* m_pDR;
+	//水しぶき　各エフェクトのパラメータを定理
+	static constexpr EffectParam PARAM_SPLASH =
+	{ 
+		//color
+		{ 0.8f, 0.9f, 1.0f, 1.0f },
+		//posOffset
+		0.5f,
+		//speed Min/Max
+		5.0f, 30.0f,
+		//radius Min/Max
+		0.0f, 5.0f,
+		//lifetime Min/Max
+		0.5f, 3.0f
+	};
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer>	m_CBuffer;
+	//爆発　各エフェクトのパラメータを定理
+	static constexpr EffectParam PARAM_EXPLOSION =
+	{
+		//color
+		{ 1.0f, 0.5f, 0.2f, 1.0f },
+		//posOffset
+		0.5f,
+		//speed Min/Max
+		5.0f, 10.0f,
+		//radius Min/Max
+		0.0f, 6.0f,
+		//lifetime Min/Max
+		0.5f, 3.0f
+	};
 
-	DX::StepTimer  m_timer;
+	//ダッシュ(突進)　各エフェクトのパラメータを定理
+	static constexpr EffectParam PARAM_DASH = 
+	{
+		//color
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		//posOffset
+		0.3f,
+		//speed Min/Max
+		1.0f, 2.0f,
+		//radius Min/Max
+		0.0f, 1.0f,
+		//lifetime Min/Max
+		0.5f, 3.0f
+	};
 
-	//	入力レイアウト
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
-
-	//	プリミティブバッチ
-	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColorTexture>> m_batch;
-	//	コモンステート
-	std::unique_ptr<DirectX::CommonStates> m_states;
-	//	テクスチャハンドル
-	std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> m_texture;
-	//	テクスチャハンドル
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture2;
-	//	頂点シェーダ
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-	//	ピクセルシェーダ
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
-	//	ジオメトリシェーダ
-	Microsoft::WRL::ComPtr<ID3D11GeometryShader> m_geometryShader;
-
-	DirectX::SimpleMath::Matrix m_world;
-	DirectX::SimpleMath::Matrix m_view;
-	DirectX::SimpleMath::Matrix m_proj;
-
-	//パーティクルのリスト 要らないかも
-	std::vector<ParticleInfo> m_particles;
-	
-	//パーティクル関係
-	//水しぶき用
-	std::vector<ParticleInfo> m_splashList;
-	//攻撃が当たったあとの爆発
-	std::vector<ParticleInfo> m_explosionList;
-	//ダッシュ中の線
-	std::vector<ParticleInfo> m_dashList;
+	//重力
+	static constexpr float GRAVITY = -19.6f;
 
 public:
-	//	頂点シェーダへ渡す頂点データの入力レイアウト定義
+
+	//頂点シェーダへ渡す頂点データの入力レイアウト定義
 	static const std::vector<D3D11_INPUT_ELEMENT_DESC> INPUT_LAYOUT;
 
 	/// <summary>
@@ -161,5 +197,47 @@ public:
 	/// パーティクル描画用のシェーダとインプットレイアウトを作成
 	/// </summary>
 	void CreateShader();
+
+private:
+
+	//デバイスリソースへのポインタ
+	DX::DeviceResources* m_pDR;
+
+	Microsoft::WRL::ComPtr<ID3D11Buffer>	m_CBuffer;
+
+	DX::StepTimer  m_timer;
+
+	//	入力レイアウト
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
+
+	//	プリミティブバッチ
+	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColorTexture>> m_batch;
+	//	コモンステート
+	std::unique_ptr<DirectX::CommonStates> m_states;
+	//	テクスチャハンドル
+	std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> m_texture;
+	//	テクスチャハンドル
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture2;
+	//	頂点シェーダ
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
+	//	ピクセルシェーダ
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
+	//	ジオメトリシェーダ
+	Microsoft::WRL::ComPtr<ID3D11GeometryShader> m_geometryShader;
+
+	DirectX::SimpleMath::Matrix m_world;
+	DirectX::SimpleMath::Matrix m_view;
+	DirectX::SimpleMath::Matrix m_proj;
+
+	//パーティクルのリスト 要らないかも
+	std::vector<ParticleInfo> m_particles;
+
+	//パーティクル関係
+	//水しぶき用
+	std::vector<ParticleInfo> m_splashList;
+	//攻撃が当たったあとの爆発
+	std::vector<ParticleInfo> m_explosionList;
+	//ダッシュ中の線
+	std::vector<ParticleInfo> m_dashList;
 };
 

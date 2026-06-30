@@ -1,5 +1,10 @@
 
-//デバッグ用のフォントクラス
+/**
+ * @file   DebugFont.h
+ * @brief  デバッグ用のフォントクラス
+ * @author 國田知睦
+ * @date   2026/06/10
+ */
 
 #pragma once
 

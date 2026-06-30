@@ -1,3 +1,12 @@
+
+/**
+ * @file   BinaryFile.cpp
+ * @brief  バイナリーデータの読み込みと保持を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/10
+ */
+
+
 #include "pch.h"
 #include "BinaryFile.h"
 

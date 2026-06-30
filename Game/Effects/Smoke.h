@@ -1,6 +1,10 @@
 
-//Smoke.h
-//シェーダ用のパーティクルクラス
+/**
+ * @file   Smoke.h
+ * @brief  煙 エフェクトのパーティクル管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
 
 #pragma once
 
@@ -35,6 +39,20 @@ public:
 		//時間パラメータ
 		DirectX::SimpleMath::Vector4	time;
 	};
+
+private:
+
+	//煙のデフォルトの色
+	static constexpr DirectX::SimpleMath::Vector3 BASE_COLOR = { 1.0f,1.0f,1.0f };
+
+	//描画する頂点の数
+	static constexpr UINT VERTEX_COUNT = 1;
+
+	//ファイルリソースのパス一覧
+	const wchar_t* TEXTURE_PATH = L"Resources/Textures/White.png";
+	const wchar_t* SHADER_VS_PATH = L"Resources/Shaders/SmokeVS.cso";
+	const wchar_t* SHADER_GS_PATH = L"Resources/Shaders/SmokeGS.cso";
+	const wchar_t* SHADER_PS_PATH = L"Resources/Shaders/SmokePS.cso";
 
 private:
 

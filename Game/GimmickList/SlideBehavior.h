@@ -1,5 +1,11 @@
-// SlideBehavior.h
-//滑る挙動
+
+/**
+ * @file   SlideBehavior.h
+ * @brief  滑る挙動のコンポーネントクラス
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
+
 
 #pragma once
 #include "pch.h"
@@ -23,6 +29,12 @@ private:
 
 	//摩擦力
 	static constexpr float FRICTION_FORCE = 2.0f;
+
+	//最小の値の大きさ
+	static constexpr float VELOCITY_THRESHOLD = 0.01f;
+
+	//完全に停止した際の微小値
+	static constexpr float STOP_EPSILON = 0.001f;
 
 public:
 

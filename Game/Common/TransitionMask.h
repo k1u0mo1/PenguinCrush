@@ -1,11 +1,13 @@
 
-//TransitionMask.h
-
-//画面切り替え用
+/**
+ * @file   TransitionMask.h
+ * @brief  シーン切り替えの管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
+#pragma once
 
 #include "SpriteBatch.h"
-
-#pragma once
 
 /// <summary>
 /// 画面切り替えの演出を管理・描画するクラス
@@ -32,6 +34,13 @@ public:
 		NONE,
 		COPY
 	};
+
+private:
+
+	//ダミーのテクスチャの縦横サイズ
+	static constexpr UINT DUMMY_TEX_SIZE = 1;
+	//
+	static constexpr uint32_t COLOR_WHITE_DATA = 0xFFFFFFFF;
 
 public:
 

@@ -1,4 +1,12 @@
-// Wave.h
+
+/**
+ * @file   Wave.h
+ * @brief  水面の波を動的に生成・描画し、物理的な高さや傾きを提供するギミッククラス
+ * @author 國田知睦
+ * @date   2026/06/12
+ */
+
+
 #pragma once
 
 #include "pch.h"
@@ -55,6 +63,47 @@ private:
     static constexpr float WAVE_SCALE_Z = 10.0f;
     //波の描画位置 （Y軸高さ）
     static constexpr float WAVE_OFFSET_Y = -1.0f;
+
+    //視野角
+    static constexpr float CAM_FOV = 45.0f;
+    //描画開始距離
+    static constexpr float CAM_NEAR = 0.1f;
+    //描画終了距離
+    static constexpr float CAM_FAR = 1000.0f;
+
+    //立方体のインデックスの数
+    static constexpr UINT CUBE_INDEX_COUNT = 36;
+    //立方体の描画個数
+    static constexpr UINT CUBE_INSTANCE_COUNT = 40000;
+
+    //立方体のサイズ
+    static constexpr float CUDE_SIZE = 0.2f;
+    //立方体の頂点数
+    static constexpr UINT CUBE_SIZE = 8;
+
+    //波1の速度
+    static constexpr float WAVE1_SPEED = 1.0f;
+
+    //波2の細かさ
+    static constexpr float WAVE2_FREQ_SCALE = 1.5f;
+    //波2の速度
+    static constexpr float WAVE2_SPEED = 1.2f;
+    //波2の高さ
+    static constexpr float WAVE2_AMP_SCALE = 0.5f;
+
+    //波3の細かさ
+    static constexpr float WAVE3_FREQ_SCALE = 0.5f;   
+    //波3の動く速度
+    static constexpr float WAVE3_SPEED = 1.0f;   
+    //波3の高さ
+    static constexpr float WAVE3_AMP_SCALE = 0.25f;  
+
+    //波4の細かさ
+    static constexpr float WAVE4_FREQ_SCALE = 0.25f;  
+    //波4の動く速度
+    static constexpr float WAVE4_SPEED = 0.5f;  
+    //波4の高さ（振幅）の倍率
+    static constexpr float WAVE4_AMP_SCALE = 0.5f;   
 
 private:
 
@@ -113,16 +162,16 @@ private:
         //-------------------------------------------
 
         //波１　ベースとなる揺れが大きくゆったり
-        float waveSlowly = sinf(localX * WAVE_FREQUENCY + time * 1.0f);
+        float waveSlowly = sinf(localX * WAVE_FREQUENCY + time * WAVE1_SPEED);
 
         //波２　少し細かく動きが速い
-        float waveQuick = cosf(localZ * WAVE_AMPLIYUDE * 1.5f + time * 1.2f) * 0.5f;
+        float waveQuick = cosf(localZ * WAVE_AMPLIYUDE * WAVE2_FREQ_SCALE + time * WAVE2_SPEED) * WAVE2_AMP_SCALE;
 
         //波３　斜めの方向へ細かい波
-        float waveSlanting = sinf((localX + localZ) * 1.0f + time * 1.0f) * 0.25f;
+        float waveSlanting = sinf((localX + localZ) * WAVE3_FREQ_SCALE + time * WAVE3_SPEED) * WAVE3_AMP_SCALE;
 
         //波４　逆斜めの方向の細かい波
-        float waveReverse = cosf((localX - localZ)   * 0.25f + time * 0.5f) * 0.5f;
+        float waveReverse = cosf((localX - localZ)   * WAVE4_FREQ_SCALE + time * WAVE4_SPEED) * WAVE4_AMP_SCALE;
 
         //すべての波を合成
         float wave = waveSlowly + waveQuick + (waveSlanting - waveReverse);

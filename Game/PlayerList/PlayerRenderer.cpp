@@ -1,5 +1,14 @@
+
+/**
+ * @file   PlayerRenderer.cpp
+ * @brief  プレイヤーキャラクターの描画を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
+
 #include "pch.h"
 #include "PlayerRenderer.h"
+#include "Game/Common/ObjectCharacter/ModelManager.h"
 
 #include "DDSTextureLoader.h"
 
@@ -25,12 +34,12 @@ void PlayerRenderer::Initialize(ID3D11Device* device)
     DirectX::EffectFactory fx(device);
     fx.SetDirectory(L"Resources\\Models");
 
-    //各状態のモデルをロード
-    m_modelIdle     = Model::CreateFromSDKMESH(device, L"Resources\\Models\\Pen_Stand.sdkmesh", fx);
-    m_modelAttack   = Model::CreateFromSDKMESH(device, L"Resources\\Models\\PenAttack.sdkmesh", fx);
-    m_modelShoot    = Model::CreateFromSDKMESH(device, L"Resources\\Models\\Pen_Shoot.sdkmesh", fx);
-    m_modelRush     = Model::CreateFromSDKMESH(device, L"Resources\\Models\\Pen_Rush.sdkmesh",  fx);
-    m_materialDizzy = Model::CreateFromSDKMESH(device, L"Resources\\Models\\Fainting.sdkmesh",  fx);
+    
+	//モデルマネージャーからモデルを取得
+    m_modelIdle = ModelManager::GetInstance()->GetIdleModel();
+    m_modelAttack = ModelManager::GetInstance()->GetAttackModel();
+    m_modelRush = ModelManager::GetInstance()->GetRushModel();
+    m_materialDizzy = ModelManager::GetInstance()->GetDizzyMaterial();
 
     //影用テクスチャの読み込み
     CreateDDSTextureFromFile(device, L"Resources\\Textures\\Shadow.dds", nullptr, m_shadowTexture.GetAddressOf());
@@ -53,16 +62,15 @@ void PlayerRenderer::Render(
     ShadowRenderer* shadowRenderer)
 {
 	//状態に応じたモデルを選択
-    Model* currentModel = m_modelIdle.get();
+    Model* currentModel = m_modelIdle;
 
 	//ふらつき状態は通常モデルを使用
     switch (state)
     {
-    case Player::PlayerState::Attack: currentModel = m_modelAttack.get(); break;
-    case Player::PlayerState::Shoot:  currentModel = m_modelShoot.get();  break;
-    case Player::PlayerState::Rush:   currentModel = m_modelRush.get();   break;
-    case Player::PlayerState::Dizzy:  currentModel = m_modelIdle.get();   break;
-    default:                          currentModel = m_modelIdle.get();   break;
+    case Player::PlayerState::Attack: currentModel = m_modelAttack; break;
+    case Player::PlayerState::Rush:   currentModel = m_modelRush;   break;
+    case Player::PlayerState::Dizzy:  currentModel = m_modelIdle;   break;
+    default:                          currentModel = m_modelIdle;   break;
     }
 
     if (!currentModel) return;
@@ -94,9 +102,6 @@ void PlayerRenderer::Render(
 		//影の位置はプレイヤーの位置と同じX,ZでYを少し下げる
         SimpleMath::Vector3 shadowPos = position;
 
-		//影の大きさ
-        float shadowScale = 2.0f;
-
 		//ステージの傾きに合わせて影も回転させる
         shadowRenderer->Render(
             context, 
@@ -104,7 +109,7 @@ void PlayerRenderer::Render(
             view, 
             proj, 
             shadowPos,
-            shadowScale,
+            SHADOW_SCALE,
             stage->GetRotateX(),
             stage->GetRotateZ());
     }
@@ -117,13 +122,17 @@ void PlayerRenderer::Render(
     {
 		//エフェクトの位置はプレイヤーの位置と同じX,ZでYを少し上げる
         SimpleMath::Matrix birdTrans = SimpleMath::Matrix::CreateTranslation(position.x, position.y + DIZZY_EFFECT_OFFSET_Y, position.z);
-		//エフェクトの大きさは0.5倍
-        SimpleMath::Matrix birdScale = SimpleMath::Matrix::CreateScale(0.5f);
-		//エフェクトの回転はY軸でふらつきの回転に加えてさらに回転させる
+		
+        //エフェクトの大きさ
+        SimpleMath::Matrix birdScale = SimpleMath::Matrix::CreateScale(DIZZY_EFFECT_SCALE);
+		
+        //エフェクトの回転はY軸でふらつきの回転に加えてさらに回転させる
         SimpleMath::Matrix birdRot = SimpleMath::Matrix::CreateRotationY(dizzyRotationY);
-		//ワールド行列の計算
+		
+        //ワールド行列の計算
         SimpleMath::Matrix birdWorld = birdScale * birdRot * birdTrans;
-		//エフェクトの描画
+		
+        //エフェクトの描画
         m_materialDizzy->Draw(context, *m_states, birdWorld, view, proj);
     }
 }

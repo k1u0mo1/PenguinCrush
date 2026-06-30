@@ -1,5 +1,9 @@
-
-//魚のマネージャー
+/**
+ * @file   FishManager.cpp
+ * @brief  魚の描画・管理を行うマネージャークラス
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
 
 #include "pch.h"
 #include "Game/GimmickList/FishManager.h"
@@ -56,11 +60,12 @@ void FishManager::Update(float dt, Player* player)
             {
                 if (col.Intersects(obb))
                 {
-                    //弾数の回復
-                    player->AddAmmo(fish->GetAmmoValue());
                     
                     //HPを回復
                     player->Heal(FISH_HEAL_AMOUNT);
+                    
+                    //回復音を再生
+                    AudioManager::GetInstance()->Play("Heal");
 
                     //弾を消す
                     fish->BulletKill();
@@ -120,7 +125,7 @@ void FishManager::SpawnFish()
     auto fish = std::make_unique<Fish>(
         m_deviceResources,
         SimpleMath::Vector3(x, y, z),
-        SimpleMath::Vector3(0.001f, -1.0f, 0), 
+        SimpleMath::Vector3(DEFAULT_DIR_X, DEFAULT_DIR_Y, DEFAULT_DIR_Z),
         m_displayCollision
     );
 

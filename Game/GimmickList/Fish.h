@@ -1,4 +1,11 @@
-// Fish.h
+
+/**
+ * @file   Fish.h
+ * @brief  魚オブジェクト
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
+
 #pragma once
 
 #include "pch.h"
@@ -20,7 +27,7 @@
 
 /// <summary>
 /// ゲーム内に登場する魚オブジェクト
-/// プレイヤーの弾薬を回復させる役割
+/// プレイヤーを回復させる役割
 /// </summary>
 class Fish 
 {
@@ -51,9 +58,9 @@ private:
     //------------------------------------------------------
 
     //箱型当たり判定のサイズ
-    static constexpr float BOUNDING_BOX_SIZE = 1.0f;
+    static constexpr float BOUNDING_BOX_SIZE = 1.5f;
     //円型当たり判定の半径
-    static constexpr float BOUNDING_SPHERE_RADIUS = 1.5f;
+    static constexpr float BOUNDING_SPHERE_RADIUS = 2.5f;
 
     //------------------------------------------------------
     //アニメーション関連
@@ -62,7 +69,7 @@ private:
     //跳ねるアニメーションの速度
     static constexpr float FLOP_SPEED = 20.0f;
     //跳ねる高さの最大値
-    static constexpr float FLOP_HEIGHT = 2.0f;
+    static constexpr float FLOP_HEIGHT = 5.0f;
 
 public:
 

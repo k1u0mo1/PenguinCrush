@@ -1,4 +1,11 @@
-// AttackP.h
+
+/**
+ * @file   AttackP.h
+ * @brief  プレイヤーの近距離攻撃を管理するクラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
+
 #pragma once
 
 #include "pch.h"
@@ -32,6 +39,20 @@ private:
     static constexpr float MAX_LIFETIME = 0.3f;
     //攻撃の判定がプレイヤーの前に出すか
     static constexpr float SPAWN_OFFSET_FRONT = 2.0f;
+
+    //攻撃距離
+    static constexpr float ATTACK_DISTANCE = 0.1f;
+
+	//当たり判定のサイズ
+	static constexpr DirectX::SimpleMath::Vector3 COLLISION_SIZE =
+        DirectX::SimpleMath::Vector3(0.5f, 1.0f, 0.5f);
+
+	//デバックの当たり判定の線の太さ
+	static constexpr float DEBUG_COLLISION_LINE_THICKNESS = 0.5f;
+
+    //デフォルトの箱のサイズ
+    static constexpr DirectX::SimpleMath::Vector3 DEFAULT_BOX_SIZE =
+        DirectX::SimpleMath::Vector3(0.3f, 0.3f, 0.3f);
 
 public:
 

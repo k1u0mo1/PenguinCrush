@@ -1,3 +1,11 @@
+
+/**
+ * @file   PlayerRenderer.h
+ * @brief  プレイヤーキャラクターの描画を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
+
 #pragma once
 
 #include "pch.h"
@@ -20,6 +28,11 @@ private:
     static constexpr float DIZZY_SWAY_ANGLE = 0.2f;  
 	//ふらつきエフェクトの高さ
     static constexpr float DIZZY_EFFECT_OFFSET_Y = 2.5f;
+
+	//プレイヤーの影のサイズ
+	static constexpr float SHADOW_SCALE = 2.0f;
+	//ふらつきのサイズ
+	static constexpr float DIZZY_EFFECT_SCALE = 0.5f;
 
 public:
     /// <summary>
@@ -68,7 +81,7 @@ public:
     /// 当たり判定用にメインモデルを取得する
     /// </summary>
     /// <returns>メインモデル</returns>
-    DirectX::Model* GetMainModel() const { return m_modelIdle.get(); }
+    DirectX::Model* GetMainModel() const { return m_modelIdle; }
 
     /// <summary>
     /// デバッグ描画用にステートを取得する
@@ -82,12 +95,17 @@ private:
     std::unique_ptr<DirectX::CommonStates> m_states;
 
     //モデル関連
-    std::shared_ptr<DirectX::Model> m_modelIdle;
+    /*std::shared_ptr<DirectX::Model> m_modelIdle;
     std::shared_ptr<DirectX::Model> m_modelAttack;
-    std::shared_ptr<DirectX::Model> m_modelShoot;
+    
     std::shared_ptr<DirectX::Model> m_modelRush;
-    std::shared_ptr<DirectX::Model> m_materialDizzy;
+    std::shared_ptr<DirectX::Model> m_materialDizzy;*/
 
+	DirectX::Model* m_modelIdle = nullptr;
+    DirectX::Model* m_modelAttack = nullptr;
+    DirectX::Model* m_modelRush = nullptr;
+    DirectX::Model* m_materialDizzy = nullptr;
+    
 	//影描画用のテクスチャ
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_shadowTexture;
 

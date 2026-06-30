@@ -1,5 +1,11 @@
 
-//効果音マネージャー
+/**
+ * @file   AudioManager.h
+ * @brief  ゲーム全体の音声（BGM・SE）を管理・再生するシングルトンクラス
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
+
 
 #pragma once
 #include <string>
@@ -12,6 +18,22 @@
 /// </summary>
 class AudioManager
 {
+private:
+
+	//最小の音量
+	static constexpr float MIN_VOLUME = 0.0f;
+	//最大の音量
+	static constexpr float MAX_VOLUME = 1.0f;
+	//デフォルトの音量
+	static constexpr float DEFAULT_VOLUME = 1.0f;
+
+	//音の高さ　（原音0.0）
+	static constexpr float DEFAULT_PITCH = 0.0f;
+	//左右　（中央0.0）
+	static constexpr float DEFAULT_PAN = 0.0f;
+
+
+
 public:
 
 	/// <summary>
@@ -89,10 +111,10 @@ private:
 	std::unique_ptr<DirectX::SoundEffectInstance> m_bgmInstance;
 
 	//現在のBGMの音量を記憶する
-	float m_bgmVolume = 1.0f;
+	float m_bgmVolume = DEFAULT_VOLUME;
 
 	//現在のSEの音量を記憶する
-	float m_seVolume = 1.0f;
+	float m_seVolume = DEFAULT_VOLUME;
 
 	//BGMを途切れないようにするキー名を記憶する
 	std::string m_currentBGMKey;

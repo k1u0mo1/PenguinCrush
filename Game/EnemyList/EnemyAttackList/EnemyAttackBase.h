@@ -1,5 +1,11 @@
 
-//攻撃の基底クラス-------------------------------
+
+/**
+ * @file   EnemyAttackBase.h
+ * @brief  敵の各攻撃パターンの基底クラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
 
 #pragma once
 #include <DirectXMath.h>

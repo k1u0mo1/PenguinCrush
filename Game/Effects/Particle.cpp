@@ -1,6 +1,10 @@
 
-//Particle
-
+/**
+ * @file   Particle.cpp
+ * @brief  シェーダ用エフェクトのパーティクル管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
 
 #include "pch.h"
 #include "Particle.h"
@@ -102,9 +106,7 @@ static float GetRandom(float min, float max)
 
 void Particle::Update(float elapsedTime)
 {
-	// 重力設定 (下向きの力)
-	const float gravity = -9.8f * 2.0f; // 少し強めに
-
+	
 	//------------------------------------
 	// 水しぶき更新
 	//------------------------------------
@@ -112,7 +114,7 @@ void Particle::Update(float elapsedTime)
 	for (auto& p : m_splashList)
 	{
 		// 速度に重力を加算
-		p.Velocity.y += gravity * elapsedTime;
+		p.Velocity.y += GRAVITY * elapsedTime;
 
 		// 位置を更新
 		p.Position += p.Velocity * elapsedTime;
@@ -134,7 +136,7 @@ void Particle::Update(float elapsedTime)
 	for (auto& p : m_explosionList)
 	{
 		// 速度に重力を加算
-		p.Velocity.y += gravity * elapsedTime;
+		p.Velocity.y += GRAVITY * elapsedTime;
 
 		// 位置を更新
 		p.Position += p.Velocity * elapsedTime;
@@ -156,7 +158,7 @@ void Particle::Update(float elapsedTime)
 	for (auto& p : m_dashList)
 	{
 		// 速度に重力を加算
-		p.Velocity.y += gravity * elapsedTime;
+		p.Velocity.y += GRAVITY * elapsedTime;
 
 		// 位置を更新
 		p.Position += p.Velocity * elapsedTime;
@@ -189,93 +191,38 @@ void Particle::Spawn(
 		ParticleInfo p;
 		p.Position = position;
 		p.Age = 0.0f;
-
 		p.Size = size;
 
-		//タイプの切り替えでエフェクトを変える
-		switch (type)
-		{
-		//----------------------------------------
-		//水しぶき
-		//----------------------------------------
-		case Type::Splash:
-		{
-			//色
-			p.Color = SimpleMath::Vector4(0.8f, 0.9f, 1.0f, 1.0f);
+		//選択されたタイプに応じたパラメータの参照を受け取る
+		const EffectParam& param = 
+			(type == Type::Splash)    ? PARAM_SPLASH :
+			(type == Type::Explosion) ? PARAM_EXPLOSION : PARAM_DASH;
 
-			// 少しばらつかせる
-			p.Position.x += GetRandom(-0.5f, 0.5f);
-			p.Position.z += GetRandom(-0.5f, 0.5f);
+		//共通の計算処理
+		//色
+		p.Color = param.color;
+		//発生座標
+		p.Position.x += GetRandom(-param.posOffset, param.posOffset);
+		p.Position.z += GetRandom(-param.posOffset, param.posOffset);
 
-			// 上方向に飛び散る速度
-			float speed = GetRandom(5.0f, 30.0f);
-			float angle = GetRandom(0.0f, DirectX::XM_2PI);
-			float radius = GetRandom(0.0f, 5.0f); // 横への広がり
+		//速度
+		float speed = GetRandom(param.speedMin, param.speedMax);
+		//角度
+		float angle = GetRandom(0.0f, DirectX::XM_2PI);
+		//半径
+		float radius = GetRandom(param.radiusMin, param.radiusMax);
 
-			p.Velocity.x = cos(angle) * radius;
-			p.Velocity.y = speed; // 上向き
-			p.Velocity.z = sin(angle) * radius;
+		//速度計算
+		p.Velocity.x = cos(angle) * radius;
+		p.Velocity.y = speed;
+		p.Velocity.z = sin(angle) * radius;
 
-			p.Age = 0.0f;
-			p.Lifetime = GetRandom(0.5f, 3.0f);
+		//発生時間のランダム
+		p.Lifetime = GetRandom(param.lifetimeMin, param.lifetimeMax);
 
-			m_splashList.push_back(p);
-			break;
-		}
-		//----------------------------------------
-		//爆発
-		//----------------------------------------
-		case Type::Explosion:
-		{
-			//色
-			p.Color = SimpleMath::Vector4(1.0f, 0.5f, 0.2f, 1.0f);
-			// 少しばらつかせる
-			p.Position.x += GetRandom(-0.5f, 0.5f);
-			p.Position.z += GetRandom(-0.5f, 0.5f);
-
-			// 上方向に飛び散る速度
-			float speed = GetRandom(5.0f, 10.0f);
-			float angle = GetRandom(0.0f, DirectX::XM_2PI);
-			float radius = GetRandom(0.0f, 3.0f); // 横への広がり
-
-			p.Velocity.x = cos(angle) * radius;
-			p.Velocity.y = speed; 
-			p.Velocity.z = sin(angle) * radius;
-
-			p.Age = 0.0f;
-			p.Lifetime = GetRandom(0.5f, 3.0f);
-
-			m_explosionList.push_back(p);
-			break;
-		}
-		//----------------------------------------
-		//ダッシュ
-		//----------------------------------------
-		case Type::Dash:
-		{
-			//色
-			p.Color = SimpleMath::Vector4(1.0f, 1.0f, 1.0f, 0.0f);
-			// 少しばらつかせる
-			p.Position.x += GetRandom(-0.3f, 0.3f);
-			p.Position.z += GetRandom(-0.3f, 0.3f);
-
-			// 上方向に飛び散る速度
-			float speed = GetRandom(1.0f, 2.0f);
-			float angle = GetRandom(0.0f, DirectX::XM_2PI);
-			float radius = GetRandom(0.0f, 1.0f); // 横への広がり
-
-			p.Velocity.x = cos(angle) * radius;
-			p.Velocity.y = speed;
-			p.Velocity.z = sin(angle) * radius;
-
-			p.Age = 0.0f;
-			p.Lifetime = GetRandom(0.5f, 3.0f);
-
-			m_dashList.push_back(p);
-			break;
-		}
-		}
-
+		if (type == Type::Splash) m_splashList.push_back(p);
+		else if (type == Type::Explosion)m_explosionList.push_back(p);
+		else m_dashList.push_back(p);
 
 		
 	}

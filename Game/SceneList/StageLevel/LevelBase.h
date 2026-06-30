@@ -1,4 +1,11 @@
 
+/**
+ * @file   LevelBase.h
+ * @brief  すべてのステージの親となる基底クラス
+ * @author 國田知睦
+ * @date   2026/06/15
+ */
+
 //ステージ共通の「親クラス」 
 
 #pragma once
@@ -8,6 +15,8 @@
 #include "Game/EnemyList/EnemyManager.h"
 #include "Game/GimmickList/FishManager.h"
 #include "Game/GimmickList/GimmickManager.h"
+
+#include "Game/WeatherList/WeatherBase.h"
 
 /// <summary>
 /// すべてのステージの親となる基底クラス
@@ -32,20 +41,55 @@ public:
 		StageManager* stageManager,
 		EnemyManager* enemyManager,
 		FishManager* fishManager,
-		/*GimmickManager* gimmickManager,*/
 		std::shared_ptr<DisplayCollision>displayCollision
-	) = 0;
+	) 
+	{
+		//全ステージ共通の初期化をする
+		stageManager->SetCurrentStage(L"DefaultStage");
+		fishManager->SetStage(stageManager->GetCurrentStage());
+		enemyManager->Initialize(deviceResources, stageManager->GetCurrentStage(), displayCollision);
+	}
 
 	/// <summary>
 	/// ステージ固有の毎フレームの更新処理
 	/// </summary>
 	/// <param name="dt">前フレームからの経過時間</param>
 	/// <param name="resources">ユーザーリソース</param>
-	virtual void Update(float /*dt*/, UserResources* /*resources*/) {}
+	virtual void Update(float dt, UserResources* resources) 
+	{
+		//引数を使っていない
+		UNREFERENCED_PARAMETER(resources);
 
+		//天気の更新
+		if (m_weather)
+		{
+			m_weather->Update(dt);
+		}
+	
+	}
+
+	
 	/// <summary>
 	/// ステージ固有の描画処理
 	/// </summary>
-	/// <param name="resources">使用していない</param>
-	virtual void Render(UserResources* /*resources*/){}
+	/// <param name="context"></param>
+	/// <param name="view"></param>
+	/// <param name="proj"></param>
+	/// <param name="camPos">カメラ座標</param>
+	virtual void Render(
+		ID3D11DeviceContext* context, 
+		const DirectX::SimpleMath::Matrix& view,
+		const DirectX::SimpleMath::Matrix& proj,
+		const DirectX::SimpleMath::Vector3& camPos)
+	{
+		//天候の描画
+		if (m_weather)
+		{
+			m_weather->Render(context, view, proj, camPos);
+		}
+	}
+
+protected:
+
+	std::unique_ptr<WeatherBase> m_weather;
 };

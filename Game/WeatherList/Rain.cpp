@@ -1,5 +1,14 @@
+
+/**
+ * @file   Rain.cpp
+ * @brief  天候(雨)のクラス
+ * @author 國田知睦
+ * @date   2026/06/10
+ */
+
 #include "pch.h"
 #include "Rain.h"
+#include <iterator>
 
 #include <Library/BinaryFile.h>
 
@@ -9,6 +18,8 @@
 
 void Rain::Initialize(ID3D11Device* device)
 {
+    m_time = 0.0f;
+
 	//親クラスの初期化
 	WeatherBase::Initialize(device);
 
@@ -28,11 +39,11 @@ void Rain::Initialize(ID3D11Device* device)
     // 入力レイアウト作成
     D3D11_INPUT_ELEMENT_DESC layout[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
     // VSDataを使ってレイアウトを作成
-    device->CreateInputLayout(layout, 2, VSData.GetData(), VSData.GetSize(), m_layout.ReleaseAndGetAddressOf());
+    device->CreateInputLayout(layout, std::size(layout), VSData.GetData(), VSData.GetSize(), m_layout.ReleaseAndGetAddressOf());
 }
 
 //----------------------------------------------------------
@@ -52,7 +63,7 @@ void Rain::Render(ID3D11DeviceContext* context, const DirectX::SimpleMath::Matri
     cb.cameraPos = DirectX::SimpleMath::Vector4(camPos.x, camPos.y, camPos.z, 1);
 
     //雨パラメータ 
-    cb.params = DirectX::SimpleMath::Vector4(20.0f, 0.1f, 0, 0);
+    cb.params = DirectX::SimpleMath::Vector4(RAIN_SPEED, RAIN_WIDTH, 0, 0);
 
     context->UpdateSubresource(m_constBuffer.Get(), 0, nullptr, &cb, 0, 0);
 
@@ -78,7 +89,7 @@ void Rain::Render(ID3D11DeviceContext* context, const DirectX::SimpleMath::Matri
     context->RSSetState(m_states->CullNone());
 
     // 描画
-    context->Draw(1000, 0);
+    context->Draw(RAIN_PARTICLE_COUNT, 0);
 
     // 後片付け
     context->GSSetShader(nullptr, nullptr, 0);

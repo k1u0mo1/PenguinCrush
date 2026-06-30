@@ -1,6 +1,9 @@
-//
-// スカイドーム（背景）
-//
+/**
+ * @file   SkyDome.cpp
+ * @brief  スカイドームの描画・管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
 
 #include "pch.h"
 #include "Game/ObjectList/SkyDome.h"
@@ -23,7 +26,7 @@ void SkyDome::Initialize()
 {
 	auto device = m_deviceResources->GetD3DDevice();
 
-	//Commonstatesを初期化
+	//CommonStatesを初期化
 	m_states = std::make_unique<DirectX::CommonStates>(device);
 
 	//エフェクトファクトリを設定
@@ -36,19 +39,19 @@ void SkyDome::Initialize()
 		L"Resources\\Models\\SkyDome.sdkmesh",
 		*m_effectFactory
 	);
+	
+	//明るさ設定
+	m_model->UpdateEffects([&](DirectX::IEffect* effect)
+		{
+			auto lights = dynamic_cast<DirectX::IEffectLights*>(effect);
+			if (lights)
+			{
+				lights->SetLightingEnabled(false);
+			}
+		}
+	);
 
-	////明るさ設定
-	//m_model->UpdateEffects([&](DirectX::IEffect* effect)
-	//	{
-	//		auto lights = dynamic_cast<DirectX::IEffectLights*>(effect);
-	//		if (lights)
-	//		{
-	//			lights->SetLightingEnabled(false);
-	//		}
-	//	}
-	//);
-
-	m_position= { 0.0f, -20.0f, 0.0f };
+	m_position= { 0.0f, HEIGHT_OFFSET_Y, 0.0f };
 
 }
 
@@ -65,7 +68,7 @@ void SkyDome::Render(
 
 	//固定する
 	DirectX::SimpleMath::Matrix world
-		= DirectX::SimpleMath::Matrix::CreateScale(m_scale)
+		= DirectX::SimpleMath::Matrix::CreateScale(DEFAULT_SCALE)
 		* DirectX::SimpleMath::Matrix::CreateTranslation(m_position);
 	
 	//ステートの設定
@@ -73,8 +76,33 @@ void SkyDome::Render(
 	//裏側カリングを無効
 	context->RSSetState(m_states->CullNone());
 
-	//モデルの描画
-	m_model->Draw(context, *m_states, world, view, proj);
+	//描画する直前にライトをもう一度OFFにする
+	m_model->UpdateEffects([&](DirectX::IEffect* effect)
+		{
+			auto lights = dynamic_cast<DirectX::IEffectLights*>(effect);
+			if (lights)
+			{
+				lights->SetLightingEnabled(false);
+			}
+		});
+
+
+	//for (const auto& mesh : m_model->meshes)
+	//{
+	//	//モデルの描画
+	//	mesh->Draw(context,  world, view, proj);
+	//}
+
+	for (const auto& mesh : m_model->meshes)
+	{
+		// モデルの描画（カスタムステートでサンプラーをリニアに強制する）
+		mesh->Draw(context, world, view, proj, false, [&]()
+			{
+				// サンプラーステートを滑らかな補間（LinearWrap）に設定
+				ID3D11SamplerState* sampler = m_states->LinearWrap();
+				context->PSSetSamplers(0, 1, &sampler);
+			});
+	}
 
 	//ステートに戻す
 	context->OMSetDepthStencilState(m_states->DepthDefault(), 0);

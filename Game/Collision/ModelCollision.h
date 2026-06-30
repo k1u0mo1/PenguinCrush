@@ -1,6 +1,11 @@
 
-//ModelCollision.h
-//モデルの衝突判定
+/**
+ * @file   ModelCollision.h
+ * @brief  ゲームのモデルの衝突判定を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
+
 
 #pragma once
 #include "Game/Collision/DisplayCollision.h"

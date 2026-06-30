@@ -1,5 +1,11 @@
 
-//敵のクラス
+/**
+ * @file   BossEnemy.h
+ * @brief  ボスの管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/24
+ */
+
 #pragma once
 
 #include "pch.h"
@@ -18,8 +24,25 @@
 #include "Game/ShadowRenderer/ShadowRenderer.h"
 
 #include "Game/GimmickList/SlideBehavior.h"
+#include "Game/Common/ObjectCharacter/CharacterBase.h"
+#include "Game/EnemyList/EnemyAttackList/EnemyAttackPattern.h"
+#include "Game/EnemyList/EnemyBase.h"
 
-class BossEnemy
+class EnemyRenderer;
+class EnemyManager;
+
+
+/// <summary>
+/// 敵の種類　通常とボスで分けるため
+/// 後々増やす
+/// </summary>
+enum class EnemyType
+{
+    Normal,
+    Boss
+};
+
+class BossEnemy : public EnemyBase
 {
 private:
 
@@ -27,10 +50,6 @@ private:
     //物理＆移動関連
     //------------------------------------------------------
 
-    //重力加速度
-    static constexpr float GRAVITY_FORCE = -100.8f;
-    //ノックバックの速度減衰率
-    static constexpr float KNOCKBACK_DRAG = 10.0f;
     //復活する時の判定の高さ
     static constexpr float FALL_LIMIT_Y = -5.0f;
     //接地する足場の位置の高さ
@@ -49,27 +68,32 @@ private:
     //ダメージ＆戦闘関連
     //------------------------------------------------------
 
-    //海に落ちたときに受けるダメージ量
-    static constexpr float FALL_DAMAGE = 250.0f;
+    
     //回避が発動する連続被弾回数
     static constexpr int EVADE_HIT_THRESHOLD = 3;
+    //回避が発動しなかったらリセット
+    static constexpr int EVADE_NOHIT_THRESHOLD = 1;
+
     //回避状態の持続時間
     static constexpr float EVADE_DURATION = 0.5f;
-    //プレイヤーからの攻撃のノックバックの力
-    static constexpr float KNOCKBACK_POWER_SCALE = 10.0f;
-    //ノックバックの持続時間
-    static constexpr float KNOCKBACK_DURATION = 0.15f;
 
+    //何回で気絶
+	static constexpr int STUN_HIT_THRESHOLD = 5;
+    //気絶時間
+	static constexpr float STUN_TIME = 100.0f;
+
+    
     //------------------------------------------------------
     //描画＆エフェクト関連
     //------------------------------------------------------
 
-    //モデルの描画サイズ
-    static constexpr float MODEL_RENDER_SCALE = 1.7f;
+    
     //着地煙の持続時間
     static constexpr float SMOKE_DURATION = 1.0f;
     //煙の初期サイズ
     static constexpr float SMOKE_BASE_SCALE = 3.0f;
+    //煙の拡大サイズ
+    static constexpr float SMOKE_SCALE = 30.0f;
     //煙の拡大速度
     static constexpr float SMOKE_GROWTH_RATE = 100.0f;
     //煙の発生位置
@@ -79,33 +103,26 @@ private:
     //接地エフェクト判定の高さ
     static constexpr float GROUND_LEVEL_THRESHOLD = 7.0f;
 
+    //攻撃
+	//近距離攻撃と突進の切り替え距離
+    static constexpr float ATTACK_SWITCH_DISTANCE = 10.0f;
+	//突進と回避の切り替え距離
+    static constexpr float RUSH_SWITCH_DISTANCE = 20.0f;
+
+    //近距離攻撃時間
+    static constexpr float ATTACK_TIMER = 1.5f;
+    //突進攻撃時間
+    static constexpr float RUSH_TIMER = 7.0f;
+
+    //攻撃の持続時間
+    static constexpr float ATTACK_DURATION = 1.0f;
+
+    //微小値
+    static constexpr float VECTOR_EPSILON = 0.0001f;
+    //コリジョンの透明度
+    static constexpr float TRANSPARENCY = 0.15f;
+
 public:
-
-    /// <summary>
-    /// ボスのアクション状態
-    /// </summary>
-    enum class EnemyState
-    {
-        Opening,         //登場演出（急に動かないように）
-        Loading,         //着地後に止まるように
-        Idle,            //通常
-        Attack,          //近距離攻撃
-        Shoot,           //遠距離攻撃
-        Rush,            //突進
-        Avoid            //回避状態
-    };
-
-    /// <summary>
-    /// プレイヤーの攻撃タイプ
-    /// 判別するため
-    /// </summary>
-    enum class PlayerAttackType 
-    {
-        None,
-        Attack, // 近接
-        Shoot,  // 弾
-        Rush    // 突進
-    };
 
     /// <summary>
     /// ボスの状態を変更、その状態を維持するタイマーを設定
@@ -125,7 +142,7 @@ public:
     /// </summary>
     /// <param name="amount">ダメージ量</param>
     /// <param name="type">プレイヤーから受けた攻撃の種類</param>
-    void TakeDamage(float amount,PlayerAttackType type);
+    void TakeDamage(float amount,PlayerAttackType type)override;
 
 public:
 
@@ -140,15 +157,14 @@ public:
     BossEnemy(
         DX::DeviceResources* deviceResources,
         const DirectX::SimpleMath::Vector3& position,
-        float hp,
-        float speed,
-        std::shared_ptr<DisplayCollision> displayCollision
+        std::shared_ptr<DisplayCollision> displayCollision,
+        EnemyType type = EnemyType::Boss
     );
 
     /// <summary>
     /// デストラクタ
     /// </summary>
-    ~BossEnemy() = default;
+    ~BossEnemy() ;
 
     /// <summary>
     /// モデルやエフェクト、サウンドなどの初期化処理
@@ -167,7 +183,8 @@ public:
         float deltaTime,
         const DirectX::SimpleMath::Vector3& playerPosition,
         Stage* stage,
-        Particle* particle
+        Particle* particle,
+        class EnemyManager* enemyManager = nullptr
     );
 
     /// <summary>
@@ -180,7 +197,7 @@ public:
         ID3D11DeviceContext* context,
         const DirectX::SimpleMath::Matrix& view,
         const DirectX::SimpleMath::Matrix& proj
-    );
+    )override;
 
     /// <summary>
     /// ボスが倒されたかどうか
@@ -198,7 +215,7 @@ public:
     /// 当たり判定を取得
     /// </summary>
     /// <returns>敵の当たり判定</returns>
-    ModelCollision* GetCollision() const { return m_collision.get(); }
+    ModelCollision* GetCollision() override { return m_collision.get(); }
 
     /// <summary>
     /// 攻撃を受けた際のノックバック力をボスに適用
@@ -206,7 +223,7 @@ public:
     /// </summary>
     /// <param name="direction">吹き飛ぶ方向ベクトル</param>
     /// <param name="power">ノックバックの強さ</param>
-    void ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float power);
+    void ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float power)override;
     
     /// <summary>
     /// 現在のHPを取得
@@ -236,30 +253,71 @@ public:
 private:
 
     /// <summary>
-    /// AIの思考処理
+	/// 敵のAI、物理挙動、状態遷移を更新
     /// </summary>
-    /// <param name="playerPos">プレイヤーの方向</param>
     /// <param name="dt">前フレームからの経過時間</param>
-    void UpdateAI(const DirectX::SimpleMath::Vector3& playerPos);
+    /// <param name="playerPos">プレイヤーの現在座標</param>
+    /// <param name="stage">地形情報取得用のステージポインタ</param>
+    /// <param name="particle">パーティクル発生用マネージャー</param>
+    /// <param name="enemyManager">敵の管理マネージャー</param>
+    void UpdateAI(
+        float dt,
+        const DirectX::SimpleMath::Vector3& playerPos,
+        Stage* stage,
+        Particle* particle,
+        EnemyManager* enemyManager
+    )override;
+
 
     /// <summary>
     /// 敵の物理演算と移動
     /// </summary>
     /// <param name="stage">ステージのポインタ</param>
     /// <param name="dt">前フレームからの経過時間</param>
-    void UpdatePhysics(Stage* stage, float dt);
+	/// <param name="particle">パーティクル発生用マネージャー</param>
+    void UpdatePhysics(Stage* stage, float dt, Particle* particle = nullptr);
     
+protected:
+
+    /// <summary>
+	/// 敵の落下の判定と処理
+    /// </summary>
+    /// <returns>落下判定の高さ</returns>
+    float GetFallLimitY() const override { return FALL_LIMIT_Y; }
+
+    /// <summary>
+	/// 敵の落下ダメージを取得
+    /// </summary>
+    /// <returns>落下ダメージの量</returns>
+    float GetFallDamage() const override { return EnemyBase::FALL_DAMAGE; }
+
+    /// <summary>
+	/// 敵の落下したときの水しぶきの粒子数を取得
+    /// </summary>
+    /// <returns>水しぶきの粒子数</returns>
+    int GetSplashParticleCount() const override { return static_cast<int>(SPLASH_PARTICLE_COUNT); }
+
+    /// <summary>
+	/// 敵のリスポーン位置を取得
+    /// </summary>
+    /// <returns>リスポーン位置の座標</returns>
+    DirectX::SimpleMath::Vector3 GetRespawnPosition() const override
+    {
+        // ボス専用の復帰座標があれば書き換えてください
+        return DirectX::SimpleMath::Vector3(0.0f, RESPAWN_HEIGHT, 0.0f);
+    }
+
+    /// <summary>
+    /// 敵が落下ダメージを受けるときの処理
+    /// </summary>
+    void ExecuteFallDamage() override
+    {
+        // ボスも同じようにダメージ関数を呼ぶ
+        TakeDamage(GetFallDamage(), PlayerAttackType::None);
+    }
+
 private:
     DX::DeviceResources* m_deviceResources;
-
-    //パラメータ
-    float m_hp;
-    float m_maxHp;
-
-    float m_speed;
-
-
-    DirectX::SimpleMath::Vector3 m_position;
 
     DirectX::SimpleMath::Vector3 m_forward = { 0.0f,0.0f,0.0f };
 
@@ -270,36 +328,16 @@ private:
     std::unique_ptr<DirectX::Model> m_model;
     std::unique_ptr<DirectX::CommonStates> m_states;
 
-    //重力
-    DirectX::SimpleMath::Vector3 m_velocity = DirectX::SimpleMath::Vector3::Zero;
-    float m_gravity = -100.8f;
-
-    //ノックバック用
-    DirectX::SimpleMath::Vector3 m_knockbackVelocity = { 0, 0, 0 };
-
-    //ノックバック持続タイマー
-    float m_knockbackTimer = 0.0f;
-
     SlideBehavior m_slideBehavior;
    
 private:
 
     //プレイヤーの原因の状態
     EnemyState m_state = EnemyState::Opening;
+
     //モデルの切り替えている時間
     float m_stateTimer = 0.0f;
-
-    //モデルを複数保持する
-    std::shared_ptr<DirectX::Model> m_modelIdle;
-    std::shared_ptr<DirectX::Model> m_modelAttack;
-    std::shared_ptr<DirectX::Model> m_modelShoot;
-    std::shared_ptr<DirectX::Model> m_modelRush;
-    //回避時
-    std::unique_ptr<DirectX::Model> m_modelAwakening;
-
-    //現在の描画に使うモデルを指すポインタ
-    DirectX::Model* m_currentModel = nullptr;
-
+    
     //最後に食らった攻撃
     PlayerAttackType m_lastAttackType = PlayerAttackType::None;
 
@@ -311,6 +349,23 @@ private:
 
     //目標とする移動速度を保持
     DirectX::SimpleMath::Vector3 m_targetVelocity = DirectX::SimpleMath::Vector3::Zero;
+
+    //プレイヤーの攻撃を数える
+	int m_playerAttackCounter = 0;
+
+	//気絶状態の揺れ用の回転角度
+	float m_dizzyRotationY = 0.0f;
+
+	//攻撃のクールダウンタイマー
+	float m_attackCooldownTimer = 0.0f;
+
+	//攻撃パターンのリスト
+	std::vector<std::shared_ptr<EnemyAttackPattern>> m_attackPatterns;
+
+	//近距離攻撃の持続時間
+    float m_meleeTimer = 0.0f;
+	//突進攻撃の持続時間
+	float m_rushTimer = 0.0f;
 
 private:
 
@@ -334,4 +389,9 @@ private:
     //一度だけ
     bool m_isLandingEffectDone = false;
 
+    //描画
+	std::unique_ptr<EnemyRenderer> m_renderer;
+
+	//敵の種類
+    EnemyType m_type = EnemyType::Boss;
 };

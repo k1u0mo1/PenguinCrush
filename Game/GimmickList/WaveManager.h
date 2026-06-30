@@ -1,4 +1,12 @@
 
+/**
+ * @file   WaveManager.h
+ * @brief  波の生成と描画を管理するマネージャークラス
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
+
+
 #pragma once
 #include "pch.h"
 #include <Game/Common/DeviceResources.h>
@@ -83,6 +91,7 @@ public:
 
 private:
 
+	//波
 	std::unique_ptr<Wave> m_wave;
 
 	//波のモード　trueなら立方体、falseなら通常の波

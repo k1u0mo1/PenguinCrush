@@ -62,11 +62,11 @@
     <Filter Include="Game\Camera">
       <UniqueIdentifier>{55213b54-1334-4161-8643-cb117367dbe6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Game\AnimatorList">
-      <UniqueIdentifier>{22157e64-d715-4e88-a6b3-e9c1745d9f2b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Game\Common">
       <UniqueIdentifier>b8ccfe1c-ee1b-4576-843e-8bdeb5ece4b0</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Common\ObjectCharacter">
+      <UniqueIdentifier>{8d4fa02a-d8ef-48c2-be92-8248b051f143}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -87,9 +87,6 @@
     </ClInclude>
     <ClInclude Include="Library\BinaryFile.h">
       <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\AnimatorList\Animator.h">
-      <Filter>Game\AnimatorList</Filter>
     </ClInclude>
     <ClInclude Include="Game\Camera\DebugCamera.h">
       <Filter>Game\Camera</Filter>
@@ -131,9 +128,6 @@
       <Filter>Game\EnemyList</Filter>
     </ClInclude>
     <ClInclude Include="Game\EnemyList\EnemyAttackList\AttackE.h">
-      <Filter>Game\EnemyList\EnemyAttackList</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\EnemyList\EnemyAttackList\BulletE.h">
       <Filter>Game\EnemyList\EnemyAttackList</Filter>
     </ClInclude>
     <ClInclude Include="Game\EnemyList\EnemyAttackList\EnemyAttackBase.h">
@@ -178,9 +172,6 @@
     <ClInclude Include="Game\PlayerList\AttackList\AttackP.h">
       <Filter>Game\PlayerList\AttackList</Filter>
     </ClInclude>
-    <ClInclude Include="Game\PlayerList\AttackList\BulletP.h">
-      <Filter>Game\PlayerList\AttackList</Filter>
-    </ClInclude>
     <ClInclude Include="Game\PlayerList\AttackList\RushP.h">
       <Filter>Game\PlayerList\AttackList</Filter>
     </ClInclude>
@@ -199,10 +190,10 @@
     <ClInclude Include="Game\SceneList\StageLevel\LevelBase.h">
       <Filter>Game\SceneList\StageLevel</Filter>
     </ClInclude>
-    <ClInclude Include="Game\SceneList\StageLevel\LevelStage1.h">
+    <ClInclude Include="Game\SceneList\StageLevel\LevelEasy.h">
       <Filter>Game\SceneList\StageLevel</Filter>
     </ClInclude>
-    <ClInclude Include="Game\SceneList\StageLevel\LevelStage2.h">
+    <ClInclude Include="Game\SceneList\StageLevel\LevelNormal.h">
       <Filter>Game\SceneList\StageLevel</Filter>
     </ClInclude>
     <ClInclude Include="Game\SceneList\StageLevel\LevelTutorial.h">
@@ -229,11 +220,41 @@
     <ClInclude Include="Game\GimmickList\SlideBehavior.h">
       <Filter>Game\GimmickList</Filter>
     </ClInclude>
+    <ClInclude Include="Game\PlayerList\PlayerRenderer.h">
+      <Filter>Game\PlayerList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Common\ObjectCharacter\HitStop.h">
+      <Filter>Game\Common\ObjectCharacter</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Common\ObjectCharacter\ModelManager.h">
+      <Filter>Game\Common\ObjectCharacter</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\EnemyList\EnemyRenderer.h">
+      <Filter>Game\EnemyList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Common\ObjectCharacter\CharacterBase.h">
+      <Filter>Game\Common\ObjectCharacter</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\EnemyList\EnemyBaseParameter.h">
+      <Filter>Game\EnemyList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\EnemyList\EnemyBase.h">
+      <Filter>Game\EnemyList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\EnemyList\NormalEnemy.h">
+      <Filter>Game\EnemyList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\EnemyList\EnemyAttackList\EnemyAttackPattern.h">
+      <Filter>Game\EnemyList\EnemyAttackList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\EnemyList\EnemyAI.h">
+      <Filter>Game\EnemyList</Filter>
+    </ClInclude>
     <ClInclude Include="Game\GimmickList\WaveManager.h">
       <Filter>Game\GimmickList</Filter>
     </ClInclude>
-    <ClInclude Include="Game\PlayerList\PlayerRenderer.h">
-      <Filter>Game\PlayerList</Filter>
+    <ClInclude Include="Game\SceneList\StageLevel\LevelHard.h">
+      <Filter>Game\SceneList\StageLevel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -248,9 +269,6 @@
     </ClCompile>
     <ClCompile Include="Library\BinaryFile.cpp">
       <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\AnimatorList\Animator.cpp">
-      <Filter>Game\AnimatorList</Filter>
     </ClCompile>
     <ClCompile Include="Game\Camera\DebugCamera.cpp">
       <Filter>Game\Camera</Filter>
@@ -285,9 +303,6 @@
     <ClCompile Include="Game\EnemyList\EnemyAttackList\AttackE.cpp">
       <Filter>Game\EnemyList\EnemyAttackList</Filter>
     </ClCompile>
-    <ClCompile Include="Game\EnemyList\EnemyAttackList\BulletE.cpp">
-      <Filter>Game\EnemyList\EnemyAttackList</Filter>
-    </ClCompile>
     <ClCompile Include="Game\EnemyList\EnemyAttackList\RushE.cpp">
       <Filter>Game\EnemyList\EnemyAttackList</Filter>
     </ClCompile>
@@ -315,14 +330,8 @@
     <ClCompile Include="Game\PlayerList\AttackList\AttackP.cpp">
       <Filter>Game\PlayerList\AttackList</Filter>
     </ClCompile>
-    <ClCompile Include="Game\PlayerList\AttackList\BulletP.cpp">
-      <Filter>Game\PlayerList\AttackList</Filter>
-    </ClCompile>
     <ClCompile Include="Game\PlayerList\AttackList\RushP.cpp">
       <Filter>Game\PlayerList\AttackList</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\SceneList\GamePlayScene.cpp">
-      <Filter>Game\SceneList</Filter>
     </ClCompile>
     <ClCompile Include="Game\SceneList\ResultScene.cpp">
       <Filter>Game\SceneList</Filter>
@@ -359,6 +368,33 @@
     </ClCompile>
     <ClCompile Include="Game\PlayerList\PlayerRenderer.cpp">
       <Filter>Game\PlayerList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Common\ObjectCharacter\HitStop.cpp">
+      <Filter>Game\Common\ObjectCharacter</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Common\ObjectCharacter\ModelManager.cpp">
+      <Filter>Game\Common\ObjectCharacter</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\EnemyList\EnemyRenderer.cpp">
+      <Filter>Game\EnemyList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Common\ObjectCharacter\CharacterBase.cpp">
+      <Filter>Game\Common\ObjectCharacter</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\EnemyList\EnemyBase.cpp">
+      <Filter>Game\EnemyList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\EnemyList\NormalEnemy.cpp">
+      <Filter>Game\EnemyList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\EnemyList\EnemyAttackList\EnemyAttackPattern.cpp">
+      <Filter>Game\EnemyList\EnemyAttackList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\EnemyList\EnemyAI.cpp">
+      <Filter>Game\EnemyList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\SceneList\GamePlayScene.cpp">
+      <Filter>Game\SceneList</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

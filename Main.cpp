@@ -60,15 +60,11 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     static bool s_fullscreen = false;
 
     //画面モード選択
-    int result = MessageBox(NULL, L"フルスクリーンにしますか？", L"画面モード設定", MB_YESNOCANCEL);
+    int result = MessageBox(NULL, L"フルスクリーンにしますか？", L"画面モード設定", MB_YESNO);
     
-    //?ボタンが押された、または「キャンセル」が押された場合はプログラム自体を終了
-    if (result == IDCANCEL)
-    {
-        return 0;
-    }
+    
     //フルスクリーン
-    else if (result == IDYES)
+    if (result == IDYES)
     {
         s_fullscreen = true;
     }

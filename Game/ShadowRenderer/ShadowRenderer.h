@@ -1,5 +1,11 @@
 
-//ゲーム全体の影　丸影
+/**
+ * @file   ShadowRenderer.h
+ * @brief  ゲーム全体のキャラクターやオブジェクトの丸影を描画するクラス
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
+
 
 #pragma once
 #include "pch.h"
@@ -17,6 +23,11 @@
 /// </summary>
 class ShadowRenderer
 {
+private:
+
+	//板ポリゴンの半分のサイズ
+	const float HALF_SIZE = 0.5f;
+
 public:
 
 	/// <summary>

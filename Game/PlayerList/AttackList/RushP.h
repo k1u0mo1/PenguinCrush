@@ -1,4 +1,11 @@
-// RushP.h
+
+/**
+ * @file   RushP.h
+ * @brief  プレイヤーの突進攻撃を管理するクラスの実装
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
+
 #pragma once
 
 #include "pch.h"
@@ -31,6 +38,30 @@ private:
     static constexpr float KNOCKBACK_POWER = 30.0f;
     //攻撃判定が消えるまでの時間
     static constexpr float MAX_LIFETIME = 0.5f;
+
+    //突進のスピード
+    static constexpr float RUSH_SPEED = 25.0f;
+
+    //サイズ
+    static constexpr float SCALE_SIZE = 1.0f;
+
+    static constexpr DirectX::SimpleMath::Vector3 FORWARD =
+        DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.1f);
+
+    //当たり判定のサイズ
+    static constexpr DirectX::SimpleMath::Vector3 COLLISION_SIZE =
+        DirectX::SimpleMath::Vector3(1.0f, 1.5f, 1.0f);
+
+    //デバックの当たり判定の線の太さ
+    static constexpr float DEBUG_COLLISION_LINE_THICKNESS = 0.5f;
+
+    //デフォルトの箱のサイズ
+    static constexpr DirectX::SimpleMath::Vector3 DEFAULT_BOX_SIZE =
+        DirectX::SimpleMath::Vector3(0.3f, 0.3f, 0.3f);
+
+    //ゼロ除算を防ぐ小さい値
+    static constexpr float EPSILON = 0.001f;
+
 
 public:
 
@@ -127,6 +158,7 @@ private:
 
     DirectX::SimpleMath::Vector3 m_position;
 
+    //方向
     DirectX::SimpleMath::Vector3 m_forward;
 
     std::unique_ptr<DirectX::CommonStates> m_states;
@@ -141,7 +173,7 @@ private:
 
     std::shared_ptr<DisplayCollision> m_displayCollision;
 
-    float m_knockbackPower = 30.0f; 
+    //float m_knockbackPower = 30.0f; 
     bool m_isDead = false;
 
     Player* m_player;

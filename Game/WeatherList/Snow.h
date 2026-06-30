@@ -1,5 +1,10 @@
 
-//雪　子クラス
+/**
+ * @file   Rain.h
+ * @brief  天候(雪)のクラス
+ * @author 國田知睦
+ * @date   2026/06/10
+ */
 
 #pragma once
 #include "WeatherBase.h"
@@ -10,6 +15,19 @@
 /// </summary>
 class Snow : public WeatherBase
 {
+private:
+
+    //雪の描画数
+    static constexpr UINT SNOW_PARTICLE_COUNT = 5000;
+
+    //シェーダに渡すタイプ
+    static constexpr float WEATHER_TYPE_SNOW = 2.0f;
+
+    //雪の横揺れ
+    static constexpr float SNOW_PARAM_X = 1.5f;
+    //雪の落下速度
+    static constexpr float SNOW_PARAM_Y = 0.5f;
+
 public:
     
     /// <summary>

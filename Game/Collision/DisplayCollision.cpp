@@ -1,5 +1,10 @@
 
-//DisplayCollision.cpp
+/**
+ * @file   DisplayCollision.cpp
+ * @brief  ゲームの衝突判定を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
 
 #include "pch.h"
 #include "DisplayCollision.h"
@@ -26,7 +31,10 @@ DisplayCollision::DisplayCollision(
 	//モデル/////////////////////////////
 	
 	//モデルの作成 (球)
-	m_modelSphere = GeometricPrimitive::CreateSphere(context, 2.0f, 8);
+	m_modelSphere = GeometricPrimitive::CreateSphere(
+		context, 
+		DEFAULT_SPHERE_SIZE, 
+		DEFAULT_SPHERE_TESSELLATION);
 
 	//モデルの作成 (ボックス)　
 	m_modelBox = GeometricPrimitive::CreateCube(context);

@@ -1,6 +1,10 @@
 
-//StageManeger.h
-//ステージを後々増やすために
+/**
+ * @file   StageManager.h
+ * @brief  ステージを管理するマネージャークラス
+ * @author 國田知睦
+ * @date   2026/06/10
+ */
 
 #include "Game/GimmickList/Stage.h"
 #include <unordered_map>
@@ -38,13 +42,19 @@ public:
 	/// <param name="hwnd">ウィンドウハンドル</param>
 	/// <param name="width">画面幅</param>
 	/// <param name="height">画面高さ</param>
-	void AddStage(const std::wstring& name, HWND hwnd, int width, int height);
+	/// <param name="mapImagePath">ステージマップ名</param>
+	void AddStage(
+		const std::wstring& name,
+		HWND hwnd, 
+		int width,
+		int height,
+		const std::string& mapImagePath);
 
 	/// <summary>
 	/// ステージの更新
 	/// </summary>
 	/// <param name="wave">波のポインタ</param>
-	void Update(WaveManager* waveManager);
+	void Update(float elapsedTime, WaveManager* waveManager);
 
 	/// <summary>
 	/// ステージの描画

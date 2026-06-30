@@ -1,29 +1,43 @@
-
-//PlayerStats.h
-
-//プレイヤーのパラメータ管理
+/**
+ * @file   PlayerStats.h
+ * @brief  プレイヤーのパラメータを管理するクラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
 
 #pragma once
+
 #include <algorithm>
 #include <Game/SoundList/AudioManager.h>
 
 struct PlayerStats
 {
+	//プレイヤーのパラメータ
+
+	//HP関連の初期値
+	static constexpr float DEFAULT_HP = 300.0f;
+	static constexpr float DEFAULT_HP_MAX = 300.0f;
+
+	//スタミナ関連の初期値
+	static constexpr float DEFAULT_STAMINA = 100.0f;
+	static constexpr float DEFAULT_STAMINA_MAX = 100.0f;
+
+	//スタミナ回復関連のパラメータ
+	//スタミナの回復速度（1秒あたりの回復量）
+	static constexpr float STAMINA_RECOVER_RATE = 100.0f; 
+	//スタミナを消費したあと、回復が始まるまでのクールタイム（秒）
+	static constexpr float STAMINA_COOL_TIME = 1.0f;
+
+
 	//プレイヤーの体力
-	float hp = 300.0f;
+	float hp = DEFAULT_HP;
 	//プレイヤーの体力（最大）
-	float hp_Max = 300.0f;
+	float hp_Max = DEFAULT_HP_MAX;
 
 	//プレイヤーのスタミナ
-	float stamina = 100.0f;
+	float stamina = DEFAULT_STAMINA;
 	//プレイヤーのスタミナ（最大）
-	float stamina_Max = 100.0f;
-
-	//プレイヤーの弾
-	int ammo = 10;
-	//プレイヤーの弾（最大）
-	int ammo_Max = 10;
-
+	float stamina_Max = DEFAULT_STAMINA_MAX;
 
 	//回復が始まるまでのタイマー
 	float staminaRecoveryCoolTimer = 0.0f;
@@ -52,7 +66,7 @@ struct PlayerStats
 			return;
 		}
 
-		stamina = std::min(stamina_Max, stamina + dt * 100.0f);
+		stamina = std::min(stamina_Max, stamina + dt * STAMINA_RECOVER_RATE);
 	}
 
 	/// <summary>
@@ -63,28 +77,8 @@ struct PlayerStats
 	{
 		stamina = std::max(0.0f, stamina - amount);
 
-		//スタミナを使ったあと、〇.〇秒間は回復しないようにする
-		staminaRecoveryCoolTimer = 1.0f;
-	}
-
-	/// <summary>
-	/// 弾を1発ずつ消費
-	/// </summary>
-	void UseAmmo()
-	{
-		if (ammo > 0)
-		{
-			ammo--;
-		}
-	}
-
-	/// <summary>
-	/// 弾を最大までリロード　リセット
-	/// </summary>
-	void ReloadAmmo()
-	{
-		ammo = ammo_Max;
-		
+		//スタミナを消費したら回復のクールタイムをリセット
+		staminaRecoveryCoolTimer = STAMINA_COOL_TIME;
 	}
 
 	/// <summary>

@@ -1,6 +1,12 @@
 
-//Collision.cpp
-//モデル衝突判定
+
+/**
+ * @file   ModelCollision.cpp
+ * @brief  ゲームのモデルの衝突判定を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
+
 
 #include "pch.h"
 #include "ModelCollision.h"

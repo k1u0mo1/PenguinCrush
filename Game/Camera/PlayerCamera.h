@@ -1,56 +1,42 @@
-﻿//--------------------------------------------------------------------------------------
-//PlayerCamera.h
-//--------------------------------------------------------------------------------------
-#pragma once
+﻿
+/**
+ * @file   PlayerCamera.h
+ * @brief  プレイヤーカメラの動きの管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/19
+ */
 
+#pragma once
 
 #include <SimpleMath.h>
 #include <Mouse.h>
 #include <Keyboard.h>
-
 
 /// <summary>
 /// ゲームプレイ中のカメラクラス
 /// </summary>
 class PlayerCamera 
 {
-	// カメラの距離
-	static const float DEFAULT_CAMERA_DISTANCE;
+private:
 
-	// 横回転
-	float m_yAngle, m_yTmp;
+	//マウス操作によるカメラの回転速度
+	static constexpr float CAMERA_ROT_SPEED = 0.003f;
 
-	// 縦回転
-	float m_xAngle, m_xTmp;
+	//通常時のカメラとプレイヤーの距離
+	static constexpr float DEFAULT_CAMERA_DISTANCE =10.0f;
+	
+	//ダッシュした際にカメラがプレイヤーに追従する速度
+	static constexpr float CAMERA_LERP_SPEED = 0.01f;
 
-	// ドラッグされた座標
-	int m_x, m_y;
+	//カメラの基本の高さのオフセット
+	static constexpr float CAMERA_OFFSET_Y = 5.0f;
+	//通常時のカメラが向く目標地点
+	static constexpr float NORMAL_TARGET_Y = 5.5f;
 
-	float m_sx, m_sy;
-
-	// 生成されたビュー行列
-	DirectX::SimpleMath::Matrix m_view;
-
-	// スクロールフォイール値
-	int m_scrollWheelValue;
-
-	// 視点
-	DirectX::SimpleMath::Vector3 m_eye;
-
-	// 注視点
-	DirectX::SimpleMath::Vector3 m_target;
-
-	// マウストラッカー
-	DirectX::Mouse::ButtonStateTracker m_tracker;
-
-	// スクリーンサイズ
-	int m_screenW, m_screenH;
-
-	//現在の注視点のY軸
-	float m_targetY;
-
-	//現在のカメラの距離
-	float m_currentDist;
+	//ダッシュ時のプレイヤーとカメラの距離
+	static constexpr float DASH_DISTANCE = 5.0f;
+	//ダッシュ時のカメラが向く目標地点
+	static constexpr float DASH_TARGET_Y = 6.5f;
 
 private:
 
@@ -130,7 +116,48 @@ public:
 	/// </summary>
 	void ShowCursor();   
 
+private:
 
+	// 横回転
+	float m_yAngle, m_yTmp;
+
+	// 縦回転
+	float m_xAngle, m_xTmp;
+
+	// ドラッグされた座標
+	int m_x, m_y;
+
+	float m_sx, m_sy;
+
+	// 生成されたビュー行列
+	DirectX::SimpleMath::Matrix m_view;
+
+	// スクロールフォイール値
+	int m_scrollWheelValue;
+
+	// 視点
+	DirectX::SimpleMath::Vector3 m_eye;
+
+	// 注視点
+	DirectX::SimpleMath::Vector3 m_target;
+
+	// マウストラッカー
+	DirectX::Mouse::ButtonStateTracker m_tracker;
+
+	// スクリーンサイズ
+	int m_screenW, m_screenH;
+
+	//現在の注視点のY軸
+	float m_targetY;
+
+	//現在のカメラの距離
+	float m_currentDist;
+
+	//目標のカメラの高さ
+	float goalTargetY;
+
+	//目標のカメラとの距離
+	float goalDist;
 
 };
 

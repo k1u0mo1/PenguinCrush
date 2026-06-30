@@ -1,5 +1,10 @@
 
-//プレイヤーと敵の UI
+/**
+ * @file   GameUI.h
+ * @brief  画面のプレイヤーと敵のUIを表示を管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/09
+ */
 
 #pragma once
 
@@ -11,11 +16,38 @@
 
 #include <SpriteBatch.h>
 
+using namespace DirectX;
+using namespace DirectX::SimpleMath;
+
 /// <summary>
 /// 画面のプレイヤーと敵のUIを表示するクラス
 /// </summary>
 class GameUI
 {
+private:
+
+    //テクスチャのパス
+    const wchar_t* TEX_PATH_WHITE= L"Resources\\Textures\\White.png";
+
+    //プレイヤーUIの配置パラメータ
+    const float   PLAYER_UI_X = 50.0f;
+    const Vector2 PLAYER_HP_SIZE = Vector2(300.0f, 30.0f);
+    const Vector2 PLAYER_STAMINA_SIZE = Vector2(200.0f, 20.0f);
+
+    //プレイヤーの最大体力
+    const float PLAYER_MAX_HP = 300.0f;
+
+    // 画面下からのオフセット
+    const float   PLAYER_HP_BOTTOM_OFFSET = 90.0f; 
+    const float   PLAYER_STAMINA_BOTTOM_OFFSET = 50.0f;
+
+    //ボスUIの配置パラメータ
+    const Vector2 BOSS_HP_SIZE = Vector2(400.0f, 30.0f);
+    const float   BOSS_HP_Y = 10.0f;
+
+    //ゲージを満タンで表示するための固定値
+    const float   BAR_FULL = 1.0f;
+
 public:
 
 	/// <summary>

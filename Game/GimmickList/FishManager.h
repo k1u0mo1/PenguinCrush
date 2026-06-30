@@ -1,4 +1,12 @@
 
+/**
+ * @file   FishManager.h
+ * @brief  魚の描画・管理を行うマネージャークラス
+ * @author 國田知睦
+ * @date   2026/06/22
+ */
+
+
 #pragma once
 #include "pch.h"
 #include <Game/Common/DeviceResources.h>
@@ -20,9 +28,9 @@ private:
     //------------------------------------------------------
 
     //魚がスポーンする間隔
-    static constexpr float FISH_SPAWN_INTERVAL = 5.0f;
+    static constexpr float FISH_SPAWN_INTERVAL = 1.0f;
     //魚を取得した際のプレイヤーのHP回復量
-    static constexpr float FISH_HEAL_AMOUNT = 5.0f;
+    static constexpr float FISH_HEAL_AMOUNT = 20.0f;
 
     //------------------------------------------------------
     //スポーン範囲関連
@@ -35,6 +43,10 @@ private:
     //スポーン時の高さ
     static constexpr float SPAWN_HEIGHT_OFFSET = 5.0f;
 
+    //魚の初期向き
+    static constexpr float DEFAULT_DIR_X = 0.001f;
+    static constexpr float DEFAULT_DIR_Y = -1.0f;
+    static constexpr float DEFAULT_DIR_Z = 0.0f;
 
 public:
 

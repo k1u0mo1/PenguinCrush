@@ -1,13 +1,16 @@
-﻿//--------------------------------------------------------------------------------------
-// PlayerCamera.cpp
-//--------------------------------------------------------------------------------------
+﻿
+/**
+ * @file   PlayerCamera.cpp
+ * @brief  プレイヤーカメラの動きの管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/19
+ */
+
 #include "pch.h"
 #include "PlayerCamera.h"
 #include "Mouse.h"
 
 using namespace DirectX;
-
-const float PlayerCamera::DEFAULT_CAMERA_DISTANCE = 5.0f;
 
 //--------------------------------------------------------------------------------------
 // コンストラクタ
@@ -24,7 +27,7 @@ PlayerCamera::PlayerCamera(int windowWidth, int windowHeight, HWND hwnd)
 	, m_screenW(windowWidth)
 	, m_screenH(windowHeight)
 	, m_hwnd(hwnd)
-	, m_targetY(2.5f)
+	, m_targetY(NORMAL_TARGET_Y)
 	, m_currentDist(DEFAULT_CAMERA_DISTANCE)
 {
 	SetWindowSize(windowWidth, windowHeight);
@@ -66,52 +69,41 @@ void PlayerCamera::Update(
 	m_prevMouseX = mouseState.x;
 
 	// 左右回転のみ
-	const float rotSpeed = 0.003f;
-	m_yTmp -= dx * rotSpeed;
+	m_yTmp -= dx * CAMERA_ROT_SPEED;
 
 	//-------------------------------------------------
 	//カメラの移動処理
 	//-------------------------------------------------
-	
-	//目標のカメラの高さ
-	float goalTargetY = 0.0f;
-	//目標のカメラとの距離
-	float goalDist = 0.0f;
 
 	//切り替え注視点
+	//ダッシュ中
 	if (isPlayerDashing)
 	{
-		//ダッシュ中
-		//m_target = playerPos + SimpleMath::Vector3(0.0f, m_targetY, 0.0f);
-		
-		goalTargetY = 1.5f;
-
-		goalDist = 4.5f;
+		//カメラの高さ
+		goalTargetY = DASH_TARGET_Y;
+		//プレイヤーとカメラの距離
+		goalDist = DASH_DISTANCE;
 	}
+	//通常
 	else
 	{		
-		//通常
-		//m_target = playerPos + SimpleMath::Vector3(0.0f, m_targetY, 0.0f);
-
-		goalTargetY = 2.5f;
-
+		//カメラの高さ
+		goalTargetY = NORMAL_TARGET_Y;
+		//プレイヤーとカメラの距離
 		goalDist = DEFAULT_CAMERA_DISTANCE;
 	}
 
-	//現在の値を目標の位置に近づける
-	float lerpSpeed = 0.05f;
-
 	//新しい値＝現在の値 ＋（ 　　目標までの距離　　）× 移動する割合
-	m_targetY = m_targetY + (goalTargetY - m_targetY) * lerpSpeed;
+	m_targetY = m_targetY + (goalTargetY - m_targetY) * CAMERA_LERP_SPEED;
 
 	//新しい値　　＝　現在の値 　＋（ 　　目標までの距離　　）× 移動する割合
-	m_currentDist = m_currentDist + (goalDist - m_currentDist) * lerpSpeed;
+	m_currentDist = m_currentDist + (goalDist - m_currentDist) * CAMERA_LERP_SPEED;
 
 	// 注視点
 	m_target = playerPos + SimpleMath::Vector3(0.0f, m_targetY, 0.0f);
 
 	// カメラ後方オフセット
-	SimpleMath::Vector3 offset(0.0f, 2.0f, m_currentDist);
+	SimpleMath::Vector3 offset(0.0f, CAMERA_OFFSET_Y, m_currentDist);
 
 	// Y軸回転のみ
 	SimpleMath::Matrix rotY = SimpleMath::Matrix::CreateRotationY(m_yTmp);

@@ -1,8 +1,15 @@
 
+/**
+ * @file   Snow.cpp
+ * @brief  天候(雪)のクラス
+ * @author 國田知睦
+ * @date   2026/06/10
+ */
+
 
 #include "pch.h"
 #include "Snow.h"
-
+#include <iterator>
 #include "Library/BinaryFile.h"
 #include <WICTextureLoader.h>
 
@@ -14,6 +21,8 @@ using namespace DirectX;
 
 void Snow::Initialize(ID3D11Device* device)
 {
+    m_time = 0.0f;
+
     // 親クラス初期化
     WeatherBase::Initialize(device);
 
@@ -31,7 +40,7 @@ void Snow::Initialize(ID3D11Device* device)
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-    device->CreateInputLayout(layout, 2, VSData.GetData(), VSData.GetSize(), m_layout.ReleaseAndGetAddressOf());
+    device->CreateInputLayout(layout, std::size(layout), VSData.GetData(), VSData.GetSize(), m_layout.ReleaseAndGetAddressOf());
     
     //テクスチャ用
     CreateWICTextureFromFile(device, L"Resources/Textures/White.png", nullptr, m_texture.ReleaseAndGetAddressOf());
@@ -47,20 +56,19 @@ void Snow::Render(
     const DirectX::SimpleMath::Matrix& proj,
     const DirectX::SimpleMath::Vector3& camPos)
 {
-    // 定数バッファ更新
+    //定数バッファ更新
     CBWeather cb;
     cb.view = view.Transpose();
     cb.proj = proj.Transpose();
 
-    // 雪は Type = 2.0f 
-    cb.time = DirectX::SimpleMath::Vector4(m_time, 2.0f, 0, 0);
+    //親クラスに渡す用 
+    cb.time = 
+        DirectX::SimpleMath::Vector4(m_time, WEATHER_TYPE_SNOW, 0, 0);
 
     cb.cameraPos = DirectX::SimpleMath::Vector4(camPos.x, camPos.y, camPos.z, 1);
 
-    // 雪パラメータ
-    //cb.params = DirectX::SimpleMath::Vector4(2.0f, 0.5f, camPos.x, camPos.z);
     //カメラに追従しないように
-    cb.params = DirectX::SimpleMath::Vector4(1.5f, 0.5f, 0.0f, 0.0f);
+    cb.params = DirectX::SimpleMath::Vector4(SNOW_PARAM_X, SNOW_PARAM_Y, 0.0f, 0.0f);
 
     context->UpdateSubresource(m_constBuffer.Get(), 0, nullptr, &cb, 0, 0);
 
@@ -91,7 +99,7 @@ void Snow::Render(
     context->OMSetDepthStencilState(m_states->DepthRead(), 0);
     context->RSSetState(m_states->CullNone());
 
-    context->Draw(5000, 0);
+    context->Draw(SNOW_PARTICLE_COUNT, 0);
 
     context->GSSetShader(nullptr, nullptr, 0);
 }

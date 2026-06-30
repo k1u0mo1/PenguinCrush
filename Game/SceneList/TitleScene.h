@@ -1,5 +1,10 @@
+/**
+ * @file   TitleScene.h
+ * @brief  タイトル画面の初期化・更新・描画を管理するシーンクラス
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
 
-//タイトルシーンクラス//////////////////////////////
 
 #pragma once
 
@@ -22,6 +27,34 @@
 /// </summary>
 class TitleScene : public Scene<UserResources>
 {
+private:
+
+	//選択（増やす際はここに追加していく）
+	enum class MenuType
+	{
+		Start = 0,
+		Quit,
+		Count
+	};
+
+	MenuType m_currentCursor = MenuType::Start;
+
+	//ボタンの配置
+	static constexpr float BUTTON_START_Y_RATIO = 0.6f;
+
+	static constexpr float BUTTON_STEP_Y = 80.0f;
+
+	//カーソルの中心から左右の離れ具合
+	static constexpr float CURSOR_OFFSET_X = 150.0f;
+	//カーソルの拡大率
+	static constexpr float CURSOR_SCALE = 0.25f;
+
+	//選択時の大きさ
+	static constexpr float BUTTON_SCALE_SELECTED = 1.2f;
+	//非選択時の大きさ
+	static constexpr float BUTTON_SCALE_NORMAL = 1.0f;
+
+
 //継承シーン関数
 public:
 
@@ -66,6 +99,22 @@ public:
 	/// </summary>
 	void OnDeviceLost() override;
 
+	/// <summary>
+	/// 中心を計算してテクスチャを描画
+	/// </summary>
+	/// <param name="texture">使用テクスチャ</param>
+	/// <param name="position">テクスチャの座標</param>
+	/// <param name="scale">テクスチャの大きさ</param>
+	/// <param name="color">テクスチャの色</param>
+	/// <param name="effects">テクスチャを反転させるか</param>
+	void DrawTextureCenter(
+		ID3D11ShaderResourceView* texture,
+		DirectX::SimpleMath::Vector2 position,
+		float scale = 1.0f,
+		DirectX::XMVECTOR color = DirectX::Colors::White,
+		DirectX::SpriteEffects effects = DirectX::SpriteEffects_None
+	);
+
 //描画関数
 private:
 
@@ -101,9 +150,7 @@ private:
 	// カーソルUIテクスチャ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureCursor;
 
-	//選択カーソル
-	int m_currentCursor = 0;
-
+	
 	//背景用
 	//雪
 	std::unique_ptr<Snow> m_snow;

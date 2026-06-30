@@ -1,6 +1,9 @@
-//
-// Game.h
-//
+/**
+ * @file   Game.h
+ * @brief  ÉQÅ[ÉÄ
+ * @author ö†ìcímñr
+ * @date   2026/06/23
+ */
 
 #pragma once
 

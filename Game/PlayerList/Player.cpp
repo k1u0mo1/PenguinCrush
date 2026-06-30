@@ -1,5 +1,12 @@
-#include "pch.h"
 
+/**
+ * @file   Player.cpp
+ * @brief  プレイヤーキャラクターの制御・パラメータ管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
+
+#include "pch.h"
 #include "Player.h"
 
 #include "PlayerRenderer.h"
@@ -10,7 +17,7 @@
 #include "Game/ShadowRenderer/ShadowRenderer.h"
 #include "Game/GimmickList/WaveManager.h"
 #include "AttackList/AttackManager.h"
-#include "Game/AnimatorList/Animator.h"
+
 #include "Game/Collision/ModelCollision.h"
 
 using namespace DirectX;
@@ -47,6 +54,7 @@ void Player::Initialize(
     //ステージ情報のセット
     m_stage = stage;
 
+	//描画用のレンダラーの生成と初期化
     m_renderer = std::make_unique<PlayerRenderer>();
     m_renderer->Initialize(m_deviceResources->GetD3DDevice());
 
@@ -58,11 +66,17 @@ void Player::Initialize(
     //ステートとモデルのリセット
     m_state = PlayerState::Idle;
     
+	//状態タイマーのリセット
     m_stateTimer = 0.0f;
 
     //初期位置や向きの設定
-    m_position = { -10.0f, 0.3f, -10.0f };
-    m_forward = { 0.0f, 0.0f, 1.0f };
+    m_position = { 
+        PLAYER_START_POSITION_X,
+        PLAYER_START_POSITION_Y, 
+        PLAYER_START_POSITION_Z };
+
+	//初期の向きはZ軸正方向
+    m_forward = { 0.0f, 0.0f, 0.0f };
 
     //パラメータのリセット
     //重力
@@ -81,8 +95,6 @@ void Player::Initialize(
     m_stats.hp = m_stats.hp_Max;
     //スタミナ
     m_stats.stamina = m_stats.stamina_Max;
-    //弾数
-    m_stats.ammo = m_stats.ammo_Max;
 }
 
 //-----------------------------------------------------------------
@@ -94,10 +106,12 @@ void Player::Update(
     const Mouse::State& mouse,
     const Mouse::ButtonStateTracker& mouseTracker,
     Stage* stage,
-    WaveManager* waveManager,
+    WaveManager* /*waveManager*/,
     Particle* particle)
 {
     if (!stage) return;
+
+    CheckAndHandleFalling(stage, particle);
 
     auto kb = DirectX::Keyboard::Get().GetState();
 
@@ -124,34 +138,12 @@ void Player::Update(
         m_attackCoolTime -= elapsedTime;
     }
 
-    //重力
-    m_velocity.y += m_gravity * elapsedTime;
-    m_position.y += m_velocity.y * elapsedTime;
-
-    //ノックバック処理
-    if (m_knockbackTimer > 0.0f)
-    {
-        //ノックバックの時間を減らす
-        m_knockbackTimer -= elapsedTime;
-
-        //ノックバックによる強制移動
-        m_position += m_knockbackVelocity * elapsedTime;
-
-        //速度を減衰させる 
-        m_knockbackVelocity -= m_knockbackVelocity * KNOCKBACK_DRAG * elapsedTime;
-
-        //ノックバック中に地面にめり込まないように高さ補正
-        float stageY = stage->GetGroundHeight(m_position.x, m_position.z);
-        if (m_position.y < stageY)
-        {
-            m_position.y = stageY;
-            m_knockbackVelocity.y = 0.0f;
-        }
-    }
-
 
     //移動
     HandleMovement(elapsedTime, stage, particle);
+
+    //ノックバック処理
+    CharacterBase::UpdatePhysice(elapsedTime, m_stage);
 
     //攻撃
     HandleAttack(elapsedTime, mouse, mouseTracker, kb);
@@ -159,23 +151,12 @@ void Player::Update(
     //スタミナ回復
     UpdateStamina(elapsedTime);
 
-    if (kb.Space && kb.W && m_stats.stamina >= 0.0f)
+    
+	//落下してステージの下に到達した場合の処理
+    if(m_position.y< STAGE_BOUNDARY_Y)
     {
-        //即時90度の回転行列を計算、メンバ変数に保存する
-        m_rotationMatrix = DirectX::SimpleMath::Matrix::CreateRotationX(DirectX::XMConvertToRadians(RUSH_ANGLE));
-    }
-    else
-    {
-        //通常時の回転
-        m_rotationMatrix = DirectX::SimpleMath::Matrix::Identity;
-    }
-
-
-    //落下して波の下に到達した場合のリスポーン処理
-    if (waveManager && m_position.y < RESPAWN_THRESHOLD_Y)
-    {
-
-        //水しぶきエフェクト発生
+        //効果音
+        AudioManager::GetInstance()->Play("Fall");
         if (particle)
         {
             // 水面の高さに合わせて発生位置
@@ -183,19 +164,31 @@ void Player::Update(
             splashPos.y = 0.0f;
             //水しぶき
             particle->Spawn(Particle::Type::Splash, splashPos, SPLASH_OF_WATER);
-
-            AudioManager::GetInstance()->Play("Fall");
         }
 
-        // プレイヤーを安全な位置
-        m_position = { 0.0f, 0.0f, 0.0f };
-        m_velocity = { 0.0f, 0.0f, 0.0f };
-        m_knockbackVelocity = { 0.0f, 0.0f, 0.0f };
-        m_knockbackTimer = 0.0f;
+		//安全なリスポーン位置の検索
+        DirectX::SimpleMath::Vector3 safePosition;
+        if (m_stage && m_stage->FindSafeRespawnPosition(RESPAWN_HEIGHT, STAGE_BOUNDARY_Y, safePosition))
+        {
+			//安全な位置が見つかった場合はそこにリスポーン
+            m_position = safePosition;
+        }
+        else
+        {
+			//安全な位置が見つからない場合は、リスポーン高さに固定してリスポーン
+            m_position = DirectX::SimpleMath::Vector3(0.0f, RESPAWN_HEIGHT, 0.0f);
+        }
 
-        //HPを減らすなどのペナルティ処理
+		//落下したときの速度をリセット
+        m_velocity = DirectX::SimpleMath::Vector3::Zero;
+		//ノックバックもリセット
+        m_knockbackVelocity = DirectX::SimpleMath::Vector3::Zero;
+
+		//HPを減らすなどのペナルティ処理
         m_stats.TakeDamage(FALL_DAMAGE);
-    }
+
+	}
+
 
     // コリジョン情報の更新を追加
     if (m_collision)
@@ -245,7 +238,7 @@ void Player::Render(ID3D11DeviceContext* context,
         //登録されたコリジョンを描画
         m_displayCollision->DrawCollision(
             context, m_states.get(), view, proj,
-            Colors::Green, Colors::Lime, 0.15f // プレイヤーは緑色で表示
+            Colors::Green, Colors::Lime, COLLISION_LINE_THICKNESS // プレイヤーは緑色で表示
         );
 
         //---------------------------------------------------------
@@ -259,16 +252,12 @@ void Player::Render(ID3D11DeviceContext* context,
 
 void Player::ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float power)
 {
-    SimpleMath::Vector3 kbDir = direction;
-    //ベクトルを加える（上方向）
-    kbDir.y = 0.5f;
+    //ノックバック
+    CharacterBase::ApplyKnockback(
+        direction, power * KNOCKBACK_POWER_SCALE,
+        KNOCKBACK_UP_FORCE, 
+        KNOCKBACK_DURATION);
 
-    kbDir.Normalize();
-
-    // プレイヤーへのノックバック設定
-    m_knockbackVelocity = kbDir * (power * 10.0f);
-    // 0.2秒間ノックバックを適用
-    m_knockbackTimer = 0.2f;
     // ノックバック中はダッシュを解除
     m_isDashing = false;
 
@@ -291,7 +280,7 @@ float Player::GetMoveSpeed() const
     //ダッシュ中の速度
     if (m_isDashing)
     {
-        return MOVE_SPEED + DASH_SPEED; // 5.0f + 30.0f = 35.0f
+        return MOVE_SPEED + DASH_SPEED; 
     }
 
     // 通常速度
@@ -323,7 +312,7 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
         m_isDashing = false;
 
         //ステージの傾斜のみを渡して更新
-        Vector3 slideDir = stage->GetSlideDirection();
+        Vector3 slideDir = stage->GetSlideDirection(m_position.x,m_position.z);
 
         m_slideBehavior.Update(m_position, Vector3::Zero, slideDir, elapsedTime);
 
@@ -380,17 +369,22 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
             if (particle)
             {
                 // 描画される高さ
-                SimpleMath::Vector3 dashPos = m_position;
-
-                //描画
-                particle->Spawn(Particle::Type::Dash, dashPos, 10, 0.2);
+                SimpleMath::Vector3 dashPos =
+                    m_position + SimpleMath::Vector3(0.0f, DASH_HEIGHT,0.0f);
+                
+                //ダッシュの煙の描画
+                particle->Spawn(
+                    Particle::Type::Dash,
+                    dashPos,
+                    DASH_EFFECT_NUM,
+                    DASH_EFFECT_SIZE);
             }
         }
     }
     else if (kb.S)
     {
         // 後退
-        targetVelocity = -forwardVector * MOVE_SPEED * 0.75f;
+        targetVelocity = -forwardVector * MOVE_SPEED ;
     }
 
 
@@ -399,7 +393,7 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
     //----------------------------------------------------
 
     //ステージからのスライド方向を取得
-    Vector3 slideDir = stage->GetSlideDirection();
+    Vector3 slideDir = stage->GetSlideDirection(m_position.x,m_position.z);
 
     //突進（ダッシュ）中かどうかで処理を分ける
     if (m_state == PlayerState::Rush || m_isDashing)
@@ -416,19 +410,7 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
         m_slideBehavior.Update(m_position, targetVelocity, slideDir, elapsedTime);
     }
 
-    // ステージの高さで補正
-    float stageY = stage->GetGroundHeight(m_position.x, m_position.z);
-
-    // プレイヤーがステージの地面より下におり、かつ、
-    // その地面がステージ上の有効な高さ（STAGE_BOUNDARY_Yより高い）である場合のみ補正を行う
-    if (m_position.y < stageY && stageY > STAGE_BOUNDARY_Y)
-    {
-        //プレイヤーの高さは足場より少し下へ
-        m_position.y = stageY - GROUND_OFFSET_Y;
-
-        m_velocity.y = 0.0f;
-    }
-
+    
 }
 
 //-----------------------------------------------------------------
@@ -467,25 +449,6 @@ void Player::HandleAttack(
         m_stats.UseStamina(STAMINA_COST_ATTACK);
     }
 
-    // 遠距離攻撃（右クリック）
-    if (mouseTracker.rightButton == Mouse::ButtonStateTracker::PRESSED &&
-        m_stats.stamina >= STAMINA_REQ_SHOOT &&
-        m_stats.ammo > 0&&
-        m_state!=PlayerState::Rush)
-    {
-        //モデル
-        m_state = PlayerState::Shoot;
-		//攻撃のクールタイマー
-        m_stateTimer = STATE_TIMER_SHOOT;
-		//攻撃処理
-        if (m_attackManager)
-            m_attackManager->Bullet(this);
-		//スタミナを消費
-        m_stats.UseStamina(STAMINA_COST_SHOOT);
-		//弾を消費
-        m_stats.UseAmmo();
-    }
-
     // ラッシュ攻撃（ダッシュ中）
     if (m_state == PlayerState::Rush)
     {
@@ -493,7 +456,6 @@ void Player::HandleAttack(
         if (!kb.Space || m_stats.stamina <= 0.0f)
         {
             m_state = PlayerState::Idle;
-
             
             m_attackCoolTime = ATTACK_COOLDOWN;
             return;
@@ -511,12 +473,12 @@ void Player::HandleAttack(
         
         m_stateTimer = 0.0f;
 
+		//攻撃処理
         if (m_attackManager)
             m_attackManager->Rush(this);
         {
             m_stats.UseStamina(STAMINA_COST_RUSH);
-            //攻撃のクールタイマー
-           // m_attackCoolTime = 0.5f;
+            
         }
     }
 }
@@ -612,7 +574,7 @@ void Player::CreateDeviceResources()
 
     //その他
     AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/P_E_落水.wav");
-    AudioManager::GetInstance()->LoadSound("Reload", L"Resources/Sounds/P_弾丸を装填.wav");
+    AudioManager::GetInstance()->LoadSound("Heal", L"Resources/Sounds/SE_回復.wav");
 
 }
 

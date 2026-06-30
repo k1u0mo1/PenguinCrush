@@ -1,4 +1,10 @@
 
+/**
+ * @file   EnemyManager.cpp
+ * @brief  敵関連をまとめる管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/15
+ */
 
 #include "pch.h"
 #include "EnemyManager.h"
@@ -11,9 +17,13 @@
 
 #include "Game/Effects/Particle.h"
 #include <Game/SoundList/AudioManager.h>
-
+#include "Game/EnemyList/BossEnemy.h"
+#include "EnemyBase.h"
+#include "Game/GimmickList/Stage.h"
+#include "NormalEnemy.h"
 
 using namespace DirectX;
+
 
 //----------------------------------------------------------
 // コンストラクタ
@@ -51,12 +61,7 @@ void EnemyManager::Initialize(
 
     DirectX::EffectFactory fx(deviceResources->GetD3DDevice());
 
-    fx.SetDirectory(L"Resources\\Models");
-    m_bulletModel = Model::CreateFromSDKMESH(
-        deviceResources->GetD3DDevice(),
-        L"Resources\\Models\\fish.sdkmesh",
-        fx
-    );
+    
 
 }
 
@@ -68,57 +73,51 @@ void EnemyManager::Update(
     float dt,  Player* player, Particle* particle)
 {
 
-    if (!m_boss) return;
-
-    //敵が生きている
-    if (m_boss)
+	//敵の更新
+    for (auto& enemy : m_enemies)
     {
-        //更新
-        m_boss->Update(
+        enemy->Update(
             dt,
             player->GetPosition(),
             m_stage,
-            particle
-        );
+            particle,
+            this
+		);
 
-        //敵がLoadingなら止まる
-        if (m_boss->GetState() == BossEnemy::EnemyState::Loading)
-        {
-            return;
-        }
-
-        //生きている
-        if(!m_boss->IsDead())
-        {
-            //攻撃生成
-            DoBossAttack(dt, player->GetPosition());
-        }
+		//enemy->UpdatePhysice(dt, m_stage);
     }
 
+    //敵の重なり防止
+    ResolveEnemyCollisions();
+
+
     //--------------------------------
-    //弾・攻撃の更新 
+    //攻撃の更新 
     //--------------------------------
     for (size_t i = 0; i < m_attacks.size(); i++)
     {
         m_attacks[i]->Update(dt);
     }
-    for (size_t i = 0; i < m_bullets.size(); i++)
+    
+    for (size_t i = 0; i < m_rush.size(); i++)
     {
-        m_bullets[i]->Update(dt,m_stage);
-    }
-    for (size_t i = 0; i < m_rushs.size(); i++)
-    {
-        m_rushs[i]->Update(dt);
+        m_rush[i]->Update(dt);
 
+
+        BossEnemy* boss = GetBossEnemy();
         // 突進エフェクト
-        if (particle && m_boss)
+        if (particle && boss)
         {
             // 現在のボスの位置を取得
-            DirectX::SimpleMath::Vector3 pos = m_boss->GetPosition();
+            DirectX::SimpleMath::Vector3 pos = boss->GetPosition();
             
-            pos.y += 1.0f;
+            pos.y += DASH_HEIGHT;
            
-            particle->Spawn(Particle::Type::Dash, pos, 1, 0.3f);
+            particle->Spawn(
+                Particle::Type::Dash,
+                pos,
+                DASH_EFFECT_COUNT,
+                DASH_EFFECT_SIZE);
         }
     }
     
@@ -142,10 +141,14 @@ void EnemyManager::Update(
                     DirectX::SimpleMath::Vector3 hitPos = player->GetPosition();
 
                     //高さを少し上げる
-                    hitPos.y += 1.0f;
+                    hitPos.y += HIT_EFFECT_HEIGHT_OFFSET;
 
                     //エフェクト生成
-                    particle->Spawn(Particle::Type::Explosion, hitPos, 10,0.1);
+                    particle->Spawn(
+                        Particle::Type::Explosion,
+                        hitPos,
+                        ATTACK_HIT_EFFECT_COUNT,
+                        ATTACK_HIT_EFFECT_SIZE);
                 }
 
                 //効果音
@@ -161,7 +164,7 @@ void EnemyManager::Update(
         }
 
         //Rushの衝突判定
-        for (auto& rush : m_rushs)
+        for (auto& rush : m_rush)
         {
             //攻撃コリジョンとプレイヤーのコリジョンの衝突判定
             if (rush->GetCollision()->Intersects(player->GetCollision()))
@@ -175,10 +178,14 @@ void EnemyManager::Update(
                     DirectX::SimpleMath::Vector3 hitPos = player->GetPosition();
 
                     //高さを少し上げる
-                    hitPos.y += 1.0f;
+                    hitPos.y += HIT_EFFECT_HEIGHT_OFFSET;
 
                     // エフェクト生成
-                    particle->Spawn(Particle::Type::Explosion, hitPos, 10,0.1);
+                    particle->Spawn(
+                        Particle::Type::Explosion,
+                        hitPos,
+                        HIT_EFFECT_COUNT,
+                        HIT_EFFECT_SIZE);
                 }
 
                 //効果音
@@ -192,57 +199,30 @@ void EnemyManager::Update(
             }
         }
 
-        //Bullet（弾）の衝突判定
-        for (auto& bullet : m_bullets)
-        {
-            //攻撃コリジョンとプレイヤーのコリジョンの衝突判定
-            if (bullet->GetCollision()->Intersects(player->GetCollision()))
-            {
-                //プレイヤーにノックバックとダメージ
-                player->ApplyKnockback(bullet->GetForward(), bullet->GetKnockbackPower());
-
-                if (particle)
-                {
-                    // プレイヤーの位置を取得
-                    DirectX::SimpleMath::Vector3 hitPos = player->GetPosition();
-
-                    //高さを少し上げる
-                    hitPos.y += 1.0f;
-
-                    //エフェクト生成
-                    particle->Spawn(Particle::Type::Explosion, hitPos, 10,0.1);
-                }
-
-                //効果音
-                AudioManager::GetInstance()->Play("DashE");
-
-                //ダメージ適用
-                player->TakeDamage(bullet->GetDamage());
-
-                //攻撃が当たったら削除
-                bullet->SetDead();
-            }
-        }
+        
         
     }
     
     //--------------------------------
     // 生存判定：死んだものを削除
     //--------------------------------
+
+    m_enemies.erase(
+        std::remove_if(m_enemies.begin(), m_enemies.end(),
+            [](std::unique_ptr<EnemyBase>& e) { return e->IsDead(); }),
+		m_enemies.end());
+
     m_attacks.erase(
         std::remove_if(m_attacks.begin(), m_attacks.end(),
             [](std::unique_ptr<AttackE>& a) { return a->IsDead(); }),
         m_attacks.end());
 
-    m_bullets.erase(
-        std::remove_if(m_bullets.begin(), m_bullets.end(),
-            [](std::unique_ptr<BulletE>& b) { return !b->IsAlive(); }),
-        m_bullets.end());
+    
 
-    m_rushs.erase(
-        std::remove_if(m_rushs.begin(), m_rushs.end(),
+    m_rush.erase(
+        std::remove_if(m_rush.begin(), m_rush.end(),
             [](std::unique_ptr<RushE>& r) { return r->IsDead(); }),
-        m_rushs.end());
+        m_rush.end());
 
 }
 
@@ -257,13 +237,21 @@ void EnemyManager::Render(
     ShadowRenderer* shadowRenderer
 )
 {
+	//敵の描画
+    for(auto& enemy : m_enemies)
+    {
+        enemy->Render(context, view, proj);
+	}
+
+
     //影を付ける
-    if (m_boss && !m_boss->IsDead() && shadowRenderer)
+
+    BossEnemy* boss = GetBossEnemy();
+    if (boss && shadowRenderer)
     {
         //ボスの現在位置を取得
-        DirectX::SimpleMath::Vector3 shadowPos = m_boss->GetPosition();
+        DirectX::SimpleMath::Vector3 shadowPos = boss->GetPosition();
 
-        
         //ステージの傾きを取得
         float rotX = m_stage->GetRotateX();
         float rotZ = m_stage->GetRotateZ();
@@ -281,37 +269,36 @@ void EnemyManager::Render(
         );
     }
 
-    //敵の描画
-    if (m_boss && !m_boss->IsDead())
-    {
-        m_boss->Render(context, view, proj);
-    }
-
     //各攻撃の描画
     for (auto& atk : m_attacks)
     {
         atk->Render(context, view, proj);
     }
-    for (auto& b : m_bullets)
-    {
-        b->Render(context, view, proj);
-    }
-    for (auto& r : m_rushs)
+    
+    for (auto& r : m_rush)
     {
         r->Render(context, view, proj);
     }
+}
+
+bool EnemyManager::HasBoss() const
+{
+    return GetBoss() != nullptr;
 }
 
 //----------------------------------------------------------
 // 現在生きているすべての敵のリストを取得
 //----------------------------------------------------------
 
-std::vector<BossEnemy*> EnemyManager::GetActiveEnemies()const
+std::vector<EnemyBase*> EnemyManager::GetActiveEnemies()const
 {
-    std::vector<BossEnemy*> enemies;
-    if (m_boss && !m_boss->IsDead())
+    std::vector<EnemyBase*> enemies;
+    for (auto& enemy : m_enemies)
     {
-        enemies.push_back(m_boss.get());
+        if (!enemy->IsDead())
+        {
+            enemies.push_back(enemy.get());
+        }
     }
     return enemies;
 }
@@ -325,7 +312,9 @@ void EnemyManager::DoBossAttack(
     const DirectX::SimpleMath::Vector3& playerPos
     )
 {
-    if (!m_boss) return;
+    BossEnemy* boss = GetBossEnemy();
+
+    if (!boss) return;
 
     m_attackCoolTimer -= dt;
 
@@ -335,7 +324,7 @@ void EnemyManager::DoBossAttack(
         return;
     }
     //敵の座標をもらう
-    auto pos = m_boss->GetPosition();
+    auto pos = boss->GetPosition();
     auto forward = (playerPos - pos);
     forward.Normalize();
 
@@ -355,60 +344,62 @@ void EnemyManager::DoBossAttack(
         )
         );
         //モデル
-        m_boss->SetState(BossEnemy::EnemyState::Attack, ATTACK_STATE_DURATION);
+        boss->SetState(EnemyState::Attack, ATTACK_STATE_DURATION);
 
         m_attackCoolTimer = ATTACK_COOLDOWN;
     }
     else if (dist < DASH_SWITCH_DISTANCE)
     {
         //突進
-        m_rushs.push_back(std::make_unique<RushE>(
+        m_rush.push_back(std::make_unique<RushE>(
             m_deviceResources,
-            m_boss.get(),
+            boss,
             forward,
             m_displayCol
         )
         );
         //モデル
-        m_boss->SetState(BossEnemy::EnemyState::Rush, RUSH_STATE_DURATION);
+        boss->SetState(EnemyState::Rush, RUSH_STATE_DURATION);
 
         m_attackCoolTimer = RUSH_COOLDOWN;
 
     }
-    else
-    {
-        //弾
-        auto spawnPos = pos + forward * BULLET_SPAWN_DISTANCE + DirectX::SimpleMath::Vector3(0, BULLET_SPAWN_HEIGHT, 0);
-
-        auto bullet = std::make_unique<BulletE>(
-            m_deviceResources,
-            spawnPos,
-            forward,
-            m_displayCol,
-            m_bulletModel
-        );
-
-        //モデル
-        m_boss->SetState(BossEnemy::EnemyState::Shoot, SHOOT_STATE_DURATION);
-
-        m_bullets.push_back(std::move(bullet));
-        m_attackCoolTimer = SHOOT_COOLDOWN;
-
-        //効果音
-        AudioManager::GetInstance()->Play("BulletE");
-    }
+    
 }
 
 //----------------------------------------------------------
 // 現在のボスのオブジェクトを取得
 //----------------------------------------------------------
 
+BossEnemy* EnemyManager::GetBoss() const
+{
+	//m_enemies の中から BossEnemy のインスタンスを探して返す
+    for (auto& enemy : m_enemies)
+    {
+		//敵が生きているか
+        if (auto boss = dynamic_cast<BossEnemy*>(enemy.get()))
+        {
+            return boss;
+        }
+    }
+    return nullptr;
+}
+
 BossEnemy* EnemyManager::GetBossEnemy() const
 {
-    const auto& enemies = GetActiveEnemies(); // アクティブな敵のリストを取得する関数を仮定
-    if (!enemies.empty())
+    // アクティブな敵のリストを取得する関数を仮定
+    const auto& enemies = GetActiveEnemies(); 
+    
+    //
+    for (EnemyBase* enemy : enemies)
     {
-        return enemies[0];
+        BossEnemy* boss = dynamic_cast<BossEnemy*>(enemy);
+
+        if (boss != nullptr)
+        {
+            return boss;
+        }
+        
     }
     return nullptr;
 }
@@ -417,17 +408,147 @@ BossEnemy* EnemyManager::GetBossEnemy() const
 // 指定したHPでボスをステージに出現
 //----------------------------------------------------------
 
-void EnemyManager::SpawnBoss(float hp)
+void EnemyManager::SpawnBoss()
 {
     // ボス生成
-    m_boss = std::make_unique<BossEnemy>(
+    auto boss = std::make_unique<BossEnemy>(
         m_deviceResources,
-        DirectX::SimpleMath::Vector3(10, 50.0f, 10), // 位置
-        hp,                                          // HP
-        5.0f,                                        // speed
-        m_displayCol
+        DirectX::SimpleMath::Vector3(BOSS_SPAWN_POS_X, BOSS_SPAWN_POS_Y, BOSS_SPAWN_POS_Z), // 位置                                         // speed
+        m_displayCol,
+        EnemyType::Boss
     );
 
     //生成後に初期化
-    m_boss->Initialize();
+    boss->Initialize();
+
+	//生成したボスを管理リストに追加
+	m_enemies.push_back(std::move(boss));
+}
+
+//----------------------------------------------------------
+// 通常の敵を指定した位置にステージに出現
+//----------------------------------------------------------
+
+void EnemyManager::SpawnNormalEnemy(
+    const DirectX::SimpleMath::Vector3& position,
+    const EnemyBaseParameter& param)
+{
+	//通常の敵の生成
+    auto enemy = std::make_unique <NormalEnemy>(
+        m_deviceResources,
+        position,
+        param,
+        m_displayCol
+
+	);
+
+	//通常の敵の初期化
+	enemy->Initialize();
+
+	//生成した通常の敵を管理リストに追加
+	m_enemies.push_back(std::move(enemy));
+}
+
+//----------------------------------------------------------
+// 敵の近距離攻撃を生成
+//----------------------------------------------------------
+
+void EnemyManager::RequestAttackE(
+    EnemyBase* enemy,
+    const DirectX::SimpleMath::Vector3& forward)
+{
+	//近距離攻撃
+    m_attacks.push_back(
+        std::make_unique<AttackE>(
+        m_deviceResources,
+        enemy->GetPosition(),
+        forward,
+        m_displayCol
+    )
+	);
+
+}
+
+//----------------------------------------------------------
+// 敵の突進攻撃を生成
+//----------------------------------------------------------
+
+void EnemyManager::RequestRushE(
+    EnemyBase* enemy,
+    const DirectX::SimpleMath::Vector3& forward)
+{
+    
+	//突進
+    m_rush.push_back(
+        std::make_unique<RushE>(
+        m_deviceResources,
+        enemy,
+        forward,
+        m_displayCol
+    )
+	);
+
+}
+
+//----------------------------------------------------------
+// 敵同士の重なりを防ぐ  総当たり
+//----------------------------------------------------------
+
+void EnemyManager::ResolveEnemyCollisions()
+{
+    //敵が2体未満ならチェックしない
+    if (m_enemies.size() < 2)return;
+
+    //2重ループで全ての敵の組み合わせを総当たりで確認
+    for (size_t i = 0; i < m_enemies.size(); i++)
+    {
+        for (size_t j = i + 1; j < m_enemies.size(); j++)
+        {
+            auto& enemyA = m_enemies[i];
+            auto& enemyB = m_enemies[j];
+
+            //どちらかがすでにやられていたらスキップ
+            if (enemyA->IsDead() || enemyB->IsDead())continue;
+
+            //２体の現在位置を取得
+            DirectX::SimpleMath::Vector3 posA = enemyA->GetPosition();
+            DirectX::SimpleMath::Vector3 posB = enemyB->GetPosition();
+
+            //高さを無視し、XZ平面で離れている方向を計算
+            DirectX::SimpleMath::Vector3 diff = posB - posA;
+            diff.y = 0.0f;
+
+            float distance = diff.Length();
+
+            //敵の当たり判定の半径を計算
+            float radiusA = enemyA->GetParam().scale * 1.2f;
+            float radiusB = enemyB->GetParam().scale * 1.2f;
+            //重ならない最低限の距離
+            float minDistance = radiusA + radiusB;
+
+            //本来の距離より敵同士が近いか
+            if (distance < minDistance)
+            {
+                //お互いが離れる方向ベクトル
+                DirectX::SimpleMath::Vector3 pushDir = DirectX::SimpleMath::Vector3::Left;
+
+                if (distance > VECTOR_EPSILON)
+                {
+                    //方向だけ
+                    pushDir = diff / distance;
+                }
+
+                //重なっている長さを計算
+                float overlap = minDistance - distance;
+
+                //めり込んでいた場合、ゆっくり押し返す
+                DirectX::SimpleMath::Vector3 pushAmount = pushDir * (overlap * 0.1f);
+
+                //敵の座標を更新　
+                enemyA->SetPosition(posA - pushAmount);
+                enemyB->SetPosition(posB + pushAmount);
+
+            }
+        }
+    }
 }

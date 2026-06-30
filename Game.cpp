@@ -1,6 +1,9 @@
-//
-// Game.cpp
-//
+/**
+ * @file   Game.cpp
+ * @brief  ÉQÅ[ÉÄ
+ * @author ö†ìcímñr
+ * @date   2026/06/23
+ */
 
 #include "pch.h"
 #include "Game.h"

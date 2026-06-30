@@ -1,5 +1,11 @@
 
-//TransitionMask.cpp
+/**
+ * @file   TransitionMask.cpp
+ * @brief  シーン切り替えの管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
+
 
 #include "pch.h"
 #include "TransitionMask.h"
@@ -25,17 +31,18 @@ TransitionMask::TransitionMask(
 
 	{
 		D3D11_TEXTURE2D_DESC desc = {};
-		desc.Width = 1;
-		desc.Height = 1;
-		desc.MipLevels = 1;
-		desc.ArraySize = 1;
+		desc.Width = DUMMY_TEX_SIZE;
+		desc.Height = DUMMY_TEX_SIZE;
+		desc.MipLevels = DUMMY_TEX_SIZE;
+		desc.ArraySize = DUMMY_TEX_SIZE;
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Count = DUMMY_TEX_SIZE;
 		desc.Usage = D3D11_USAGE_DEFAULT;
 		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 		desc.CPUAccessFlags = 0;
 
-		uint32_t pixel = 0xFFFFFFFF; // 白 (R,G,B,A = 1,1,1,1)
+		//白
+		uint32_t pixel = 0xFFFFFFFF; 
 		D3D11_SUBRESOURCE_DATA initData = {};
 		initData.pSysMem = &pixel;
 		initData.SysMemPitch = sizeof(uint32_t);
@@ -141,10 +148,6 @@ void TransitionMask::Draw(
 			case FadeType::WIPE:
 				context->PSSetShader(m_fade_PS.Get(), nullptr, 0);
 				break;
-
-				/*case FadeType::CHECKER:
-					context->PSSetShader(m_PS_FadeSe.Get(), nullptr, 0);
-					break;*/
 
 			}
 		}

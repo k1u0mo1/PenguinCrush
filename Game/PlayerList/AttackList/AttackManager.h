@@ -1,5 +1,10 @@
 
-//弾（攻撃）をまとめて管理する
+/**
+ * @file   AttackManager.h
+ * @brief  攻撃の管理クラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
 
 #pragma once
 
@@ -10,33 +15,35 @@
 
 #include "Game/Collision/DisplayCollision.h"
 
-class BossEnemy;
+class EnemyBase;
 class Player;
 class Particle;
+class HitStop;
 
 class AttackManager
 {
 private:
 
-	//------------------------------------------------------
-	//定数関連
-	//------------------------------------------------------
+	//エフェクトの高さ
+	static constexpr float HIT_EFFECT_HEIGHT = 1.0f;
+	//エフェクトの生成数
+	static constexpr int HIT_EFFECT_COUNT = 50;
+	//エフェクトのサイズ
+	static constexpr float HIT_EFFECT_SIZE = 0.1f;
+	
+	//ダメージ量
+	static constexpr float ATTACK_DAMAGE = 100.0f;
 
-	//弾の速度
-	static constexpr float SPAWN_FORWARD_DIST = 1.5f;
-	//弾の生成する高さ
-	static constexpr float SPAWN_HEIGHT_OFFSET = 1.5f;
+	//ダッシュのノックバックの強さ
+	static constexpr float RUSH_KNOCKBACK_POWER = 10.0f;
+
+	//ヒットストップの時間
+	static constexpr float HIT_STOP_DURATION = 0.1f;
 
 public: 
 	
 	AttackManager() = default;
 	~AttackManager() = default;
-
-	/// <summary>
-	/// 遠距離攻撃（弾）を生成して発射
-	/// </summary>
-	/// <param name="player">攻撃を行うプレイヤーのポインタ</param>
-	void Bullet(Player* player);  
 
 	/// <summary>
 	/// 近距離攻撃を生成して実行
@@ -60,9 +67,9 @@ public:
 	/// 攻撃の更新処理と敵の当たり判定
 	/// </summary>
 	/// <param name="dt">前フレームからの経過時間</param>
-	/// <param name="enemies">ステージ上に存在するボスのリスト</param>
+	/// <param name="enemies">ステージ上に存在する敵のリスト</param>
 	/// <param name="particle">ヒット時のエフェクト発生用マネージャー</param>
-	void Update(float dt, std::vector<BossEnemy*>& enemies,Particle* particle);
+	void Update(float dt, std::vector<EnemyBase*>& enemies,Particle* particle,HitStop* hitStop);
 
 	/// <summary>
 	/// 攻撃のモデルを描画
@@ -76,12 +83,7 @@ public:
 		const DirectX::SimpleMath::Matrix& proj
 	);
 
-	/// <summary>
-	/// 弾の描画に使うモデルの設定
-	/// </summary>
-	/// <param name="model">弾の描画に使用する3Dモデルのポインタ</param>
-	void SetBulletModel(std::shared_ptr<DirectX::Model> model);
-
+	
 	/// <summary>
 	/// 描画ステートを設定
 	/// </summary>
@@ -101,8 +103,7 @@ private:
 
 	std::vector<std::shared_ptr<AttackBase>> m_attacks;
 
-	std::shared_ptr<DirectX::Model> m_bulletModel;
-
+	
 	DirectX::CommonStates* m_states = nullptr;
 
 	//コリジョン消す

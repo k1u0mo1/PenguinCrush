@@ -1,5 +1,10 @@
 
-//ゲーム全体の影
+/**
+ * @file   ShadowRenderer.cpp
+ * @brief  ゲーム全体のキャラクターやオブジェクトの丸影を描画するクラス
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
 
 #include "pch.h"
 #include "ShadowRenderer.h"
@@ -42,10 +47,10 @@ ShadowRenderer::ShadowRenderer(
 	//-------------------------------------------------------
 	VertexData vertices[] =
 	{
-		{ SimpleMath::Vector3(-0.5f, 0.0f,  0.5f), SimpleMath::Vector2(0.0f, 0.0f) },
-		{ SimpleMath::Vector3(0.5f, 0.0f,  0.5f), SimpleMath::Vector2(1.0f, 0.0f) },
-		{ SimpleMath::Vector3(-0.5f, 0.0f, -0.5f), SimpleMath::Vector2(0.0f, 1.0f) },
-		{ SimpleMath::Vector3(0.5f, 0.0f, -0.5f), SimpleMath::Vector2(1.0f, 1.0f) },
+		{ SimpleMath::Vector3(-HALF_SIZE, 0.0f,  HALF_SIZE), SimpleMath::Vector2(0.0f, 0.0f) },
+		{ SimpleMath::Vector3( HALF_SIZE, 0.0f,  HALF_SIZE), SimpleMath::Vector2(1.0f, 0.0f) },
+		{ SimpleMath::Vector3(-HALF_SIZE, 0.0f, -HALF_SIZE), SimpleMath::Vector2(0.0f, 1.0f) },
+		{ SimpleMath::Vector3( HALF_SIZE, 0.0f, -HALF_SIZE), SimpleMath::Vector2(1.0f, 1.0f) },
 	};
 
 	//頂点バッファの作成

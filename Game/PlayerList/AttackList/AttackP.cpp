@@ -1,6 +1,9 @@
-//
-// AttackP.cpp
-//
+/**
+ * @file   AttackP.cpp
+ * @brief  プレイヤーの近距離攻撃を管理するクラスの実装
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
 
 #include "pch.h"
 #include "AttackP.h"
@@ -52,7 +55,7 @@ AttackP::AttackP(
 		//OBB初期化
         m_collision = std::make_unique<ModelCollisionOrientedBox>(m_attackModel.get());
 		m_collision->SetCenter(m_position);
-		m_collision->SetExtents(SimpleMath::Vector3(0.5f, 1.0f, 0.5f));
+		m_collision->SetExtents(COLLISION_SIZE);
 	}
 
 	m_states = std::make_unique<CommonStates>(m_deviceResources->GetD3DDevice());
@@ -66,8 +69,8 @@ void AttackP::Update(float deltaTime)
 {
 	m_lifetime += deltaTime;
 
-	// 弾の移動
-	m_position += m_forward * 0.1f;
+	//攻撃を前方に移動させる
+	m_position += m_forward * ATTACK_DISTANCE;
 
 	if (m_collision)
 	{
@@ -93,6 +96,7 @@ void AttackP::Render(
 {
 	if (!m_attackModel)return;
 
+	//ワールド行列の計算
 	SimpleMath::Matrix world = 
 		SimpleMath::Matrix::CreateScale(1.0f) *
 		SimpleMath::Matrix::CreateTranslation(m_position);
@@ -120,7 +124,9 @@ void AttackP::Render(
 		//DisplayCollision に登録された情報を描画
 		m_displayCollision->DrawCollision(
 			context, m_states.get(), view, proj,
-			DirectX::Colors::Red, DirectX::Colors::DarkRed, 0.5f
+			DirectX::Colors::Red,
+			DirectX::Colors::DarkRed,
+			DEBUG_COLLISION_LINE_THICKNESS
 		);
 	}
 
@@ -132,7 +138,7 @@ void AttackP::Render(
 
 bool AttackP::IsAlive() const
 {
-	return m_lifetime < MAX_LIFETIME;
+	return (m_lifetime < MAX_LIFETIME) && !m_isDead;
 }
 
 //-----------------------------------------------------------------
@@ -151,7 +157,7 @@ DirectX::BoundingBox AttackP::GetBoundingBox() const
 	{
 		//デフォルト小さい箱
 		box.Center = m_position;
-		box.Extents = DirectX::SimpleMath::Vector3(0.3f, 0.3f, 0.3f);
+		box.Extents = DirectX::SimpleMath::Vector3(DEFAULT_BOX_SIZE);
 	}
 	return box;
 }

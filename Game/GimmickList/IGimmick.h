@@ -1,7 +1,10 @@
 
-//IGimmick.h
-//ギミックの共通のインターフェース（ルール的なもの）
-//
+/**
+ * @file   IGimmick.h
+ * @brief  ギミックの共通のインターフェースクラス
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
 
 #pragma once
 #include <pch.h>

@@ -1,11 +1,16 @@
-//
-// RushE.cpp
-//
+/**
+ * @file   RushE.cpp
+ * @brief  敵の突進攻撃クラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
 
 #include "pch.h"
 #include "RushE.h"
 
 #include "Game/EnemyList/BossEnemy.h"
+#include "Game/EnemyList/EnemyBase.h"
+
 
 #include <Effects.h>
 
@@ -19,24 +24,23 @@ using Microsoft::WRL::ComPtr;
 
 RushE::RushE(
 	DX::DeviceResources* deviceResources,
-	/*const DirectX::SimpleMath::Vector3& playerPos, */
-	BossEnemy* boss,
+	EnemyBase* enemy,
 	const DirectX::SimpleMath::Vector3& forward,
 	std::shared_ptr<DisplayCollision> displayCollision)
 	: m_deviceResources(deviceResources)
 	, m_forward(forward)
 	, m_lifetime(0.0f)
 	, m_displayCollision(displayCollision)
-	, m_boss(boss)
+	, m_enemy(enemy)
 {
 	
 	//ボスの位置に当たり判定を作る
-	m_position = m_boss->GetPosition();
+	m_position = m_enemy->GetPosition();
 
 	//当たり判定
 	m_collision = std::make_unique<ModelCollisionOrientedBox>();
 	m_collision->SetCenter(m_position);
-	m_collision->SetExtents(SimpleMath::Vector3(1.0f, 1.5f, 1.0f));
+	m_collision->SetExtents(COLLISION_SIZE);
 
 	
 	////OBB （幅 高さ 奥行き）
@@ -45,7 +49,7 @@ RushE::RushE(
 	//	//OBB初期化
 	//  m_collision = std::make_unique<ModelCollisionOrientedBox>(m_rushModel.get());
 	//	m_collision->SetCenter(m_position);
-	//	m_collision->SetExtents(SimpleMath::Vector3(0.5f, 1.0f, 0.5f));
+	//	m_collision->SetExtents(COLLISION_SIZE);
 	//}
 
 	m_states = std::make_unique<CommonStates>(m_deviceResources->GetD3DDevice());
@@ -60,17 +64,17 @@ void RushE::Update(float deltaTime)
 	m_lifetime += deltaTime;
 
 	
-	//ボスの向きを進行方向に向ける
+	//敵の向きをプレイヤーの方に向ける
 	float angle = atan2(m_forward.x, m_forward.z);
-	m_boss->SetRotationY(angle);
+	m_enemy->SetRotationY(angle);
 
 	//ボスを滑らせる(移動)
-	SimpleMath::Vector3 currentPos = m_boss->GetPosition();
+	SimpleMath::Vector3 currentPos = m_enemy->GetPosition();
 	
 	SimpleMath::Vector3 nextPos = currentPos + m_forward * RUSH_SPEED * deltaTime;
 
 	//ボスの位置を更新
-	m_boss->SetPosition(nextPos);
+	m_enemy->SetPosition(nextPos);
 
 	//当たり判定もボスに追従
 	m_position = nextPos;
@@ -93,7 +97,7 @@ void RushE::Render(
 {
 
 	SimpleMath::Matrix world = 
-		SimpleMath::Matrix::CreateScale(1.0f) *
+		SimpleMath::Matrix::CreateScale(SCALE_SIZE) *
 		SimpleMath::Matrix::CreateTranslation(m_position);
 
 	
@@ -116,7 +120,7 @@ void RushE::Render(
 		// 赤色で攻撃判定を表示
 		m_displayCollision->DrawCollision(
 			context, m_states.get(), view, proj,
-			Colors::Red, Colors::DarkRed, 0.5f
+			Colors::Red, Colors::DarkRed, DEBUG_COLLISION_LINE_THICKNESS
 		);
 	}
 
@@ -138,7 +142,7 @@ DirectX::BoundingBox RushE::GetBoundingBox() const
 	{
 		// デフォルト小さい箱
 		box.Center = m_position;
-		box.Extents = DirectX::SimpleMath::Vector3(DEFAULT_BOUNDING_SIZE, DEFAULT_BOUNDING_SIZE, DEFAULT_BOUNDING_SIZE);
+		box.Extents = DirectX::SimpleMath::Vector3(DEFAULT_BOUNDING_SIZE);
 	}
 	return box;
 }

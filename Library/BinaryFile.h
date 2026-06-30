@@ -1,5 +1,10 @@
 
-//	バイナリーファイル
+/**
+ * @file   BinaryFile.h
+ * @brief  バイナリーデータの読み込みと保持を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/10
+ */
 
 #pragma once
 

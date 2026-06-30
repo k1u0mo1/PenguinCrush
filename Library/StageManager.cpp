@@ -1,3 +1,11 @@
+
+/**
+ * @file   StageManager.cpp
+ * @brief  ステージを管理するマネージャークラス
+ * @author 國田知睦
+ * @date   2026/06/10
+ */
+
 #include "pch.h"
 #include "Library/StageManager.h"
 
@@ -37,21 +45,6 @@ void StageManager::Initialize(HWND /*hwnd*/, int /*width*/, int /*height*/)
 }
 
 //----------------------------------------------------------
-// 新しいステージを生成しリストに追加して登録
-//----------------------------------------------------------
-
-void StageManager::AddStage(const std::wstring& name, HWND hwnd, int width, int height)
-{
-    auto stage = std::make_unique<Stage>(m_deviceResources);
-
-    //ステージの初期化
-    stage->Initialize(hwnd, width, height);
-
-    //作成したステージを登録 ＜－大切
-    m_stages[name] = std::move(stage);
-}
-
-//----------------------------------------------------------
 // 指定した名前のステージに切り替える
 //----------------------------------------------------------
 
@@ -77,14 +70,31 @@ void StageManager::SetCurrentStage(const std::wstring& name)
 }
 
 //----------------------------------------------------------
+// 新しいステージを生成しリストに追加して登録
+//----------------------------------------------------------
+void StageManager::AddStage(
+    const std::wstring& name,
+    HWND hwnd, int width, int height,
+    const std::string& mapImagePath)
+{
+    auto stage = std::make_unique<Stage>(m_deviceResources);
+
+    //ステージの初期化
+    stage->Initialize(hwnd, width, height, mapImagePath);
+
+    //作成したステージを登録 ＜－大切
+    m_stages[name] = std::move(stage);
+}
+
+//----------------------------------------------------------
 // ステージの更新
 //----------------------------------------------------------
 
-void StageManager::Update(WaveManager* waveManager)
+void StageManager::Update(float elapsedTime, WaveManager* waveManager)
 {
     if (m_currentStage)
     {
-        m_currentStage->Update(waveManager);
+        m_currentStage->Update(elapsedTime, waveManager);
     }
 }
 

@@ -1,6 +1,9 @@
-﻿//
-// SlideBehavior.cpp
-//
+﻿/**
+ * @file   SlideBehavior.cpp
+ * @brief  滑る挙動のコンポーネントクラス
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
 
 #include "pch.h"
 
@@ -14,7 +17,7 @@ void SlideBehavior::Update(DirectX::SimpleMath::Vector3& position, const DirectX
 {
 
 	//自発的な移動の慣性計算
-	float lerpFactor = (targetVelocity.LengthSquared() > 0.01f) ? ACCELERATION_FORCE : FRICTION_FORCE;
+	float lerpFactor = (targetVelocity.LengthSquared() > VELOCITY_THRESHOLD) ? ACCELERATION_FORCE : FRICTION_FORCE;
 
 	m_slidingInertia = DirectX::SimpleMath::Vector3::Lerp(
 		m_slidingInertia,
@@ -23,14 +26,14 @@ void SlideBehavior::Update(DirectX::SimpleMath::Vector3& position, const DirectX
 	);
 
 	//微小の慣性は無くす
-	if (targetVelocity.LengthSquared() < 0.001f 
-		&& m_slidingInertia.LengthSquared() < 0.01f)
+	if (targetVelocity.LengthSquared() < STOP_EPSILON
+		&& m_slidingInertia.LengthSquared() < VELOCITY_THRESHOLD)
 	{
 		m_slidingInertia = DirectX::SimpleMath::Vector3::Zero;
 	}
 
 	//傾斜の慣性計算
-	float slideLerpFactor = (slideDir.LengthSquared() > 0.001f) ? ACCELERATION_FORCE : FRICTION_FORCE;
+	float slideLerpFactor = (slideDir.LengthSquared() > STOP_EPSILON) ? ACCELERATION_FORCE : FRICTION_FORCE;
 
 	m_currentSlideVelocity = DirectX::SimpleMath::Vector3::Lerp(
 		m_currentSlideVelocity,
@@ -39,8 +42,8 @@ void SlideBehavior::Update(DirectX::SimpleMath::Vector3& position, const DirectX
 	);
 
 	//微小の慣性は無くす
-	if (slideDir.LengthSquared() < 0.001f 
-		&& m_currentSlideVelocity.LengthSquared() < 0.01f)
+	if (slideDir.LengthSquared() < STOP_EPSILON
+		&& m_currentSlideVelocity.LengthSquared() < VELOCITY_THRESHOLD)
 	{
 		m_currentSlideVelocity = DirectX::SimpleMath::Vector3::Zero;
 	}

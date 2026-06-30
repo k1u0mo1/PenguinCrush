@@ -1,4 +1,11 @@
-// AttackE.h
+
+/**
+ * @file   Attack.h
+ * @brief  敵の近距離攻撃クラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
+
 #pragma once
 
 #include "pch.h"
@@ -39,6 +46,17 @@ private:
     static constexpr float SPAWN_DISTANCE = 1.0f;
     //当たり判定のサイズ
     static constexpr float DEFAULT_BOUNDING_SIZE = 0.3f;
+
+
+    //当たり判定を○秒だけ判定させる
+    static constexpr float MAX_LIFETIME = 0.3f;
+
+    //サイズ
+    static constexpr float SCALE_SIZE = 1.0f;
+
+    //コリジョンの当たり判定のサイズ
+    static constexpr DirectX::SimpleMath::Vector3 COLLISION_SIZE =
+        DirectX::SimpleMath::Vector3(1.0f, 1.0f, 1.0f);
 
 public:
 
@@ -136,9 +154,7 @@ private:
 
     //長さ
     float m_lifetime;
-    //○秒だけ判定させる
-    static constexpr float MAX_LIFETIME = 0.3f;
-
+    
     //当たり判定用　
     //std::shared_ptr<CollisionAABB> m_collision;
 

@@ -1,12 +1,14 @@
-﻿//
-// Wave.cpp
-//
+﻿
+/**
+ * @file   Wave.h
+ * @brief  水面の波を動的に生成・描画し、物理的な高さや傾きを提供するギミッククラス
+ * @author 國田知睦
+ * @date   2026/06/17
+ */
 
 #include "pch.h"
 #include "Wave.h"
 #include <Game/Common/ReadData.h>
-
-
 
 using namespace DirectX;
 
@@ -36,6 +38,7 @@ void Wave::Initialize(HWND /*hwnd*/, int width, int height)
 //----------------------------------------------------------
 // 波の更新
 //----------------------------------------------------------
+
 
 void Wave::Update(float deltaTime)
 {
@@ -106,8 +109,9 @@ void Wave::Render(ID3D11DeviceContext* context, const SimpleMath::Matrix& view, 
 		//三角形の面として描画設定
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		//まとめて描画　10000個の立方体を描画
-        context->DrawIndexedInstanced(36, 40000, 0, 0, 0);
+		//まとめて立方体を描画
+        context->DrawIndexedInstanced(
+            CUBE_INDEX_COUNT, CUBE_INSTANCE_COUNT, 0, 0, 0);
     }
     //通常の波モード
     else
@@ -131,7 +135,6 @@ void Wave::Render(ID3D11DeviceContext* context, const SimpleMath::Matrix& view, 
 void Wave::CreateDeviceResources()
 {
     auto device = m_deviceResources->GetD3DDevice();
-    auto context = m_deviceResources->GetD3DDeviceContext();
 
     device;
 
@@ -142,6 +145,7 @@ void Wave::CreateDeviceResources()
     const float offsetX = (GRID_WIDTH - 1) * GRID_SPACING *0.5f;
     const float offsetZ = (GRID_HEIGHT - 1) * GRID_SPACING * 0.5f;
 
+    
     m_waveVertices.clear();
     for (int z = 0; z < GRID_HEIGHT; z++)
     {
@@ -202,10 +206,10 @@ void Wave::CreateDeviceResources()
     {
         for (int x = 0; x < GRID_WIDTH - 1; x++)
         {
-            int i0 = z * GRID_WIDTH + x;
-            int i1 = z * GRID_WIDTH + (x + 1);
-            int i2 = (z + 1) * GRID_WIDTH + x;
-            int i3 = (z + 1) * GRID_WIDTH + (x + 1);
+            uint16_t i0 = static_cast<uint16_t>(z * GRID_WIDTH + x);
+            uint16_t i1 = static_cast<uint16_t>(z * GRID_WIDTH + (x + 1));
+            uint16_t i2 = static_cast<uint16_t>((z + 1) * GRID_WIDTH + x);
+            uint16_t i3 = static_cast<uint16_t>((z + 1) * GRID_WIDTH + (x + 1));
 
             //１つ目の三角形
             indices.push_back(i0);
@@ -256,9 +260,9 @@ void Wave::CreateWindowSizeResources(int /*width*/, int /*height*/)
 
     // 射影行列の作成
     m_proj = SimpleMath::Matrix::CreatePerspectiveFieldOfView(
-        XMConvertToRadians(45.0f)
+        XMConvertToRadians(CAM_FOV)  
         , static_cast<float>(rect.right) / static_cast<float>(rect.bottom)
-        , 0.1f, 1000.0f);
+        , CAM_NEAR, CAM_FAR);
 }
 
 void Wave::CreateCubeBuffer()
@@ -266,19 +270,19 @@ void Wave::CreateCubeBuffer()
     auto device = m_deviceResources->GetD3DDevice();
 
     //頂点データ
-    WaveVertex cv[8] = {
-        { DirectX::SimpleMath::Vector3(-0.2f,  0.2f, -0.2f), DirectX::SimpleMath::Vector4(0.0f, 1.0f, 0.8f, 1.0f) },
-        { DirectX::SimpleMath::Vector3( 0.2f,  0.2f, -0.2f), DirectX::SimpleMath::Vector4(0.0f, 1.0f, 0.8f, 1.0f) },
-        { DirectX::SimpleMath::Vector3( 0.2f,  0.2f,  0.2f), DirectX::SimpleMath::Vector4(0.0f, 1.0f, 0.8f, 1.0f) },
-        { DirectX::SimpleMath::Vector3(-0.2f,  0.2f,  0.2f), DirectX::SimpleMath::Vector4(0.0f, 1.0f, 0.8f, 1.0f) },
-        { DirectX::SimpleMath::Vector3(-0.2f, -0.2f, -0.2f), DirectX::SimpleMath::Vector4(0.0f, 0.5f, 0.8f, 1.0f) },
-        { DirectX::SimpleMath::Vector3( 0.2f, -0.2f, -0.2f), DirectX::SimpleMath::Vector4(0.0f, 0.5f, 0.8f, 1.0f) },
-        { DirectX::SimpleMath::Vector3( 0.2f, -0.2f,  0.2f), DirectX::SimpleMath::Vector4(0.0f, 0.5f, 0.8f, 1.0f) },
-        { DirectX::SimpleMath::Vector3(-0.2f, -0.2f,  0.2f), DirectX::SimpleMath::Vector4(0.0f, 0.5f, 0.8f, 1.0f) },
+    WaveVertex cv[CUBE_SIZE] = {
+        { DirectX::SimpleMath::Vector3(-CUDE_SIZE,  CUDE_SIZE, -CUDE_SIZE), DirectX::SimpleMath::Vector4(0.0f, 1.0f, 0.8f, 1.0f) },
+        { DirectX::SimpleMath::Vector3( CUDE_SIZE,  CUDE_SIZE, -CUDE_SIZE), DirectX::SimpleMath::Vector4(0.0f, 1.0f, 0.8f, 1.0f) },
+        { DirectX::SimpleMath::Vector3( CUDE_SIZE,  CUDE_SIZE,  CUDE_SIZE), DirectX::SimpleMath::Vector4(0.0f, 1.0f, 0.8f, 1.0f) },
+        { DirectX::SimpleMath::Vector3(-CUDE_SIZE,  CUDE_SIZE,  CUDE_SIZE), DirectX::SimpleMath::Vector4(0.0f, 1.0f, 0.8f, 1.0f) },
+        { DirectX::SimpleMath::Vector3(-CUDE_SIZE, -CUDE_SIZE, -CUDE_SIZE), DirectX::SimpleMath::Vector4(0.0f, 0.5f, 0.8f, 1.0f) },
+        { DirectX::SimpleMath::Vector3( CUDE_SIZE, -CUDE_SIZE, -CUDE_SIZE), DirectX::SimpleMath::Vector4(0.0f, 0.5f, 0.8f, 1.0f) },
+        { DirectX::SimpleMath::Vector3( CUDE_SIZE, -CUDE_SIZE,  CUDE_SIZE), DirectX::SimpleMath::Vector4(0.0f, 0.5f, 0.8f, 1.0f) },
+        { DirectX::SimpleMath::Vector3(-CUDE_SIZE, -CUDE_SIZE,  CUDE_SIZE), DirectX::SimpleMath::Vector4(0.0f, 0.5f, 0.8f, 1.0f) },
     };
 
     //頂点をつなげる
-    const uint16_t ci[36] = {
+    const uint16_t ci[CUBE_INDEX_COUNT] = {
         0,1,2, 0,2,3,//上
         4,6,5 ,4,7,6,//下
         4,5,1, 4,1,0,//手前
@@ -288,22 +292,22 @@ void Wave::CreateCubeBuffer()
     };
 
     //頂点バッファの作成
-    D3D11_BUFFER_DESC cvbd = {};
-    cvbd.Usage = D3D11_USAGE_DEFAULT;
-    cvbd.ByteWidth = sizeof(WaveVertex) * 8; //8つの頂点
-    cvbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    D3D11_SUBRESOURCE_DATA cvsd = {};
-    cvsd.pSysMem = cv;
-    DX::ThrowIfFailed(device->CreateBuffer(&cvbd, &cvsd, m_cubeVertexBuffer.ReleaseAndGetAddressOf()));
+    D3D11_BUFFER_DESC CubeVertexBufferDesc = {};
+    CubeVertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    CubeVertexBufferDesc.ByteWidth = sizeof(WaveVertex) * CUBE_SIZE;
+    CubeVertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    D3D11_SUBRESOURCE_DATA cubeVertexSubresourceData = {};
+    cubeVertexSubresourceData.pSysMem = cv;
+    DX::ThrowIfFailed(device->CreateBuffer(&CubeVertexBufferDesc, &cubeVertexSubresourceData, m_cubeVertexBuffer.ReleaseAndGetAddressOf()));
 
     //インデックスバッファの作成
-    D3D11_BUFFER_DESC cibd = {};
-    cibd.Usage = D3D11_USAGE_DEFAULT;
-    cibd.ByteWidth = sizeof(uint16_t) * 36; // 36インデックス
-    cibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    D3D11_SUBRESOURCE_DATA cisd = {};
-    cisd.pSysMem = ci;
-    DX::ThrowIfFailed(device->CreateBuffer(&cibd, &cisd, m_cubeIndexBuffer.ReleaseAndGetAddressOf()));
+    D3D11_BUFFER_DESC CubeIndexBufferDesc = {};
+    CubeIndexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    CubeIndexBufferDesc.ByteWidth = sizeof(uint16_t) * CUBE_INDEX_COUNT;
+    CubeIndexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    D3D11_SUBRESOURCE_DATA cubeIndexSubresourceData = {};
+    cubeIndexSubresourceData.pSysMem = ci;
+    DX::ThrowIfFailed(device->CreateBuffer(&CubeIndexBufferDesc, &cubeIndexSubresourceData, m_cubeIndexBuffer.ReleaseAndGetAddressOf()));
 }
 
 //----------------------------------------------------------
@@ -365,15 +369,6 @@ DirectX::SimpleMath::Vector3 Wave::GetPosition() const
 DirectX::SimpleMath::Vector2 Wave::GetWaveAngle(float x, float z) const
 {
    
-    //float fx = x;
-    //float fz = z;
-
-    //// 勾配の計算（WAVE_FREQUENCY を使用）
-    //float dy_dx = cosf(fx * WAVE_FREQUENCY + m_time) * WAVE_FREQUENCY;
-    //float dy_dz = -sinf(fz * WAVE_FREQUENCY + m_time) * WAVE_FREQUENCY;
-
-    //return { dy_dz, dy_dx };
-
     //○.○fだけ座標をずらして実際の高さを調べて傾きを計算
     const float epsilon = 0.1f;
 

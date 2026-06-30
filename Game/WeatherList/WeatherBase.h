@@ -1,6 +1,10 @@
 
-//天候の親クラス
-//WeatherBase.h
+/**
+ * @file   WeatherBase.h
+ * @brief  天候の親クラス
+ * @author 國田知睦
+ * @date   2026/06/17
+ */
 
 #pragma once
 #include "pch.h"
@@ -13,6 +17,21 @@
 /// </summary>
 class WeatherBase
 {
+private:
+
+	//横幅の範囲
+	static constexpr int SPAWN_RANGE_X = 2000;
+	//高さの範囲
+	static constexpr int SPAWN_RANGE_Y = 1000;
+	//奥行き範囲
+	static constexpr int SPAWN_RANGE_Z = 2000;
+
+	//パーティクルの最大数
+	static constexpr int MAX_PARTICLES = 5000;
+
+	//パーティクルの初期サイズ
+	static constexpr float DEFAULT_PARTICLE_SIZE = 1.0f;
+
 public:
 
 	/// <summary>

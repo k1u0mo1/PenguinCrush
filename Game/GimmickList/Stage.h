@@ -1,4 +1,11 @@
-// Stage.h
+
+/**
+ * @file   Stage.h
+ * @brief  ゲームの足場（ステージ）を管理・描画するクラス
+ * @author 國田知睦
+ * @date   2026/06/24
+ */
+
 #pragma once
 
 #include "pch.h"
@@ -28,21 +35,90 @@ private:
     //------------------------------------------------------
 
     //ステージの半分のサイズ （ここを変更すると描画と当たり判定が自動で変更される）
-    static constexpr float STAGE_HALF_SIZE = 30.0f;
-
+    static constexpr float STAGE_HALF_SIZE = 2.0f;
+    
     //3Dモデル本来の半分のサイズ
     static constexpr float MODEL_BASE_HALF_SIZE = 5.0f;
 
     //ステージのX軸スケール　（STAGE_HALF_SIZEに連動して自動で計算）
     static constexpr float STAGE_SCALE_X = STAGE_HALF_SIZE / MODEL_BASE_HALF_SIZE;
+
     //ステージのZ軸スケール　（STAGE_HALF_SIZEに連動して自動で計算）
     static constexpr float STAGE_SCALE_Z = STAGE_HALF_SIZE / MODEL_BASE_HALF_SIZE;
 
     //ステージのY軸スケール 厚さと高さ
-    static constexpr float STAGE_SCALE_Y = 5.0f;
-
+    static constexpr float STAGE_SCALE_Y = 3.0f;
+    //ステージの高さのずれを調整するオフセット
+    static constexpr float STAGE_OFFSET_Y = 5.0f;
+    
     //ステージの揺れの大きさ
-    static constexpr float STADE_ANGLE = 500.0f;
+    static constexpr float STAGE_ANGLE = 100.0f;
+    //流氷の数　縦＊横
+    static constexpr int DRIFT_ICE_NUM = 20;
+    //流氷同士の間隔
+    static constexpr float DRIFT_ICE_SPACING = 3.0f;
+
+	//乗っている時に１秒間当たりの食らうダメージの大きさ
+	static constexpr float DAMAGE_PER_SECOND = 50.0f;
+    //流氷のHP
+    static constexpr float ICE_HP = 100.0f;
+
+	//落下判定のY座標　これを下回ったら落ちたとみなす
+    static constexpr float FALL_LIMIT_Y = -10.0f;
+	//ステージの端のY座標　これを下回るとステージから落ちたとみなす
+    static constexpr float STAGE_BOUNDARY_Y = -4.9f;
+	
+    //真下に延ばすレイ
+    static constexpr float RAY_START_HEIGHT = 1000.0f;
+    static constexpr float RAY_MIN_HEIGHT = -100.0f;
+
+    //
+    static constexpr float RESPAWN_SEARCH_MIN = -10.0f;
+    static constexpr float RESPAWN_SEARCH_MAX = 10.0f; 
+    static constexpr float RESPAWN_SEARCH_STEP = 2.0f;
+
+    //描画周り
+    static constexpr float CAMERA_FOV = 45.0f;
+    static constexpr float CAMERA_NEAR = 0.1f;
+    static constexpr float CAMERA_FAR = 1000.0f;
+
+    //流氷の落ちる速度
+    static constexpr float GRAVITY = 1.8f;
+    static constexpr float WAVE_BLEND_FACTOR = 0.2f;
+
+    //小さい揺れ
+    static constexpr float SMALL_SHAKING = 0.01f;
+    //耐久性が低いときの揺れ
+    static constexpr float MINUTE_SHAKING = 0.0003f;
+
+    //微数値
+    static constexpr float SLIDE_EPSILON = 0.0001f; 
+
+
+
+    //
+    struct IceFloe
+    {
+        //ローカルワールド行列
+        DirectX::SimpleMath::Vector3 position;
+        //初期位置を記憶する
+        DirectX::SimpleMath::Vector3 basePosition;
+        //X軸傾き
+        float rotateX = 0.0f;
+        //Z軸傾き
+        float rotateZ = 0.0f;
+        DirectX::BoundingOrientedBox obb;
+        //波の傾きを正確に表す回転行列
+        DirectX::SimpleMath::Matrix rotationMatrix = DirectX::SimpleMath::Matrix::Identity;
+
+        //この流氷は崩れているか？
+        bool isFallen = false;
+        //落ちる速度
+        float fallSpeed = 0.0f;
+        //耐久値
+        float hp = ICE_HP;
+
+    };
 
 public:
 
@@ -63,13 +139,14 @@ public:
     /// <param name="window">ウィンドウハンドル</param>
     /// <param name="width">画面の幅</param>
     /// <param name="height">画面の高さ</param>
-    void Initialize(HWND window, int width, int height);
+    /// <param name="mapFilename">ステージマップ名</param>
+    void Initialize(HWND window, int width, int height, const std::string& mapFilename);
 
     /// <summary>
     /// 波の状態を基にステージの傾きなどを更新
     /// </summary>
     /// <param name="wave">計算に利用する波オブジェクトのポインタ</param>
-    void Update(WaveManager* waveManager);
+    void Update(float elapsedTime, WaveManager* waveManager);
 
     /// <summary>
     /// 足場（ステージ）の描画
@@ -147,7 +224,7 @@ public:
     /// 現在のステージの傾きに基づいて、プレイヤー等が滑る方向を取得
     /// </summary>
     /// <returns>滑る方向を示す正規化されたベクトル</returns>
-    DirectX::SimpleMath::Vector3 GetSlideDirection() const;
+    DirectX::SimpleMath::Vector3 GetSlideDirection(float x, float z) const;
 
     //面の向きを渡す用　影で使う
 
@@ -156,6 +233,26 @@ public:
     /// </summary>
     /// <returns>上を向いた法線ベクトル</returns>
     DirectX::SimpleMath::Vector3 GetNormal() const;
+
+    /// <summary>
+    /// 流氷の個別足場とオブジェの判定を調べる
+    /// </summary>
+    /// <param name="elapsedTime">前フレームからの経過時間</param>
+    /// <param name="x">X座標</param>
+    /// <param name="z">Z座標</param>
+    void ApplyDamegeToFloe(float elapsedTime, float x, float z);
+
+    /// <summary>
+	/// ステージ上の安全なリスポーン位置を見つける
+    /// </summary>
+    /// <param name="respawnHeight">リスポーン位置の高さ</param>
+    /// <param name="boudaryY">境界のY座標</param>
+    /// <param name="outPos">見つかったリスポーン位置を格納するベクトル</param>
+    /// <returns>安全なリスポーン位置が見つかった場合はtrue、見つからなかった場合はfalse</returns>
+    bool FindSafeRespawnPosition(
+        float respawnHeight,
+        float boundaryY,
+        DirectX::SimpleMath::Vector3& outPos) const;
 
 private:
 
@@ -179,7 +276,7 @@ private:
 
     std::unique_ptr<DirectX::CommonStates> m_states;
     std::unique_ptr<DirectX::Model> m_stageModel;
-    //std::unique_ptr<Imase::DebugCamera> m_camera;
+    
 
     DirectX::SimpleMath::Vector3 m_position;
 
@@ -189,6 +286,9 @@ private:
     // Z軸に対する回転角（ラジアン）
     float m_rotateZ;
 
+
+    //複数の流氷を管理する配列
+    std::vector<IceFloe> m_iceFloes;
 
     std::unique_ptr<DirectX::EffectFactory> m_effectFactory;
 

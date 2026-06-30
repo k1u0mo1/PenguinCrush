@@ -96,6 +96,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/Zc:__cplusplus /ZH:SHA_256 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -117,6 +118,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/Zc:__cplusplus /ZH:SHA_256 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,6 +143,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/Zc:__cplusplus /ZH:SHA_256 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -167,6 +170,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/Zc:__cplusplus /ZH:SHA_256 %(AdditionalOptions)</AdditionalOptions>
       <GuardEHContMetadata>true</GuardEHContMetadata>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -181,24 +185,31 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Game.h" />
-    <ClInclude Include="Game\AnimatorList\Animator.h" />
     <ClInclude Include="Game\Camera\DebugCamera.h" />
     <ClInclude Include="Game\Camera\PlayerCamera.h" />
     <ClInclude Include="Game\Collision\DisplayCollision.h" />
     <ClInclude Include="Game\Collision\ModelCollision.h" />
     <ClInclude Include="Game\Collision\Object.h" />
     <ClInclude Include="Game\Common\DeviceResources.h" />
+    <ClInclude Include="Game\Common\ObjectCharacter\CharacterBase.h" />
+    <ClInclude Include="Game\Common\ObjectCharacter\HitStop.h" />
+    <ClInclude Include="Game\Common\ObjectCharacter\ModelManager.h" />
     <ClInclude Include="Game\Common\ReadData.h" />
     <ClInclude Include="Game\Common\StepTimer.h" />
     <ClInclude Include="Game\Common\TransitionMask.h" />
     <ClInclude Include="Game\Effects\Particle.h" />
     <ClInclude Include="Game\Effects\Smoke.h" />
     <ClInclude Include="Game\EnemyList\BossEnemy.h" />
+    <ClInclude Include="Game\EnemyList\EnemyAI.h" />
     <ClInclude Include="Game\EnemyList\EnemyAttackList\AttackE.h" />
-    <ClInclude Include="Game\EnemyList\EnemyAttackList\BulletE.h" />
     <ClInclude Include="Game\EnemyList\EnemyAttackList\EnemyAttackBase.h" />
+    <ClInclude Include="Game\EnemyList\EnemyAttackList\EnemyAttackPattern.h" />
     <ClInclude Include="Game\EnemyList\EnemyAttackList\RushE.h" />
+    <ClInclude Include="Game\EnemyList\EnemyBase.h" />
+    <ClInclude Include="Game\EnemyList\EnemyBaseParameter.h" />
     <ClInclude Include="Game\EnemyList\EnemyManager.h" />
+    <ClInclude Include="Game\EnemyList\EnemyRenderer.h" />
+    <ClInclude Include="Game\EnemyList\NormalEnemy.h" />
     <ClInclude Include="Game\GimmickList\Fish.h" />
     <ClInclude Include="Game\GimmickList\FishManager.h" />
     <ClInclude Include="Game\GimmickList\GimmickManager.h" />
@@ -211,7 +222,6 @@
     <ClInclude Include="Game\PlayerList\AttackList\AttackBase.h" />
     <ClInclude Include="Game\PlayerList\AttackList\AttackManager.h" />
     <ClInclude Include="Game\PlayerList\AttackList\AttackP.h" />
-    <ClInclude Include="Game\PlayerList\AttackList\BulletP.h" />
     <ClInclude Include="Game\PlayerList\AttackList\RushP.h" />
     <ClInclude Include="Game\PlayerList\Player.h" />
     <ClInclude Include="Game\PlayerList\PlayerRenderer.h" />
@@ -220,8 +230,9 @@
     <ClInclude Include="Game\SceneList\ResultScene.h" />
     <ClInclude Include="Game\SceneList\SelectScene.h" />
     <ClInclude Include="Game\SceneList\StageLevel\LevelBase.h" />
-    <ClInclude Include="Game\SceneList\StageLevel\LevelStage1.h" />
-    <ClInclude Include="Game\SceneList\StageLevel\LevelStage2.h" />
+    <ClInclude Include="Game\SceneList\StageLevel\LevelEasy.h" />
+    <ClInclude Include="Game\SceneList\StageLevel\LevelHard.h" />
+    <ClInclude Include="Game\SceneList\StageLevel\LevelNormal.h" />
     <ClInclude Include="Game\SceneList\StageLevel\LevelTutorial.h" />
     <ClInclude Include="Game\SceneList\TitleScene.h" />
     <ClInclude Include="Game\ShadowRenderer\ShadowRenderer.h" />
@@ -240,20 +251,26 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="Game\AnimatorList\Animator.cpp" />
     <ClCompile Include="Game\Camera\DebugCamera.cpp" />
     <ClCompile Include="Game\Camera\PlayerCamera.cpp" />
     <ClCompile Include="Game\Collision\DisplayCollision.cpp" />
     <ClCompile Include="Game\Collision\ModelCollision.cpp" />
     <ClCompile Include="Game\Common\DeviceResources.cpp" />
+    <ClCompile Include="Game\Common\ObjectCharacter\CharacterBase.cpp" />
+    <ClCompile Include="Game\Common\ObjectCharacter\HitStop.cpp" />
+    <ClCompile Include="Game\Common\ObjectCharacter\ModelManager.cpp" />
     <ClCompile Include="Game\Common\TransitionMask.cpp" />
     <ClCompile Include="Game\Effects\Particle.cpp" />
     <ClCompile Include="Game\Effects\Smoke.cpp" />
     <ClCompile Include="Game\EnemyList\BossEnemy.cpp" />
+    <ClCompile Include="Game\EnemyList\EnemyAI.cpp" />
     <ClCompile Include="Game\EnemyList\EnemyAttackList\AttackE.cpp" />
-    <ClCompile Include="Game\EnemyList\EnemyAttackList\BulletE.cpp" />
+    <ClCompile Include="Game\EnemyList\EnemyAttackList\EnemyAttackPattern.cpp" />
     <ClCompile Include="Game\EnemyList\EnemyAttackList\RushE.cpp" />
+    <ClCompile Include="Game\EnemyList\EnemyBase.cpp" />
     <ClCompile Include="Game\EnemyList\EnemyManager.cpp" />
+    <ClCompile Include="Game\EnemyList\EnemyRenderer.cpp" />
+    <ClCompile Include="Game\EnemyList\NormalEnemy.cpp" />
     <ClCompile Include="Game\GimmickList\Fish.cpp" />
     <ClCompile Include="Game\GimmickList\FishManager.cpp" />
     <ClCompile Include="Game\GimmickList\SlideBehavior.cpp" />
@@ -263,7 +280,6 @@
     <ClCompile Include="Game\ObjectList\SkyDome.cpp" />
     <ClCompile Include="Game\PlayerList\AttackList\AttackManager.cpp" />
     <ClCompile Include="Game\PlayerList\AttackList\AttackP.cpp" />
-    <ClCompile Include="Game\PlayerList\AttackList\BulletP.cpp" />
     <ClCompile Include="Game\PlayerList\AttackList\RushP.cpp" />
     <ClCompile Include="Game\PlayerList\Player.cpp" />
     <ClCompile Include="Game\PlayerList\PlayerRenderer.cpp" />

@@ -1,0 +1,109 @@
+
+/**
+ * @file   LevelHard.h
+ * @brief  ハードステージの管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/22
+ */
+
+
+#pragma once
+#include "LevelBase.h"
+#include "Game/EnemyList/EnemyBaseParameter.h"
+
+#include "Game/WeatherList/Rain.h"
+#include "Game/WeatherList/Snow.h"
+#include "Game/SoundList/AudioManager.h"
+
+
+/// <summary>
+/// ハードステージの管理を行うクラス
+/// </summary>
+class LevelHard :public LevelBase
+{
+private:
+
+    //BGMの大きさ
+    static constexpr float DEFAULT_BGM_VOLUME = 0.2f;
+
+public:
+
+	/// <summary>
+	/// ハードステージの初期化
+	/// </summary>
+	/// <param name="deviceResources">デバイスリソース</param>
+	/// <param name="stageManager">ステージマネージャー</param>
+	/// <param name="enemyManager">エネミーマネージャー</param>
+	/// <param name="fishManager">魚（ギミック）マネージャー</param>
+	/// <param name="displayCollision">当たり判定の表示用</param>
+	void Initialize(
+        DX::DeviceResources* deviceResources,
+		StageManager* stageManager,
+		EnemyManager* enemyManager,
+		FishManager* fishManager,
+		/*GimmickManager* gimmickManager,*/
+        std::shared_ptr<DisplayCollision> /*displayCollision*/
+	)override
+	{
+        //ステージ共通の初期化
+        //LevelBase::Initialize(deviceResources, stageManager, enemyManager, fishManager, displayCollision);
+
+        //---------------------------------------
+        // 個別のステージの登録
+        //---------------------------------------
+
+        stageManager->AddStage(L"HardStage",
+            deviceResources->GetWindow(),
+            1280, 720,
+            "Resources\\Stages\\HardStage.bmp");
+
+        stageManager->SetCurrentStage(L"HardStage");
+
+       
+
+
+        //天候　2択
+        if (rand() % 2 == 0)
+        {
+            m_weather = std::make_unique<Rain>();
+        }
+        else
+        {
+            m_weather = std::make_unique<Snow>();
+        }
+
+        //天候の初期化
+        m_weather->Initialize(deviceResources->GetD3DDevice());
+
+
+        //ステージのBGM
+        AudioManager* audio = AudioManager::GetInstance();
+        audio->LoadSound("Stage1_BGM", L"Resources/Sounds/BGM_Game.wav");
+        audio->SetBGMVolume(DEFAULT_BGM_VOLUME);
+        audio->PlayBGM("Stage1_BGM");
+
+        //---------------------------------------
+        // 敵（ボス）
+        //---------------------------------------
+
+        //ボスを出す　hp設定
+        enemyManager->SpawnBoss();
+
+        //---------------------------------------
+        // 魚（ギミック）の配置
+        //---------------------------------------
+        
+        // 魚配置
+        fishManager->SetStage(stageManager->GetCurrentStage());
+	}
+
+    /// <summary>
+    /// ハードステージの更新
+    /// </summary>
+    /// <param name="dt">前フレームからの経過時間</param>
+    /// <param name="resources">ユーザーリソース</param>
+    void Update(float dt, UserResources* resources) override
+    {
+        LevelBase::Update(dt, resources);
+    }
+};

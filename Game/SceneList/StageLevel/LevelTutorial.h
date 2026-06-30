@@ -1,5 +1,11 @@
 
-//チュートリアル
+/**
+ * @file   LevelTutorial.h
+ * @brief  チュートリアルステージの管理とUI表示を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/22
+ */
+
 
 #pragma once
 #include "LevelBase.h"
@@ -8,6 +14,11 @@
 #include "WICTextureLoader.h"
 #include "SpriteBatch.h"
 #include "CommonStates.h"
+#include "Game/EnemyList/EnemyBaseParameter.h"
+
+#include "Game/WeatherList/Rain.h"
+#include "Game/WeatherList/Snow.h"
+#include "Game/SoundList/AudioManager.h"
 
 /// <summary>　
 /// チュートリアルステージの管理とUI表示を行うクラス
@@ -15,6 +26,13 @@
 class LevelTutorial :public LevelBase
 {
 private:
+
+	//BGMの大きさ
+	static constexpr float DEFAULT_BGM_VOLUME = 0.2f;
+
+	//敵が出る座標
+	static constexpr float ENEMY_POS_X = 10.0f;
+	static constexpr float ENEMY_POS_Z = 10.0f;
 
 	//表示フラグ
 	bool m_isShowHelp = true;
@@ -43,7 +61,7 @@ public:
 		EnemyManager* enemyManager,
 		FishManager* fishManager,
 		/*GimmickManager* gimmickManager,*/
-		std::shared_ptr<DisplayCollision> displayCollision
+		std::shared_ptr<DisplayCollision> /*displayCollision*/
 	)override
 	{
 		auto device = deviceResources->GetD3DDevice();
@@ -61,21 +79,48 @@ public:
 			m_textureUI.GetAddressOf()
 		);
 
-		//---------------------------------------
-		//  ステージ（地面）の設定
-		//---------------------------------------
-		stageManager->SetCurrentStage(L"DefaultStage");
+		//ステージ共通の初期化
+		//LevelBase::Initialize(deviceResources, stageManager, enemyManager, fishManager, displayCollision);
 
 		//---------------------------------------
-		// 敵の配置
+		// 個別のステージの登録
 		//---------------------------------------
-		// 敵の初期化（リセット）
-		enemyManager->Initialize(
-			deviceResources,
-			stageManager->GetCurrentStage(),
-			displayCollision
-		);
 
+		stageManager->AddStage(L"TutorialStage",
+			deviceResources->GetWindow(),
+			1280, 720,
+			"Resources\\Stages\\TutorialStage.bmp");
+
+		stageManager->SetCurrentStage(L"TutorialStage");
+
+
+
+		//天候　2択
+		if (rand() % 2 == 0)
+		{
+			m_weather = std::make_unique<Rain>();
+		}
+		else
+		{
+			m_weather = std::make_unique<Snow>();
+		}
+
+		//天候の初期化
+		m_weather->Initialize(deviceResources->GetD3DDevice());
+
+		//ステージのBGM
+		AudioManager* audio = AudioManager::GetInstance();
+		audio->LoadSound("Stage1_BGM", L"Resources/Sounds/BGM_Game.wav");
+		audio->SetBGMVolume(DEFAULT_BGM_VOLUME);
+		audio->PlayBGM("Stage1_BGM");
+
+		//敵の出現座標
+		const DirectX::SimpleMath::Vector3 enemySpawnPos(ENEMY_POS_X, 0.0f, ENEMY_POS_Z);
+
+		//敵の出現位置と敵の種類
+		enemyManager->SpawnNormalEnemy(enemySpawnPos,EnemyData::NormalEnemy);
+
+		
 		//---------------------------------------
 		// 魚（ギミック）の配置
 		//---------------------------------------
@@ -100,12 +145,27 @@ public:
 		}
 	}
 
+	
 	/// <summary>
 	/// チュートリアルレベルの描画
 	/// </summary>
-	/// <param name="resources">ユーザーリソース</param>
-	void Render(UserResources* /*resources*/) override
+	/// <param name="context"></param>
+	/// <param name="view"></param>
+	/// <param name="proj"></param>
+	/// <param name="camPos"></param>
+	void Render(
+		ID3D11DeviceContext* context,
+		const DirectX::SimpleMath::Matrix& view,
+		const DirectX::SimpleMath::Matrix& proj,
+		const DirectX::SimpleMath::Vector3& camPos
+	) override
 	{
+		UNREFERENCED_PARAMETER(context);
+		UNREFERENCED_PARAMETER(view);
+		UNREFERENCED_PARAMETER(proj);
+		UNREFERENCED_PARAMETER(camPos);
+		
+
 		//フラグがfalseなら何も描画しない
 		if (!m_isShowHelp) return;
 
@@ -123,26 +183,6 @@ public:
 			m_spriteBatch->End();
 
 		}
-
-		//auto debugFont = resources->GetDebugFont();
-
-		//// 説明文の描画
-		//float x = 900.0f;
-		//float y = 200.0f;
-		//float line = 30.0f;
-
-		//debugFont->AddString(L"=== TUTORIAL ===", DirectX::SimpleMath::Vector2(x, y));
-		//y += line;
-		//debugFont->AddString(L"[3] : Toggle Help", DirectX::SimpleMath::Vector2(x, y)); // 切り替えキーの説明
-		//y += line;
-		//debugFont->AddString(L"[W] [S] : Move", DirectX::SimpleMath::Vector2(x, y));
-		//y += line;
-		//debugFont->AddString(L"[MouseL] or [MouseR] : Attack", DirectX::SimpleMath::Vector2(x, y));
-		//y += line;
-		//debugFont->AddString(L"[W] + [Space] : Dash", DirectX::SimpleMath::Vector2(x, y));
-		//y += line;
 	}
-
-
 };
 

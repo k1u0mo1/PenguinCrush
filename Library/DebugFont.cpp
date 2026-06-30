@@ -1,5 +1,10 @@
 ﻿
-//デバッグフォントクラス
+/**
+ * @file   DebugFont.h
+ * @brief  デバッグ用のフォントクラス
+ * @author 國田知睦
+ * @date   2026/06/10
+ */
 
 #include "pch.h"
 #include "DebugFont.h"

@@ -1,4 +1,10 @@
-// RushE.h
+/**
+ * @file   RushE.h
+ * @brief  敵の突進攻撃クラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
+
 #pragma once
 
 #include "pch.h"
@@ -14,7 +20,7 @@
 
 #include "Game/EnemyList/EnemyAttackList/EnemyAttackBase.h"
 
-class BossEnemy;
+class EnemyBase;
 
 class RushE : public EnemyAttackBase
 {
@@ -41,6 +47,16 @@ private:
     //当たり判定のサイズ
     static constexpr float DEFAULT_BOUNDING_SIZE = 0.3f;
 
+    //コリジョンの当たり判定のサイズ
+    static constexpr DirectX::SimpleMath::Vector3 COLLISION_SIZE =
+        DirectX::SimpleMath::Vector3(1.0f, 1.5f, 1.0f);
+
+    //デバックの当たり判定の線の太さ
+    static constexpr float DEBUG_COLLISION_LINE_THICKNESS = 0.5f;
+
+    //サイズ
+    static constexpr float SCALE_SIZE = 1.0f;
+
 public:
 
     /// <summary>
@@ -52,8 +68,7 @@ public:
     /// <param name="displayCollision">デバッグ描画用</param>
     RushE(
         DX::DeviceResources* deviceResources,
-        /*const DirectX::SimpleMath::Vector3& playerPos,*/
-        BossEnemy* boss,
+        EnemyBase* enemy,
         const DirectX::SimpleMath::Vector3& forward,
         std::shared_ptr<DisplayCollision> displayCollision);
 
@@ -79,11 +94,11 @@ public:
     /// </summary>
     /// <returns>寿命（MAX_LIFETIME）を超えていれば</returns>
     bool IsDead() const override { return m_lifetime >= MAX_LIFETIME; }
-   
+
     /// <summary>
     /// 攻撃を強制的に終了
     /// </summary>
-    void SetDead() override { m_lifetime = MAX_LIFETIME; } 
+    void SetDead() override { m_lifetime = MAX_LIFETIME; }
 
     /// <summary>
     /// 攻撃が当たった時のノックバック力を取得
@@ -91,19 +106,19 @@ public:
     /// </summary>
     /// <returns>ノックバック力</returns>
     float GetKnockbackPower() const override { return KNOCKBACK_POWER; }
-    
+
     /// <summary>
     /// 当たり判定を取得
     /// </summary>
     /// <returns>モデルコリジョンのポインタ</returns>
     ModelCollision* GetCollision() const override { return m_collision.get(); }
-    
+
     /// <summary>
     /// 攻撃判定の現在のワールド座標を取得
     /// </summary>
     /// <returns>現在の座標</returns>
     DirectX::SimpleMath::Vector3 GetPosition() const override { return m_position; }
-    
+
     /// <summary>
     /// 攻撃の進行方向ベクトルを取得
     /// </summary>
@@ -138,14 +153,12 @@ private:
 
     //長さ
     float m_lifetime;
-    
 
-    
     std::unique_ptr<ModelCollisionOrientedBox> m_collision;
 
     std::shared_ptr<DisplayCollision> m_displayCollision;
 
-    //ボスへのポインタ
-    BossEnemy* m_boss;
+    //攻撃を行う敵のポインタ
+    EnemyBase* m_enemy;
 
 };

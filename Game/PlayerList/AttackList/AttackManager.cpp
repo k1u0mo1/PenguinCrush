@@ -1,9 +1,16 @@
-#include "pch.h"
 
+/**
+ * @file   AttackManager.cpp
+ * @brief  攻撃の管理クラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
+
+#include "pch.h"
 #include "Game/PlayerList/AttackList/AttackManager.h"
 #include "Game/PlayerList/Player.h"
 
-#include "Game/PlayerList/AttackList/BulletP.h"
+
 
 #include "Game/PlayerList/AttackList/AttackP.h"
 #include "Game/PlayerList/AttackList/RushP.h"
@@ -13,47 +20,7 @@
 //効果音
 #include "Game/SoundList/AudioManager.h"
 
-
-//-----------------------------------------------------------------
-// 遠距離攻撃（弾）を生成して発射
-//-----------------------------------------------------------------
-
-void AttackManager::Bullet(Player* player)
-{
-	using namespace DirectX::SimpleMath;
-
-	if (!m_bulletModel)
-	{
-		return;
-	}
-
-	//カメラ視線方向を取得
-	Vector3 eye = player->GetCamera()->GetEyePosition();
-	Vector3 target = player->GetCamera()->GetTargetPosition();
-	Vector3 dir = player->GetForward();
-	//dir.y = 0;
-	dir.Normalize();
-
-	//弾の生成位置
-	Vector3 spawnPos =
-		player->GetPosition() 
-		+ dir * SPAWN_FORWARD_DIST
-		+ Vector3(0, SPAWN_HEIGHT_OFFSET, 0);
-
-	auto bullet = std::make_shared<BulletP>(
-		spawnPos,
-		dir,
-		m_bulletModel,
-		m_states,
-		player->GetStage(),
-		player->GetDisplayCollision()
-	);
-
-	AddAttack(bullet);
-
-	//効果音
-	AudioManager::GetInstance()->Play("Bullet");
-}
+#include "Game/Common/ObjectCharacter/HitStop.h"
 
 //-----------------------------------------------------------------
 // 近距離攻撃を生成して実行
@@ -115,8 +82,9 @@ void AttackManager::AddAttack(std::shared_ptr<AttackBase> attack)
 
 void AttackManager::Update(
 	float dt,
-	std::vector<BossEnemy*>& enemies,
-	Particle* particle)
+	std::vector<EnemyBase*>& enemies,
+	Particle* particle,
+	HitStop* hitStop)
 {
 	for (auto& atk : m_attacks)
 	{
@@ -162,9 +130,13 @@ void AttackManager::Update(
 					//敵の座標を取得
 					DirectX::SimpleMath::Vector3 hitPos = enemy->GetPosition();
 					//高さ上げる
-					hitPos.y += 1.0f;
+					hitPos.y += HIT_EFFECT_HEIGHT;
 					//パーティクル生成
-					particle->Spawn(Particle::Type::Explosion, hitPos, 10, 0.1);
+					particle->Spawn(
+						Particle::Type::Explosion,
+						hitPos,
+						HIT_EFFECT_COUNT, 
+						HIT_EFFECT_SIZE);
 
 				}
 
@@ -172,24 +144,13 @@ void AttackManager::Update(
 				enemy->ApplyKnockback(knockbackDirection, basePower);
 				
 				//攻撃の種類を判別する変数
-				BossEnemy::PlayerAttackType type = BossEnemy::PlayerAttackType::None;
-				//ダメージを調整用 個別で変更可
-				float damage = 100.0f;
-
-				// 弾（BulletP）だった場合
-				if (dynamic_cast<BulletP*>(atk.get()))
-				{
-					//種類
-					type = BossEnemy::PlayerAttackType::Shoot;
-
-					//音
-					AudioManager::GetInstance()->Play("Dash");
-				}
+				PlayerAttackType type = PlayerAttackType::None;
+				
 				// 近接攻撃（AttackP）だった場合
-				else if (dynamic_cast<AttackP*>(atk.get()))
+				if (dynamic_cast<AttackP*>(atk.get()))
 				{
 					//種類
-					type = BossEnemy::PlayerAttackType::Attack;
+					type = PlayerAttackType::Attack;
 
 					//音
 					AudioManager::GetInstance()->Play("Attack");
@@ -198,7 +159,7 @@ void AttackManager::Update(
 				else if (RushP* rushAtk = dynamic_cast<RushP*>(atk.get()))
 				{
 					//種類
-					type = BossEnemy::PlayerAttackType::Rush;
+					type = PlayerAttackType::Rush;
 
 					//音
 					AudioManager::GetInstance()->Play("Dash");
@@ -212,13 +173,18 @@ void AttackManager::Update(
 						DirectX::SimpleMath::Vector3 bounceDir = -hitPlayer->GetForward();
 
 						//プレイヤーにノックバックを与える
-						hitPlayer->ApplyKnockback(bounceDir, 2.0f);
+						hitPlayer->ApplyKnockback(bounceDir, RUSH_KNOCKBACK_POWER);
 					}
 				}
 
+				if (hitStop)
+				{
+					//ヒットストップの開始
+					hitStop->StartHitStop(HIT_STOP_DURATION); 
+				}
 
 				//判別した種類で攻撃
-				enemy->TakeDamage(damage, type);
+				enemy->TakeDamage(ATTACK_DAMAGE, type);
 
 				//攻撃を消す
 				atk->SetDead();
@@ -255,14 +221,6 @@ void AttackManager::Render(
 	}
 }
 
-//-----------------------------------------------------------------
-// 弾の描画に使うモデルの設定
-//-----------------------------------------------------------------
-
-void AttackManager::SetBulletModel(std::shared_ptr<DirectX::Model> model)
-{
-	m_bulletModel = model;
-}
 
 //-----------------------------------------------------------------
 // 描画ステートを設定

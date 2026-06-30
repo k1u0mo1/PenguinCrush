@@ -1,3 +1,11 @@
+
+/**
+ * @file   BossEnemy.cpp
+ * @brief  ボスの管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/24
+ */
+
 #include "pch.h"
 #include "BossEnemy.h"
 #include <Effects.h>
@@ -6,8 +14,15 @@
 
 #include <Game/Effects/Particle.h>
 #include <Game/Effects/Smoke.h>
+#include "Game/EnemyList/EnemyRenderer.h"
+
+#include "Game/EnemyList/EnemyManager.h"
+#include "Game/EnemyList/EnemyAttackList/EnemyAttackPattern.h"
+#include "Game/EnemyList/EnemyBaseParameter.h"
+
 
 using namespace DirectX;
+
 
 //----------------------------------------------------------
 // ボスのインスタンスを生成
@@ -16,21 +31,34 @@ using namespace DirectX;
 BossEnemy::BossEnemy(
     DX::DeviceResources* deviceResources,
     const SimpleMath::Vector3& position,
-    float hp,
-    float speed,
-    std::shared_ptr<DisplayCollision> displayCollision
+    std::shared_ptr<DisplayCollision> displayCollision,
+    EnemyType type
 )
-    : m_deviceResources(deviceResources)
-    , m_position(position)
-    , m_hp(hp)
-    , m_maxHp(hp)
-    , m_speed(speed)
+    : EnemyBase(deviceResources,position,EnemyData::BossEnemy)
+    , m_deviceResources(deviceResources)
     , m_displayCollision(displayCollision)
     , m_isSmokeActive(false)
     , m_isLandingEffectDone(false)
     , m_smokeTimer(0.0f)
     , m_isGroundPrev(false)
     , m_isGroundNow(false)
+{
+
+    m_type = type;
+
+	//攻撃パターンの追加
+    m_attackPatterns.push_back(std::make_shared<MeleeAttackPattern>());
+	m_attackPatterns.push_back(std::make_shared<RushAttackPattern>());
+
+    m_meleeTimer = 0.0f;
+    m_rushTimer = 0.0f;
+}
+
+//----------------------------------------------------------
+// デストラクタ
+//----------------------------------------------------------
+
+BossEnemy::~BossEnemy()
 {
 }
 
@@ -42,31 +70,13 @@ void BossEnemy::Initialize()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
-    EffectFactory fx(device);
-    fx.SetDirectory(L"Resources\\Models");
-
-    m_model = Model::CreateFromSDKMESH(
-        device,
-        L"Resources\\Models\\Pen_Stand.sdkmesh",
-        fx
-    );
-
-    //各モデルのロード
-    m_modelIdle      = DirectX::Model::CreateFromSDKMESH(device, L"Resources\\Models\\Pen_Stand.sdkmesh", fx);
-    m_modelAttack    = DirectX::Model::CreateFromSDKMESH(device, L"Resources\\Models\\PenAttack.sdkmesh", fx);
-    m_modelShoot     = DirectX::Model::CreateFromSDKMESH(device, L"Resources\\Models\\Pen_Shoot.sdkmesh", fx);
-    m_modelRush      = DirectX::Model::CreateFromSDKMESH(device, L"Resources\\Models\\Pen_Rush.sdkmesh",  fx);
-    //回避時
-    m_modelAwakening = DirectX::Model::CreateFromSDKMESH(device, L"Resources\\Models\\Awakening.sdkmesh", fx);
-
-    //初期状態はIdle
-    m_currentModel = m_modelIdle.get();
-    m_state = EnemyState::Opening;
+    m_renderer = std::make_unique<EnemyRenderer>();
+	m_renderer->Initialize(device);
 
 
-    if (m_model)
+    if (m_renderer->GetMainModel())
     {
-        m_collision = std::make_unique<ModelCollisionOrientedBox>(m_model.get());
+        m_collision = std::make_unique<ModelCollisionOrientedBox>(m_renderer->GetMainModel());
     }
 
     m_states = std::make_unique<CommonStates>(device);
@@ -75,8 +85,7 @@ void BossEnemy::Initialize()
     //音の読み込み
     AudioManager::GetInstance()->LoadSound("AttackE", L"Resources/Sounds/E_近距離攻撃.wav");
     AudioManager::GetInstance()->LoadSound("DashE", L"Resources/Sounds/E_突進攻撃.wav");
-    AudioManager::GetInstance()->LoadSound("BulletE", L"Resources/Sounds/P_E_遠距離攻撃.wav");
-
+    
     AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/P_E_落水.wav");
 
     //エフェクト系
@@ -99,7 +108,9 @@ void BossEnemy::Initialize()
 void BossEnemy::Update(float deltaTime,
     const SimpleMath::Vector3& playerPosition,
     Stage* stage,
-    Particle* particle)
+    Particle* particle,
+	EnemyManager* enemyManager
+)
 {
     if (IsDead()) return;
 
@@ -113,14 +124,13 @@ void BossEnemy::Update(float deltaTime,
         {
             //止まるー＞通常にする
             m_state = EnemyState::Idle;
-            m_currentModel = m_modelIdle.get();
         }
     }
     
     //------------------------------------------------
     //AIによる思考処理
     //------------------------------------------------
-    UpdateAI(playerPosition);
+    UpdateAI(deltaTime, playerPosition, stage,particle,enemyManager);
 
     //------------------------------------------------
     //物理演算と移動処理
@@ -153,47 +163,14 @@ void BossEnemy::Update(float deltaTime,
         m_smokeTimer += deltaTime;
 
         //経過で消えるように
-        if (m_smokeTimer >= 1.0f)
+        if (m_smokeTimer >= SMOKE_DURATION)
         {
             m_isSmokeActive = false;
             
         }
     }
 
-    //------------------------------------------------
-    //落下時のリスポーン処理
-    //------------------------------------------------
-
-    //落下リスポーン処理
-    if (m_position.y < FALL_LIMIT_Y)
-    {
-
-        // 水しぶき
-        if (particle) // 引数で受け取っている前提
-        {
-            SimpleMath::Vector3 splashPos = m_position;
-            splashPos.y = 0.0f;
-            
-            //水しぶきの発生
-            particle->Spawn(Particle::Type::Splash, m_position, static_cast<int>(SPLASH_PARTICLE_COUNT));
-            
-        }
-
-        //復帰座標を設定
-        m_position = SimpleMath::Vector3(0.0f, RESPAWN_HEIGHT, 0.0f);
-
-        //挙動をリセット
-        m_velocity = SimpleMath::Vector3::Zero;
-        m_knockbackVelocity = SimpleMath::Vector3::Zero;
-        m_knockbackTimer = 0.0f;
-
-        TakeDamage(FALL_DAMAGE, PlayerAttackType::Attack);
-
-        //効果音
-        AudioManager::GetInstance()->Play("Fall");
-
-    }
-
+    
     //------------------------------------------------
     //当たり判定の座標更新
     //------------------------------------------------
@@ -201,7 +178,7 @@ void BossEnemy::Update(float deltaTime,
     if (m_collision)
     {
         SimpleMath::Matrix world =
-            SimpleMath::Matrix::CreateScale(MODEL_RENDER_SCALE)
+            SimpleMath::Matrix::CreateScale(m_param.scale)
             * SimpleMath::Matrix::CreateTranslation(m_position);
 
         m_collision->UpdateBoundingInfo(world);
@@ -221,56 +198,57 @@ void BossEnemy::Render(
 {
     if (IsDead()) return;
    
-    //
+	//モデルの回転行列を作る前に、X軸の回転行列を初期化
     SimpleMath::Matrix rotX = SimpleMath::Matrix::Identity;
-
-    //突進時に傾ける
-    if (m_state == EnemyState::Rush)
-    {
-        rotX = SimpleMath::Matrix::CreateRotationX(DirectX::XMConvertToRadians(-90.0f));
-    }
-
 
     // Y軸の回転行列 (計算した角度)
     SimpleMath::Matrix rotation = SimpleMath::Matrix::CreateRotationY(m_rotationY+DirectX::XM_PI);
 
-    // ワールド行列の作成: スケール -> 回転 -> 平行移動
-    SimpleMath::Matrix world =
-        SimpleMath::Matrix::CreateScale(MODEL_RENDER_SCALE) *
-        rotX *
-        rotation *
-        SimpleMath::Matrix::CreateTranslation(m_position);
+	//モデルの回転と拡大を組み合わせた行列
+	SimpleMath::Matrix combinedTransform = 
+        SimpleMath::Matrix::CreateScale(m_param.scale) *
+        rotX * 
+		rotation;
     
-    //モデルの描画
-    m_currentModel->Draw(context, *m_states, world, view, proj);
+	//モデルの描画
+    if (m_renderer)
+    {
+        m_renderer->Render(
+            context,
+            m_position,
+            m_forward,
+            m_state,
+            0.0f,
+            combinedTransform,
+            view,
+            proj,
+            nullptr, 
+            nullptr  
+        );
+    }
 
+    
     m_displayCollision->DrawCollision(
         context, m_states.get(), view, proj,
-        Colors::White, Colors::Blue, 0.15f
+        Colors::White, Colors::Blue, TRANSPARENCY
     );
-
-    //回避時　限定
-    if (m_consecutiveHitCount >= EVADE_HIT_THRESHOLD)
-    {
-        m_modelAwakening->Draw(context, *m_states, world, view, proj);
-    }
 
     //煙の描画
     if (m_isSmokeActive)
     {
-        // 時間経過に合わせて大きくする 
-        float scale = 3.0f + m_smokeTimer * SMOKE_GROWTH_RATE;
+        //時間経過に合わせて大きくする 
+        float scale = SMOKE_SCALE + m_smokeTimer * SMOKE_GROWTH_RATE;
 
-        // 時間経過に合わせて透明にする 
+        //時間経過に合わせて透明にする 
         float alpha = 1.0f - (m_smokeTimer / SMOKE_DURATION);
 
-        // 煙の描画実行
+        //煙の描画実行
         DirectX::SimpleMath::Vector3 drawPos = m_position;
         drawPos.y += SMOKE_Y_OFFSET;
 
+		//煙の描画実行
         m_smokeEffect->Render(view, proj, drawPos, scale, alpha);
 
-        
     }
 
 
@@ -300,13 +278,13 @@ void BossEnemy::TakeDamage(float amount, PlayerAttackType type)
     else
     {
         //違ったらカウントを戻す
-        m_consecutiveHitCount = 1;
+        m_consecutiveHitCount = EVADE_NOHIT_THRESHOLD;
         //最後に受けた攻撃のタイプ
         m_lastAttackType = type;
     }
 
     //回避発動 3回連続で同じ攻撃だったら
-    if (m_consecutiveHitCount >= 3)
+    if (m_consecutiveHitCount >= EVADE_HIT_THRESHOLD)
     {
         
         //回避状態へ
@@ -314,6 +292,21 @@ void BossEnemy::TakeDamage(float amount, PlayerAttackType type)
 
         return;
     }
+
+	//気絶状態でなければ攻撃回数をカウント
+    if (m_state != EnemyState::Dizzy)
+    {
+        m_playerAttackCounter++;
+
+        if (m_playerAttackCounter >= STUN_HIT_THRESHOLD)
+        {
+            m_playerAttackCounter = 0;
+
+			//気絶状態へ　何秒動けないか
+            SetState(EnemyState::Dizzy, STUN_TIME);
+        }
+    }
+
 
     //HPを減らす
     m_hp -= amount;
@@ -328,10 +321,13 @@ void BossEnemy::TakeDamage(float amount, PlayerAttackType type)
 
 void BossEnemy::ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float power)
 {
-    //敵へのノックバックは軽めに設定 
-    m_knockbackVelocity = direction * (power * KNOCKBACK_POWER_SCALE);
-    //ノックバック持続時間を適用
-    m_knockbackTimer = KNOCKBACK_DURATION;
+    //敵自身が受けるノックバックの倍率
+    //後ろに飛ぶ強さ
+    m_knockbackVelocity = direction * power * m_param.receivedKnockbackPowerMultiplier;
+    //上に飛ぶ強さ
+    m_knockbackVelocity.y = m_param.receivedKnockbackUpwardForce;
+    //ノックバック後の硬直
+    m_knockbackTimer = m_param.receivedKnockbackDuration;
 
 }
 
@@ -339,8 +335,17 @@ void BossEnemy::ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, fl
 // AIの思考処理
 //----------------------------------------------------------
 
-void BossEnemy::UpdateAI(const DirectX::SimpleMath::Vector3& playerPos)
+void BossEnemy::UpdateAI(
+    float dt,
+    const DirectX::SimpleMath::Vector3& playerPos,
+    Stage* stage,
+    Particle* /*particle*/,
+    EnemyManager* enemyManager)
 {
+	//攻撃のクールダウンタイマーを減らす
+    if (m_meleeTimer > 0.0f) m_meleeTimer -= dt;
+    if (m_rushTimer > 0.0f)  m_rushTimer -= dt;
+
     //毎フレームの最初は歩かない状態にリセット
     m_targetVelocity = DirectX::SimpleMath::Vector3::Zero;
 
@@ -351,14 +356,15 @@ void BossEnemy::UpdateAI(const DirectX::SimpleMath::Vector3& playerPos)
     }
 
     //プレイヤーへの方向ベクトルを計算
-    DirectX::SimpleMath::Vector3 dirToPlayer = playerPos - m_position;
-    dirToPlayer.y = 0.0f;
+    float dist = DirectX::SimpleMath::Vector3::Distance(m_position, playerPos);
+	DirectX::SimpleMath::Vector3 forward = playerPos - m_position;
+    forward.y = 0.0f;
 
     //プレイヤーの方を向く
-    if (dirToPlayer.LengthSquared() > 0.0001f)
+    if (forward.LengthSquared() > VECTOR_EPSILON)
     {
-        //atan2でZ軸回転角度を求める
-        m_rotationY = std::atan2(dirToPlayer.x, dirToPlayer.z);
+		//向きベクトルを正規化して角度を計算
+        forward.Normalize();
     }
 
     //ノックバック中か
@@ -374,13 +380,51 @@ void BossEnemy::UpdateAI(const DirectX::SimpleMath::Vector3& playerPos)
     case EnemyState::Idle:
     {
         //プレイヤーとの距離が一定以上離れていたら近づく
-        if (dirToPlayer.LengthSquared() > (STOP_DISTANCE * STOP_DISTANCE))
-        {
-            //純粋な向きだけにする
-            dirToPlayer.Normalize();
+        if (dist > STOP_DISTANCE)
+        { 
+            if (m_enemyAI)
+            {
+                m_enemyAI->UpdateAI(
+                    dt,
+                    m_position,
+                    playerPos,
+                    stage,
+                    m_param.speed,
+                    m_targetVelocity,
+                    m_rotationY
+                );
 
-            //歩きたい速度をセット
-            m_targetVelocity = dirToPlayer * m_speed;
+            }
+        }
+        else
+        {
+            //プレイヤーに近づきすぎないようにする
+            if (forward.LengthSquared() > VECTOR_EPSILON)
+            {
+                m_rotationY = std::atan2(forward.x, forward.z);
+            }
+        }
+
+        
+		//攻撃のクールダウンが終わっていて、プレイヤーが近ければ攻撃する
+        if (enemyManager && !m_attackPatterns.empty())
+        {
+			//近距離攻撃と突進攻撃の切り替え距離を設定
+            if (dist < ATTACK_SWITCH_DISTANCE && m_meleeTimer <= 0.0f)
+            {
+				m_attackPatterns[0]->Execute(this, forward, enemyManager);
+
+                SetState(EnemyState::Attack, ATTACK_DURATION);
+                m_meleeTimer = ATTACK_TIMER;
+            }
+			//プレイヤーと少し遠ければ突進攻撃
+            else if (dist < RUSH_SWITCH_DISTANCE && m_rushTimer <= 0.0f)
+            {
+                m_attackPatterns[1]->Execute(this, forward, enemyManager);
+
+				SetState(EnemyState::Rush, ATTACK_DURATION);
+                m_rushTimer = RUSH_TIMER;
+            }
         }
         break;
 
@@ -388,48 +432,40 @@ void BossEnemy::UpdateAI(const DirectX::SimpleMath::Vector3& playerPos)
     //攻撃中はAIは何もしない
     case EnemyState::Rush:
     case EnemyState::Attack:
-    case EnemyState::Shoot:
     default:
         break;
+
+	//回避状態の行動パターン
+    case EnemyState::Avoid:
+    {
+        //プレイヤーから見て右方向を計算
+        DirectX::SimpleMath::Vector3 rightDir =
+            DirectX::SimpleMath::Vector3::Up.Cross(forward);
+
+        //右方向に歩く
+        m_targetVelocity = rightDir/* * (m_speed * 1.5f)*/;
+		break;
+    }
     }
 
-
 }
+
+
 
 //----------------------------------------------------------
 // 敵の物理演算と移動
 //----------------------------------------------------------
 
-void BossEnemy::UpdatePhysics(Stage* stage, float dt)
+void BossEnemy::UpdatePhysics(Stage* stage, float dt, Particle* particle)
 {
-    //------------------------------------------------
-    //ノックバック処理
-    //------------------------------------------------
-    if (m_knockbackTimer > 0.0f)
-    {
-        m_knockbackTimer -= dt;
-
-        //ノックバックの強制的な速度を座標に足す
-        m_position += m_knockbackVelocity * dt;
-
-        //摩擦を掛けてノックバックの威力を落とす
-        m_knockbackVelocity -= m_knockbackVelocity * KNOCKBACK_DRAG * dt;
-
-        //勢いがほとんどなくなったら停止
-        if (m_knockbackVelocity.LengthSquared() < 0.01f)
-        {
-            m_knockbackVelocity = DirectX::SimpleMath::Vector3::Zero;
-        }
-    }
-
-    //------------------------------------------------
-    //重力の適用
-    //------------------------------------------------
     
-    //落下速度を重力加速度を足す
-    m_velocity.y += m_gravity * dt;
-    //Y座標を更新
-    m_position.y += m_velocity.y * dt;
+
+    CharacterBase::UpdatePhysice(dt, stage);
+
+    if(stage)
+    {
+        CheckAndHandleFalling(stage, particle);
+	}
 
     //------------------------------------------------
     //ステージの傾きとAIの歩行速度の結合
@@ -438,7 +474,8 @@ void BossEnemy::UpdatePhysics(Stage* stage, float dt)
     if (stage)
     {
         //ステージから現在の傾きを取得
-        DirectX::SimpleMath::Vector3 slideDir = stage->GetSlideDirection();
+        DirectX::SimpleMath::Vector3 slideDir = 
+            stage->GetSlideDirection(m_position.x,m_position.z);
 
         //自発的な移動と波の傾きを渡し、座標を更新
         m_slideBehavior.Update(m_position, m_targetVelocity, slideDir, dt);
@@ -450,11 +487,7 @@ void BossEnemy::UpdatePhysics(Stage* stage, float dt)
         //足場より下、かつ足場の底より上なら着地
         if (m_position.y<groundY && groundY>STAGE_BOUNDARY_Y)
         {
-            //地面の上を押し上げる
-            m_position.y = groundY - GROUND_HEIGHT_OFFSET;
-
-            //落下速度をリセット
-            m_velocity.y = 0.0f;
+            
 
             //ノックバックをリセット
             m_knockbackVelocity.y = 0.0f;
@@ -463,17 +496,14 @@ void BossEnemy::UpdatePhysics(Stage* stage, float dt)
             if (m_state == EnemyState::Opening)
             {
                 m_state = EnemyState::Loading;
-                m_currentModel = m_modelIdle.get();
+                
             }
         }
-    }
-    //ステージ情報が取れなかった場合の簡易的な着地判定
-    else if (m_position.y <= STAGE_BOUNDARY_Y)
-    {
-        m_position.y = STAGE_BOUNDARY_Y + GROUND_HEIGHT_OFFSET;
 
-        m_velocity.y = 0.0f;
+		//落下の判定と処理
+		CheckAndHandleFalling(stage, nullptr);
     }
+    
 }
 
 //----------------------------------------------------------
@@ -482,34 +512,7 @@ void BossEnemy::UpdatePhysics(Stage* stage, float dt)
 
 void BossEnemy::SetState(EnemyState state, float duration)
 {
+	//状態を変更
     m_state = state;
     m_stateTimer = duration;
-
-    switch (m_state)
-    {
-        //上から落ちてきている
-    case EnemyState::Opening:
-        m_currentModel = m_modelIdle.get();
-        break;
-        //着地後止まる
-    case EnemyState::Loading:
-        m_currentModel = m_modelIdle.get();
-        break;
-        //通常
-    case EnemyState::Idle:  
-        m_currentModel = m_modelIdle.get(); 
-        break;
-        //叩く
-    case EnemyState::Attack:
-        m_currentModel = m_modelAttack.get();
-        break;
-        //発射
-    case EnemyState::Shoot:
-        m_currentModel = m_modelShoot.get();
-        break;
-        //突進
-    case EnemyState::Rush: 
-        m_currentModel = m_modelRush.get(); 
-        break;
-    }
 }

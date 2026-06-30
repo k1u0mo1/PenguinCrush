@@ -1,3 +1,11 @@
+
+/**
+ * @file   GameUI.cpp
+ * @brief  画面のプレイヤーと敵のUIを表示を管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/17
+ */
+
 #include "pch.h"
 #include "GameUI.h"
 
@@ -31,7 +39,7 @@ void GameUI::Initialize()
     
     CreateWICTextureFromFile(
         device,
-        L"Resources\\Textures\\White.png",
+        TEX_PATH_WHITE,
         nullptr,
         m_texture.GetAddressOf()
     );
@@ -43,8 +51,7 @@ void GameUI::Initialize()
 
 void GameUI::Render(Player* player, BossEnemy* boss)
 {
-    /*auto context = m_deviceResources->GetD3DDeviceContext();*/
-
+    
     // 画面サイズを取得
     RECT rectSize = m_deviceResources->GetOutputSize();
     /*float screenWidth = static_cast<float>(rectSize.right - rectSize.left);*/
@@ -61,11 +68,9 @@ void GameUI::Render(Player* player, BossEnemy* boss)
     {
         // 座標の計算 
         // HP
-        Vector2 hpPos = { 50.0f, screenHeight - 90.0f };
+        Vector2 hpPos = { PLAYER_UI_X, screenHeight - PLAYER_HP_BOTTOM_OFFSET };
         // スタミナ
-        Vector2 stPos = { 50.0f, screenHeight - 50.0f };
-        // 弾数
-        Vector2 amPos = { 50.0f, screenHeight - 20.0f };
+        Vector2 stPos = { PLAYER_UI_X, screenHeight - PLAYER_STAMINA_BOTTOM_OFFSET };
 
         // ---------------------------------------------------
         // プレイヤーのHPバー (画面左下)
@@ -73,19 +78,19 @@ void GameUI::Render(Player* player, BossEnemy* boss)
         //背景（黒）
         DrawBar(
             hpPos,
-            100, 
-            100,
+            BAR_FULL,
+            BAR_FULL,
             Color(Colors::Black),
-            { 300,30 }
+            PLAYER_HP_SIZE
         );
 
         // HP（緑）
         DrawBar(
             hpPos,
             player->GetHP(),
-            300.0f, // 100.0fは最大HP
+            PLAYER_MAX_HP,
             Color(Colors::Lime),
-            { 300, 30 }
+            PLAYER_HP_SIZE
         ); 
 
         // ---------------------------------------------------
@@ -95,59 +100,20 @@ void GameUI::Render(Player* player, BossEnemy* boss)
         // スタミナ（黄色） - HPの下に表示する
         DrawBar(
             stPos,
-            100,
-            100,
+            BAR_FULL,
+            BAR_FULL,
             Color(Colors::Black),
-            { 200, 20 }
+            PLAYER_STAMINA_SIZE
         );
 
         DrawBar(
             stPos,
             player->GetStamina(),
-            100.0f,
+            player->GetMaxStamina(),
             Color(Colors::Yellow),
-            { 200, 20 }
+            PLAYER_STAMINA_SIZE
         );
 
-        // ---------------------------------------------------
-        // プレイヤーの弾数バー (画面左下)
-        // ---------------------------------------------------
-        //現在の弾数
-        int currentAmmo = player->GetAmmo();
-        //最大弾数
-        int maxAmmo = player->GetMaxAmmo();
-
-        //１発当たりのサイズと間隔
-        float bulletWidth = 10.0f; //幅
-        float bulletHeight = 15.0f;//高さ
-        float gap = 4.0f;          //間隔 
-
-        for (int i = 0; i < maxAmmo; ++i)
-        {
-            // 描画位置を計算（横にずらしていく）
-            Vector2 drawPos = amPos;
-            drawPos.x += i * (bulletWidth + gap);
-
-            DirectX::SimpleMath::Color color;
-            if (i < currentAmmo)
-            {
-                // 残っている弾の色
-                color = DirectX::Colors::Blue; 
-            }
-            else
-            {
-                // 空きスロットの色
-                color = DirectX::Colors::Gray * 0.3f;
-
-            }
-
-            DrawBar(
-                drawPos,
-                1.0f, 1.0f,    // 常に満タン扱いにしてサイズを固定する
-                color,
-                { bulletWidth, bulletHeight }
-            );
-        }
     }
 
     //---------------------------------------------------
@@ -161,21 +127,21 @@ void GameUI::Render(Player* player, BossEnemy* boss)
         // 画面中央計算
         RECT size = m_deviceResources->GetOutputSize();
         float centerX = (size.right - size.left) / 2.0f;
-        Vector2 pos = { centerX - 200.0f, 10.0f }; // 中央から左にずらす
+        Vector2 pos = { centerX - (BOSS_HP_SIZE.x/2.0f), BOSS_HP_Y}; // 中央から左にずらす
 
         // 背景
         DrawBar(pos, 
-            1.0f,
-            1.0f,
+            BAR_FULL,
+            BAR_FULL,
             Color(Colors::Black), 
-            { 400, 30 }
+            BOSS_HP_SIZE
         );
         // HP（赤）
         DrawBar(pos,
             boss->GetHP(),
             bossMaxHP,
             Color(Colors::Red), 
-            { 400, 30 }
+            BOSS_HP_SIZE
         );
     }
 

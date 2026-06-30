@@ -1,6 +1,10 @@
-//
-// RushP.cpp
-//
+
+/**
+ * @file   RushP.cpp
+ * @brief  プレイヤーの突進攻撃を管理するクラスの実装
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
 
 #include "pch.h"
 #include "RushP.h"
@@ -24,20 +28,20 @@ RushP::RushP(
 	std::shared_ptr<DisplayCollision> displayCollision)
 
 	: m_deviceResources(deviceResources)
-	//, m_forward(forward)
 	, m_lifetime(0.0f)
 	, m_displayCollision(displayCollision)
 	, m_player(player)
 {
-	/*auto device = m_deviceResources->GetD3DDevice();*/
-
+	
 	//コピー
 	m_forward = forward;
 	//水平に
 	m_forward.y = 0.0f;
-	if (m_forward.LengthSquared() < 0.001f)
+
+	
+	if (m_forward.LengthSquared() < EPSILON)
 	{
-		m_forward = DirectX::SimpleMath::Vector3(0.0f, 0.0f, 1.0f);
+		m_forward = FORWARD;
 	}
 
 	m_forward.Normalize();
@@ -50,7 +54,7 @@ RushP::RushP(
 	//当たり判定の作成
 	m_collision = std::make_unique<ModelCollisionOrientedBox>();
 	m_collision->SetCenter(m_position);
-	m_collision->SetExtents(SimpleMath::Vector3(1.0f, 1.5f, 1.0f));
+	m_collision->SetExtents(DEFAULT_BOX_SIZE);
 
 	//回転を進行方向に合わせる
 	//float angle = atan2(m_forward.x, m_forward.z);
@@ -69,13 +73,12 @@ void RushP::Update(float deltaTime)
 	m_lifetime += deltaTime;
 
 	//プレイヤー本体を移動
-	float speed = 25.0f;
 	SimpleMath::Vector3 currentPos = m_player->GetPosition();
 
 	SimpleMath::Vector3 nextPos = currentPos;
 
-	nextPos.x += m_forward.x * speed * deltaTime;
-	nextPos.z += m_forward.z * speed * deltaTime;
+	nextPos.x += m_forward.x * RUSH_SPEED * deltaTime;
+	nextPos.z += m_forward.z * RUSH_SPEED * deltaTime;
 
 	//プレイヤーの位置を更新
 	m_player->SetPosition(nextPos);
@@ -101,7 +104,7 @@ void RushP::Render(
 {
 
 	SimpleMath::Matrix world = 
-		SimpleMath::Matrix::CreateScale(1.0f) *
+		SimpleMath::Matrix::CreateScale(SCALE_SIZE) *
 		SimpleMath::Matrix::CreateTranslation(m_position);
 
 	//当たり判定
@@ -113,7 +116,9 @@ void RushP::Render(
 		// DisplayCollision に登録された情報を描画（色は赤を設定）
 		m_displayCollision->DrawCollision(
 			context, m_states.get(), view, proj,
-			DirectX::Colors::Red, DirectX::Colors::DarkRed, 0.5f
+			DirectX::Colors::Red,
+			DirectX::Colors::DarkRed, 
+			DEBUG_COLLISION_LINE_THICKNESS
 		);
 	}
 
@@ -153,7 +158,7 @@ DirectX::BoundingBox RushP::GetBoundingBox() const
 	{
 		// デフォルト小さい箱
 		box.Center = m_position;
-		box.Extents = DirectX::SimpleMath::Vector3(0.3f, 0.3f, 0.3f);
+		box.Extents = DEFAULT_BOX_SIZE;
 	}
 	return box;
 }

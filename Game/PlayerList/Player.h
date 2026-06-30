@@ -1,15 +1,21 @@
 
-//プレイヤーのクラス
+/**
+ * @file   Player.h
+ * @brief  プレイヤーキャラクターの制御・パラメータ管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
+
 #pragma once
 
 #include "pch.h"
 #include <DirectXMath.h>
 #include <memory>
 #include "Game/Common/DeviceResources.h"
-
 #include "PlayerStats.h"
 #include "Game/Collision/DisplayCollision.h"
 #include "Game/GimmickList/SlideBehavior.h"
+#include "Game/Common/ObjectCharacter/CharacterBase.h"
 
 class PlayerRenderer;
 class Stage;
@@ -22,7 +28,7 @@ class Animator;
 class ModelCollision;
 class ModelCollisionOrientedBox;
 
-class Player
+class Player : public CharacterBase
 {
 public:
 
@@ -33,7 +39,6 @@ public:
     {
         Idle,            //通常
         Attack,          //近距離攻撃
-        Shoot,           //遠距離攻撃
         Rush,            //突進
         Dizzy            //攻撃後のふらつき
     };
@@ -41,6 +46,11 @@ public:
 private:
 
     //定数系
+
+    //プレイヤーの初期座標
+	static constexpr float PLAYER_START_POSITION_X = -10.0f;
+	static constexpr float PLAYER_START_POSITION_Y =   0.3f;
+	static constexpr float PLAYER_START_POSITION_Z = -10.0f;
 
     //移動関連
 	//通常移動の速度
@@ -59,41 +69,51 @@ private:
     static constexpr float RESPAWN_THRESHOLD_Y = -15.0f;
 
     //ダメージ・効果
-	//落下ダメージ
-    static constexpr float FALL_DAMAGE = 20.0f;
 	//ダメージを受けたときの無敵時間
     static constexpr float DIZZY_EFFECT_ROT_SPEED = 2.0f;
 	//水しぶきのエフェクトの高さ
     static constexpr int SPLASH_OF_WATER = 50;
+	//リスポーンする高さ
+	static constexpr float RESPAWN_HEIGHT = 10.0f;
 
     //状態タイマー・クールタイム
 	//攻撃後のふらつき時間
     static constexpr float STATE_TIMER_DIZZY = 2.0f;
 	//攻撃のモーション時間
     static constexpr float STATE_TIMER_ATTACK = 0.4f;
-	//遠距離攻撃のモーション時間
-    static constexpr float STATE_TIMER_SHOOT = 0.5f;
 	//クールタイム
     static constexpr float ATTACK_COOLDOWN = 0.5f;
 
     //スタミナ関連
 	//近距離攻撃で必要な最低スタミナ量
     static constexpr float STAMINA_REQ_ATTACK = 10.0f;
-	//遠距離攻撃で必要な最低スタミナ量
-    static constexpr float STAMINA_REQ_SHOOT = 15.0f;
 	//突進攻撃で必要な最低スタミナ量
     static constexpr float STAMINA_REQ_RUSH = 20.0f;
 	//攻撃に必要なスタミナ
     static constexpr float STAMINA_COST_ATTACK = 15.0f;
-	//遠距離攻撃に必要なスタミナ
-    static constexpr float STAMINA_COST_SHOOT = 5.0f;
 	//ダッシュに必要なスタミナ
-    static constexpr float STAMINA_COST_DASH = 5.0f;
+    static constexpr float STAMINA_COST_DASH = 15.0f;
 	//突進に必要なスタミナ
     static constexpr float STAMINA_COST_RUSH = 5.0f;
+	
+    //ノックバック関連
+    //吹っ飛ぶ強さ
+    static constexpr float KNOCKBACK_POWER_SCALE = 10.0f;
+    //吹き飛ぶ時に上方向への力
+    static constexpr float KNOCKBACK_UP_FORCE = 50.0f;
+    //ノックバックの持続時間
+    static constexpr float KNOCKBACK_DURATION = 0.2f;
 
-	//突進の角度
-    static constexpr float RUSH_ANGLE = -90.0f;
+    //ダッシュ時の高さ
+	static constexpr float DASH_HEIGHT = 0.5f;
+	//ダッシュ時のエフェクトの数
+	static constexpr int DASH_EFFECT_NUM = 5;
+	//ダッシュエフェクトのサイズ
+	static constexpr float DASH_EFFECT_SIZE = 0.5f;
+
+	//当たり判定の線の太さ
+    static constexpr float COLLISION_LINE_THICKNESS = 0.1f;
+    
 
 public:
 
@@ -157,29 +177,10 @@ public:
     );
 
     /// <summary>
-    /// どの攻撃かをもらう
+    /// どの攻撃かをもらうか判別
     /// </summary>
     /// <param name="attackManager">攻撃マネージャーのポインタ</param>
     void SetAttackManager(AttackManager* attackManager) { m_attackManager = attackManager; }
-
-    //攻撃関連
-
-    /// <summary>
-    /// 弾の弾数はあるのか？
-    /// </summary>
-    /// <returns>弾が撃てる状態なら true、撃てないなら false<</returns>
-    bool CanShoot() const { return m_stats.ammo > 0; }
-
-    /// <summary>
-    /// 弾の発射
-    /// </summary>
-    void ShootBullet() { m_stats.UseAmmo(); }
-
-    /// <summary>
-    /// プレイヤーの座標を取得
-    /// </summary>
-    /// <returns>現在の座標</returns>
-    DirectX::SimpleMath::Vector3 GetPosition() const { return m_position; }
 
     /// <summary>
     /// ステージの情報を取得
@@ -259,18 +260,12 @@ public:
     /// </summary>
     /// <returns>現在のスタミナ</returns>
     float GetStamina() const { return m_stats.stamina; }
-
+   
     /// <summary>
-    /// 弾数を取得用
+    /// 最大のスタミナを取得
     /// </summary>
-    /// <returns>現在の弾数</returns>
-    int GetAmmo() const { return m_stats.ammo; }
-
-    /// <summary>
-    /// 最大弾数を取得
-    /// </summary>
-    /// <returns>最大弾数</returns>
-    int GetMaxAmmo() const { return m_stats.ammo_Max; }
+    /// <returns>最大のスタミナ</returns>
+    float GetMaxStamina() const { return m_stats.stamina_Max; }
 
     //-------------------------------------------------
 
@@ -286,19 +281,6 @@ public:
     /// </summary>
     /// <returns>魚の当たり判定</returns>
     ModelCollision* GetCollision() const;
-
-    /// <summary>
-    /// 弾薬を補充
-    /// </summary>
-    /// <param name="value">補充する弾数</param>
-    void AddAmmo(int value)
-    {
-        // 弾を増やす
-        m_stats.ammo = std::min(m_stats.ammo + value, m_stats.ammo_Max);
-
-        //効果音
-        AudioManager::GetInstance()->Play("Reload");
-    }
 
     /// <summary>
     /// プレイヤーにダメージ
@@ -353,6 +335,37 @@ public:
 
 private:
 
+	/// <summary>
+	/// プレイヤーの落下判定のY座標を取得
+	/// </summary>
+	/// <returns>落下判定のY座標</returns>
+	float GetFallLimitY() const override { return STAGE_BOUNDARY_Y; }
+
+	/// <summary>
+	/// プレイヤーのリスポーンするY座標を取得
+	/// </summary>
+	/// <returns>リスポーンするY座標</returns>
+	float GetFallDamage() const override { return CharacterBase::FALL_DAMAGE; }
+
+    /// <summary>
+	/// プレイヤーのリスポーン位置を取得
+    /// </summary>
+    /// <returns>リスポーン位置</returns>
+    DirectX::SimpleMath::Vector3 GetRespawnPosition() const override
+    {
+        return DirectX::SimpleMath::Vector3(0.0f, RESPAWN_HEIGHT, 0.0f);
+	}
+
+    /// <summary>
+    /// 落下ダメージを適用 ダメージ調整はCharacterBase
+    /// </summary>
+    void ExecuteFallDamage() override 
+    {
+        TakeDamage(GetFallDamage());
+    }
+
+private:
+
     DX::DeviceResources* m_deviceResources;
 
     std::shared_ptr<DisplayCollision> m_displayCollision;
@@ -370,15 +383,12 @@ private:
     std::unique_ptr<DirectX::CommonStates> m_states;
     std::shared_ptr<DirectX::Model> m_model;
 
-    DirectX::SimpleMath::Vector3 m_position = { 0,0,0 };
+    
     DirectX::SimpleMath::Vector3 m_forward = { 0,0,1 };
 
     bool m_isDashing = false;
 
-    DirectX::SimpleMath::Vector3 m_velocity = { 0,0,0 };
-
-    //重力
-    float m_gravity = -100.8f;
+    
 
     // Optional: スライド移動用
     DirectX::SimpleMath::Vector3 m_slideVelocity = { 0,0,0 };
@@ -388,21 +398,12 @@ private:
     //プレイヤーの現在の回転行列を保持する
     DirectX::SimpleMath::Matrix m_rotationMatrix = DirectX::SimpleMath::Matrix::Identity;
 
-    //ノックバック用
-    DirectX::SimpleMath::Vector3 m_knockbackVelocity = { 0, 0, 0 };
-    //ノックバック持続タイマー
-    float m_knockbackTimer = 0.0f;
-    //速度減衰率
-    const float KNOCKBACK_DRAG = 10.0f;
-
     //攻撃の連射防止用タイマー
     float m_attackCoolTime = 0.0f;
 
 private:
 
-    //アニメーション　まだ実装未定
-    std::unique_ptr<Animator> m_animator;
-
+    
 	//プレイヤーの描画クラス
     std::unique_ptr<PlayerRenderer> m_renderer;
 

@@ -1,6 +1,10 @@
 
-//GimmickManager.h
-//ギミック全体を管理
+/**
+ * @file   GimmickManager.h
+ * @brief  ゲーム内のギミックを一括で保持、更新、描画、管理するクラス
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
 
 #pragma once
 #include <vector>
@@ -64,6 +68,7 @@ public:
 			g->Render(context, view, proj);
 		}
 	}
+
 
 	/// <summary>
 	/// 登録されているギミックの中から、指定したクラスのギミックを検索して取得

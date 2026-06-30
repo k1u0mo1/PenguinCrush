@@ -1,5 +1,10 @@
 ﻿
-//タイトルシーンクラス
+/**
+ * @file   TitleScene.h
+ * @brief  タイトル画面の初期化・更新・描画を管理するシーンクラス
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
 
 #include "pch.h"
 #include "TitleScene.h"
@@ -35,8 +40,8 @@ void TitleScene::Initialize()
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 
-	//カーソルリセット
-	m_currentCursor = 0;
+	//カーソルの位置をリセット
+	m_currentCursor = MenuType::Start;
 
 	// フェードイン
 	GetUserResources()->GetTransitionMask()->Open();
@@ -64,23 +69,32 @@ void TitleScene::Update(float elapsedTime)
 		m_waveManager->ToggleMode();
 	}
 
+
+	//計算しやすいようにintに変換
+	//カーソルの位置
+	int cursorInt = static_cast<int>(m_currentCursor);
+	//カーソルの最大値
+	int maxCount = static_cast<int>(MenuType::Count);
+
 	// --- カーソル移動 ---
 	if (input->kbTracker.pressed.Up || input->kbTracker.pressed.W)
 	{
 		//移動音
 		AudioManager::GetInstance()->Play("SE_Move");
-
-		m_currentCursor--;
-		if (m_currentCursor < 0) m_currentCursor = 1;
+		//↑
+		cursorInt = (cursorInt - 1 + maxCount) % maxCount;
 	}
 	if (input->kbTracker.pressed.Down || input->kbTracker.pressed.S)
 	{
 		//移動音
 		AudioManager::GetInstance()->Play("SE_Move");
-
-		m_currentCursor++;
-		if (m_currentCursor > 1) m_currentCursor = 0;
+		//↓
+		cursorInt = (cursorInt + 1) % maxCount;
 	}
+
+	//計算したintを戻す
+	m_currentCursor = static_cast<MenuType>(cursorInt);
+
 
 	auto transitionMask = GetUserResources()->GetTransitionMask();
 
@@ -100,7 +114,8 @@ void TitleScene::Update(float elapsedTime)
 		//決定音
 		AudioManager::GetInstance()->Play("SE_Click");
 
-		if (m_currentCursor == 0)
+		
+        if (m_currentCursor == MenuType::Start)
 		{
 			// スタート -> セレクト画面へ
 			//ChangeScene<SelectScene>();
@@ -130,7 +145,7 @@ void TitleScene::Update(float elapsedTime)
 	//波を揺らしたかったら
 	if (m_backgroundStage)
 	{
-		m_backgroundStage->Update(m_waveManager.get());
+		m_backgroundStage->Update(elapsedTime, m_waveManager.get());
 	}
 
 }
@@ -211,65 +226,33 @@ void TitleScene::Render()
 		);
 	}
 
-	//--------------------------------------
-	//スタート
-	//--------------------------------------
+	// ボタンを表示する基準の高さ
+	float startY = screenH * BUTTON_START_Y_RATIO;
+	float stepY = BUTTON_STEP_Y; // ボタンごとの間隔
 
-	if (m_textureStart)
+	//テクスチャを配列にまとめる
+	ID3D11ShaderResourceView* buttonTextures[] =
 	{
-		Microsoft::WRL::ComPtr<ID3D11Resource> res;
+		m_textureStart.Get(),
+		m_textureQuit.Get()
+	};
 
-		m_textureStart->GetResource(&res);
-
-		CD3D11_TEXTURE2D_DESC desc;
-
-		Microsoft::WRL::ComPtr<ID3D11Texture2D>(reinterpret_cast<ID3D11Texture2D*>(res.Get()))->GetDesc(&desc);
-		Vector2 origin(desc.Width / 2.0f, desc.Height / 2.0f);
-
-		// 選択中なら色を明るく、サイズを大きく
-		bool isSelected = (m_currentCursor == 0);
-		float scale = isSelected ? 1.2f : 1.0f;
-		XMVECTOR color = isSelected ? Colors::White : Colors::Gray; 
-
-		m_spriteBatch->Draw(
-			m_textureStart.Get(),
-			Vector2(centerX, screenH * 0.6f),
-			nullptr,
-			color, 
-			0.0f,
-			origin,
-			scale
-		);
-	}
-
-	//--------------------------------------
-	//やめる
-	//--------------------------------------
-
-	if (m_textureQuit)
+	//テクスチャを配列でまとめたものを一か所で描画を行う
+	for (int i = 0; i < static_cast<int>(MenuType::Count); i++)
 	{
-		Microsoft::WRL::ComPtr<ID3D11Resource> res;
+		//現在の回数とカーソルの位置が一致しているか
+		bool isSelected = (static_cast<int>(m_currentCursor) == i);
 
-		m_textureQuit->GetResource(&res);
+		//選択されていたらサイズを大きく
+		float buttonScale = isSelected ? BUTTON_SCALE_SELECTED : BUTTON_SCALE_NORMAL;
 
-		CD3D11_TEXTURE2D_DESC desc;
+		//選択されていたら色を変更
+		XMVECTOR color = isSelected ? Colors::White : Colors::Gray;
 
-		Microsoft::WRL::ComPtr<ID3D11Texture2D>(reinterpret_cast<ID3D11Texture2D*>(res.Get()))->GetDesc(&desc);
-		Vector2 origin(desc.Width / 2.0f, desc.Height / 2.0f);
-
-		bool isSelected = (m_currentCursor == 1);
-		float scale = isSelected ? 1.2f : 1.0f;
-		XMVECTOR color = isSelected ? Colors::White : Colors::Gray; 
-
-		m_spriteBatch->Draw(
-			m_textureQuit.Get(),
-			Vector2(centerX, screenH * 0.75f),
-			nullptr,
-			color, 
-			0.0f,
-			origin, 
-			scale
-		);
+		DrawTextureCenter(
+			buttonTextures[i],
+			Vector2(centerX, startY + (stepY * i)),
+			buttonScale, color);
 	}
 
 	//--------------------------------------
@@ -278,54 +261,14 @@ void TitleScene::Render()
 
 	if (m_textureCursor)
 	{
-		//画像サイズの取得
-		Microsoft::WRL::ComPtr<ID3D11Resource> res;
-		m_textureCursor->GetResource(&res);
-		CD3D11_TEXTURE2D_DESC desc;
+		int cursorIndex = static_cast<int>(m_currentCursor);
+		//カーソルに応じたY座標を出す
+		float cursorY = startY + (stepY * cursorIndex);
 
-		Microsoft::WRL::ComPtr<ID3D11Texture2D>(reinterpret_cast<ID3D11Texture2D*>(res.Get()))->GetDesc(&desc);
-		Vector2 origin(desc.Width / 2.0f, desc.Height / 2.0f);
-
-		//カーソルの位置計算
-		SimpleMath::Vector2 cursorPos;
-
-		
-		//Startを選択中
-		if (m_currentCursor == 0)
-		{
-			cursorPos.y = screenH * 0.6f;
-		}
-		//Quitを選択中
-		else
-		{
-			cursorPos.y = screenH * 0.75f;
-		}
-		cursorPos.x = centerX-120.0f;
-
-		//カーソルの描画
-		m_spriteBatch->Draw(
-			m_textureCursor.Get(),
-			cursorPos,
-			nullptr,
-			Colors::White,
-			0.0f,
-			origin,
-			0.25f
-		);
-
-		cursorPos.x = centerX + 120.0f;
-
-		//カーソルの描画
-		m_spriteBatch->Draw(
-			m_textureCursor.Get(),
-			cursorPos,
-			nullptr,
-			Colors::White,
-			0.0f,
-			origin,
-			0.25f,
-			SpriteEffects_FlipHorizontally //反転
-		);
+		//左側の矢印
+		DrawTextureCenter(m_textureCursor.Get(), SimpleMath::Vector2(centerX - CURSOR_OFFSET_X, cursorY), CURSOR_SCALE);
+		//右側の矢印 反転
+		DrawTextureCenter(m_textureCursor.Get(), SimpleMath::Vector2(centerX + CURSOR_OFFSET_X, cursorY), CURSOR_SCALE, Colors::White, SpriteEffects_FlipHorizontally);
 
 	}
 
@@ -439,7 +382,10 @@ void TitleScene::CreateWindowSizeDependentResources()
 
 	//ステージ
 	m_backgroundStage = std::make_unique<Stage>(GetUserResources()->GetDeviceResources());
-	m_backgroundStage->Initialize(GetUserResources()->GetDeviceResources()->GetWindow(), width, height);
+	m_backgroundStage->Initialize(
+		GetUserResources()->GetDeviceResources()->GetWindow(),
+		width, height,
+		"Resources\\Stages\\TitleStage.bmp");
 
 }
 
@@ -450,4 +396,29 @@ void TitleScene::CreateWindowSizeDependentResources()
 void TitleScene::OnDeviceLost()
 {
 	Finalize();
+}
+
+//-----------------------------------------------------------------
+// 中心を基準にしてテクスチャを描画する関数
+//-----------------------------------------------------------------
+
+void TitleScene::DrawTextureCenter(
+	ID3D11ShaderResourceView* texture,
+	DirectX::SimpleMath::Vector2 position,
+	float scale,
+	DirectX::XMVECTOR color,
+	DirectX::SpriteEffects effects)
+{
+	if (!texture)return;
+
+	Microsoft::WRL::ComPtr<ID3D11Resource> res;
+
+	texture->GetResource(&res);
+	D3D11_TEXTURE2D_DESC desc;
+	((ID3D11Texture2D*)res.Get())->GetDesc(&desc);
+
+	//画像自体の中心点を作る
+	DirectX::SimpleMath::Vector2 origin(desc.Width / 2.0f, desc.Height / 2.0f);
+	//描画
+	m_spriteBatch->Draw(texture, position, nullptr, color, 0.0f, origin, scale, effects);
 }

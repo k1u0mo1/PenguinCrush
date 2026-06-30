@@ -1,7 +1,14 @@
 
+/**
+ * @file   AudioManager.cpp
+ * @brief  ゲーム全体の音声（BGM・SE）を管理・再生するシングルトンクラス
+ * @author 國田知睦
+ * @date   2026/06/11
+ */
 
 #include "pch.h"
 #include "AudioManager.h"
+
 
 using namespace DirectX;
 
@@ -97,7 +104,8 @@ void AudioManager::Play(const std::string& key)
 		return;
 	}
 
-	m_sounds[key]->Play(m_seVolume, 0.0f, 0.0f);
+	//音のリストをもらい流す
+	m_sounds[key]->Play(m_seVolume, DEFAULT_PITCH, DEFAULT_PAN);
 
 }
 
@@ -108,13 +116,13 @@ void AudioManager::Play(const std::string& key)
 void AudioManager::SetSEVolume(float volume)
 {
 	//音量の範囲を0.0～1.0
-	if (volume < 0.0f)
+	if (volume < MIN_VOLUME)
 	{
-		volume = 0.0f;
+		volume = MIN_VOLUME;
 	}
-	if (volume > 1.0f)
+	if (volume > MAX_VOLUME)
 	{
-		volume = 1.0f;
+		volume = MAX_VOLUME;
 	}
 
 	m_seVolume = volume;
@@ -182,13 +190,13 @@ void AudioManager::StopBGM()
 void AudioManager::SetBGMVolume(float volume)
 {
 	//音量の範囲を0.0～1.0
-	if (volume < 0.0f)
+	if (volume < MIN_VOLUME)
 	{
-		volume = 0.0f;
+		volume = MIN_VOLUME;
 	}
-	if (volume > 1.0f)
+	if (volume > MAX_VOLUME)
 	{
-		volume = 1.0f;
+		volume = MAX_VOLUME;
 	}
 
 	m_bgmVolume = volume;

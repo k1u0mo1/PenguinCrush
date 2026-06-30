@@ -1,5 +1,10 @@
 
-//スカイドーム（背景）
+/**
+ * @file   SkyDome.h
+ * @brief  スカイドームの描画・管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
 
 #pragma once
 
@@ -15,6 +20,14 @@
 /// </summary>
 class SkyDome
 {
+private:
+
+	//空の球体の大きさ
+	static constexpr float DEFAULT_SCALE = 250.0f;
+
+	//球体の高さを合わせるためのY軸オフセット
+	static constexpr float HEIGHT_OFFSET_Y = -20.0f;
+
 public:
 
 	/// <summary>
@@ -56,9 +69,5 @@ private:
 
 	//カメラの位置
 	DirectX::SimpleMath::Vector3 m_position;
-
-	//サイズ
-	float m_scale =250.0f;
-	//float m_scale =100.0f;
 
 };

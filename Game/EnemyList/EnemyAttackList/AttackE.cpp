@@ -1,6 +1,10 @@
-//
-// AttackE.cpp
-//
+
+/**
+ * @file   Attack.cpp
+ * @brief  敵の近距離攻撃クラス
+ * @author 國田知睦
+ * @date   2026/06/04
+ */
 
 #include "pch.h"
 #include "AttackE.h"
@@ -52,7 +56,7 @@ AttackE::AttackE(
 		//OBB初期化
         m_collision = std::make_unique<ModelCollisionOrientedBox>(m_attackModel.get());
 		m_collision->SetCenter(m_position);
-		m_collision->SetExtents(SimpleMath::Vector3(1.0f, 1.0f, 1.0f));
+		m_collision->SetExtents(COLLISION_SIZE);
 	}
 
 	m_states = std::make_unique<CommonStates>(m_deviceResources->GetD3DDevice());
@@ -92,7 +96,7 @@ void AttackE::Render(
 	if (!m_attackModel)return;
 
 	SimpleMath::Matrix world = 
-		SimpleMath::Matrix::CreateScale(1.0f) *
+		SimpleMath::Matrix::CreateScale(SCALE_SIZE) *
 		SimpleMath::Matrix::CreateTranslation(m_position);
 
 	
@@ -127,7 +131,10 @@ DirectX::BoundingBox AttackE::GetBoundingBox() const
 	{
 		//デフォルト小さい箱
 		box.Center = m_position;
-		box.Extents = DirectX::SimpleMath::Vector3(DEFAULT_BOUNDING_SIZE, DEFAULT_BOUNDING_SIZE, DEFAULT_BOUNDING_SIZE);
+		box.Extents = 
+			DirectX::SimpleMath::Vector3(
+				DEFAULT_BOUNDING_SIZE
+				);
 	}
 	return box;
 }

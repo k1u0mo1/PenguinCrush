@@ -1,5 +1,10 @@
 
-//‰J@Rain.h
+/**
+ * @file   Rain.h
+ * @brief  “VŒó(‰J)‚ÌƒNƒ‰ƒX
+ * @author š “c’m–r
+ * @date   2026/06/10
+ */
 
 #pragma once
 #include "WeatherBase.h"
@@ -10,6 +15,15 @@
 /// </summary>
 class Rain :public WeatherBase
 {
+private:
+
+	//‰J‚Ì—‰º‘¬“x
+	static constexpr float RAIN_SPEED = 20.0f;
+	//‰J‚Ì‘¾‚³
+	static constexpr float RAIN_WIDTH = 0.5f;
+	//‰J‚Ì•`‰æ”
+	static constexpr UINT RAIN_PARTICLE_COUNT = 1000;
+
 public:
 
 	/// <summary>

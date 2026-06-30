@@ -1,5 +1,12 @@
 
-//確認用デバッグカメラ
+/**
+ * @file   DebugCamera.h
+ * @brief  確認用デバッグカメラの動きの管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
+
+
 #pragma once
 
 #include <SimpleMath.h>
@@ -13,43 +20,24 @@ using namespace DirectX::SimpleMath;
 /// </summary>
 class DebugCamera
 {
-	/// <summary>
-	/// カメラの距離
-	/// </summary>
-	static const float DEFAULT_CAMERA_DISTANCE;
-
-	// 横回転
-	float m_yAngle, m_yTmp;
-
-	// 縦回転
-	float m_xAngle, m_xTmp;
-
-	// ドラッグされた座標
-	int m_x, m_y;
-
-	float m_sx, m_sy;
-
-	// 生成されたビュー行列
-	DirectX::SimpleMath::Matrix m_view;
-
-	// スクロールフォイール値
-	int m_scrollWheelValue;
-
-	// 視点
-	DirectX::SimpleMath::Vector3 m_eye;
-
-	// 注視点
-	DirectX::SimpleMath::Vector3 m_target;
-
-	// マウストラッカー
-	DirectX::Mouse::ButtonStateTracker m_tracker;
-
-	// スクリーンサイズ
-	int m_screenW, m_screenH;
-
 private:
 
-	float m_distance;
+	//カメラの間隔
+	static constexpr float DEFAULT_CAMERA_DISTANCE = 5.0f;
+	//ホイールのスクロール感度
+	static constexpr float SCROLL_SENSITIVITY = 0.005f;
+	//カメラの最低距離の制限
+	static constexpr float DISTANCE_MIN = 1.0f;
+	//カメラの最大距離の制限
+	static constexpr float DISTANCE_MAX = 50.0f;
+	//キーボード操作時の移動の速さ
+	static constexpr float MOVE_SPEED = 0.5f;
+	//方向ベクトルがほぼゼロかどうか判定用
+	static constexpr float ZERO_THRESHOLD = 0.001f;
+	//注視点からの高さのオフセット
+	static constexpr float CAMERA_OFFSET_Y = 2.0;
+
+private:
 
 	/// <summary>
 	/// 行列の生成
@@ -118,6 +106,39 @@ public:
 	void SetFromOtherCamera(
 		const DirectX::SimpleMath::Vector3& eye,
 		const DirectX::SimpleMath::Vector3& target);
+
+private:
+	// 横回転
+	float m_yAngle, m_yTmp;
+
+	// 縦回転
+	float m_xAngle, m_xTmp;
+
+	// ドラッグされた座標
+	int m_x, m_y;
+
+	float m_sx, m_sy;
+
+	// 生成されたビュー行列
+	DirectX::SimpleMath::Matrix m_view;
+
+	// スクロールフォイール値
+	int m_scrollWheelValue;
+
+	// 視点
+	DirectX::SimpleMath::Vector3 m_eye;
+
+	// 注視点
+	DirectX::SimpleMath::Vector3 m_target;
+
+	// マウストラッカー
+	DirectX::Mouse::ButtonStateTracker m_tracker;
+
+	// スクリーンサイズ
+	int m_screenW, m_screenH;
+
+	float m_distance;
+
 };
 
 

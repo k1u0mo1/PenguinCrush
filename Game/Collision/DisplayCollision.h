@@ -1,9 +1,12 @@
 
-//DisplayCollision.h
-//コリジョン表示
+/**
+ * @file   DisplayCollision.h
+ * @brief  ゲームの衝突判定を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
 
 #pragma once
-
 
 #include <vector>
 #include "SimpleMath.h"
@@ -20,6 +23,12 @@
 class DisplayCollision
 {
 private:
+
+	//球のデフォルトの直径
+	static constexpr float DEFAULT_SPHERE_SIZE = 2.0f;
+
+	//球のポリゴン分割数
+	static constexpr size_t DEFAULT_SPHERE_TESSELLATION = 8;
 
 	//表示可能のコリジョンの最大　デフォルト
 	static const uint32_t DISPLAY_COLLISION_MAX = 100;

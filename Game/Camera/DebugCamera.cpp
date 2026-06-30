@@ -1,10 +1,17 @@
+
+/**
+ * @file   DebugCamera.cpp
+ * @brief  確認用デバッグカメラの動きの管理を行うクラス
+ * @author 國田知睦
+ * @date   2026/06/08
+ */
+
 #include "pch.h"
 #include "DebugCamera.h"
 #include "Mouse.h"
 
 using namespace DirectX;
 
-const float DebugCamera::DEFAULT_CAMERA_DISTANCE = 5.0f;
 
 //--------------------------------------------------------------------------------------
 // コンストラクタ
@@ -41,14 +48,11 @@ void DebugCamera::Update()
 	m_scrollWheelValue = state.scrollWheelValue; 
 
 	// スクロールホイール値に応じて距離を更新
-	const float SCROLL_SENSITIVITY = 0.005f;
 	m_distance -= scrollDelta * SCROLL_SENSITIVITY;
 
 	// 距離に制限を設ける
-	m_distance = std::max(1.0f, m_distance); // 最低距離 1.0f
-	m_distance = std::min(50.0f, m_distance); // 最大距離 50.0f
-
-
+	m_distance = std::max(DISTANCE_MIN, m_distance); 
+	m_distance = std::min(DISTANCE_MAX, m_distance); 
 
 	m_tracker.Update(state);
 
@@ -78,7 +82,7 @@ void DebugCamera::Update()
 	//水平に移動させるためにY成分を消す
 	forward.y = 0.0f;
 
-	if (forward.LengthSquared() > 0.001f)
+	if (forward.LengthSquared() > ZERO_THRESHOLD)
 	{
 		forward.Normalize();
 	}
@@ -93,9 +97,7 @@ void DebugCamera::Update()
 	Vector3 worldUp = Vector3::Up;
 	Vector3 move = Vector3::Zero;
 
-	//移動スピード
-	float speed = 0.5f;
-
+	
 	// WASDキーで前後左右に移動
 	if (kb.W) move += forward;
 	if (kb.S) move -= forward;
@@ -110,7 +112,7 @@ void DebugCamera::Update()
 	if (move != Vector3::Zero)
 	{
 		move.Normalize();
-		m_target += move * speed;
+		m_target += move * MOVE_SPEED;
 	}
 
 	//-----------------------------------------------------
@@ -123,10 +125,8 @@ void DebugCamera::Update()
 	// プレイヤーを注視
 	Vector3 up = Vector3::Transform(Vector3::UnitY, rt.Invert());
 
-	// プレイヤーカメラと似た距離扱い
-	//float distance = DEFAULT_CAMERA_DISTANCE - state.scrollWheelValue * 0.01f;
-
-	Vector3 offset(0.0f, 2.0f, m_distance);
+	
+	Vector3 offset(0.0f, CAMERA_OFFSET_Y, m_distance);
 	offset = Vector3::Transform(offset, rt);
 
 	m_eye = m_target + offset;
