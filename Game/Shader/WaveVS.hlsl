@@ -39,7 +39,6 @@ PS_INPUT main(VS_INPUT input)
         //中心を（０，０）にするためのオフセット
         float offsetX = (fGridX - (fGridWidth * 0.5f)) * spacing;
         float offsetZ = (fGridZ - (fGridWidth * 0.5f)) * spacing;
-        
         //１つ１つのキューブを特定の位置に移動
         localPos.x = input.Pos.x * cubeScale;
         localPos.y = input.Pos.y * cubeScale;
@@ -92,7 +91,7 @@ PS_INPUT main(VS_INPUT input)
     output.Pos      = mul(viewPos,   matProj);
 	
     //ピクセルシェーダに情報を渡す
-    output.WorldPos = worldPos.xyz;
+    output.WorldPos = localPos.xyz;
     output.Color = input.Color;
     
 	return output;

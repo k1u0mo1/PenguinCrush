@@ -65,7 +65,7 @@ void SkyDome::Render(
 	const DirectX::SimpleMath::Matrix& view,
 	const DirectX::SimpleMath::Matrix& proj)
 {
-	if (!m_model) return;
+	if (!m_model || !m_states) return;
 
 	//固定する
 	DirectX::SimpleMath::Matrix world
@@ -87,10 +87,13 @@ void SkyDome::Render(
 			}
 		});
 
+	context->VSSetShader(nullptr, nullptr, 0);
+	context->PSSetShader(nullptr, nullptr, 0);
+
 	for (const auto& mesh : m_model->meshes)
 	{
 		// モデルの描画（カスタムステートでサンプラーをリニアに強制する）
-		mesh->Draw(context, world, view, proj, false, [&]()
+		mesh->Draw(context, world, view, proj, true, [this, context]()
 			{
 				// サンプラーステートを滑らかな補間（LinearWrap）に設定
 				ID3D11SamplerState* sampler = m_states->LinearWrap();

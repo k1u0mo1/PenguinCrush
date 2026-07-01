@@ -24,7 +24,7 @@ void AudioManager::Initialize()
 	DirectX::AUDIO_ENGINE_FLAGS eflags = DirectX::AudioEngine_Default;
 
 #ifdef  _DEBUG
-	eflags |= AudioEngine_Debug;
+	eflags |= DirectX::AudioEngine_Debug;
 #endif //  _DEBUG
 
 	m_audioEngine = std::make_unique<DirectX::AudioEngine>(eflags);

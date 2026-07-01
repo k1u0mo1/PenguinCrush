@@ -16,7 +16,6 @@ struct VS_INPUT
 {
 	float3 Pos : POSITION;
 	float4 Color: COLOR;
-    
     uint instanceID : SV_InstanceID;//何個目のコピー？
 };
 
