@@ -3,11 +3,10 @@
  * @file   EnemyRenderer.h
  * @brief  敵の描画関連の管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/05
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "pch.h"
 #include <DirectXMath.h>
 #include <memory>
@@ -100,6 +99,5 @@ private:
     
 	//影描画用のテクスチャ
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_shadowTexture;
-
 };
 

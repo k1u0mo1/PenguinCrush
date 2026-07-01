@@ -3,24 +3,20 @@
  * @file   ShadowRenderer.cpp
  * @brief  ゲーム全体のキャラクターやオブジェクトの丸影を描画するクラス
  * @author 國田知睦
- * @date   2026/06/11
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "ShadowRenderer.h"
-
 //テクスチャの読み込み用
 #include <DDSTextureLoader.h>
-
-using namespace DirectX;
 
 //板ポリゴンの頂点データ構造体
 struct VertexData
 {
-	SimpleMath::Vector3 position;
-	//SimpleMath::Vector3 normal;
-	SimpleMath::Vector2 texCoord;
-};
+	DirectX::SimpleMath::Vector3 position;
+	DirectX::SimpleMath::Vector2 texCoord;
+}; 
 
 //----------------------------------------------------------
 // コンストラクタ
@@ -35,7 +31,7 @@ ShadowRenderer::ShadowRenderer(
 	//影用テクスチャの読み込み 
 	//-------------------------------------------------------
 
-	CreateDDSTextureFromFile(
+	DirectX::CreateDDSTextureFromFile(
 		device,
 		L"Resources/Textures/Shadow.dds",
 		nullptr,
@@ -47,10 +43,10 @@ ShadowRenderer::ShadowRenderer(
 	//-------------------------------------------------------
 	VertexData vertices[] =
 	{
-		{ SimpleMath::Vector3(-HALF_SIZE, 0.0f,  HALF_SIZE), SimpleMath::Vector2(0.0f, 0.0f) },
-		{ SimpleMath::Vector3( HALF_SIZE, 0.0f,  HALF_SIZE), SimpleMath::Vector2(1.0f, 0.0f) },
-		{ SimpleMath::Vector3(-HALF_SIZE, 0.0f, -HALF_SIZE), SimpleMath::Vector2(0.0f, 1.0f) },
-		{ SimpleMath::Vector3( HALF_SIZE, 0.0f, -HALF_SIZE), SimpleMath::Vector2(1.0f, 1.0f) },
+		{ DirectX::SimpleMath::Vector3(-HALF_SIZE, 0.0f,  HALF_SIZE), DirectX::SimpleMath::Vector2(0.0f, 0.0f) },
+		{ DirectX::SimpleMath::Vector3( HALF_SIZE, 0.0f,  HALF_SIZE), DirectX::SimpleMath::Vector2(1.0f, 0.0f) },
+		{ DirectX::SimpleMath::Vector3(-HALF_SIZE, 0.0f, -HALF_SIZE), DirectX::SimpleMath::Vector2(0.0f, 1.0f) },
+		{ DirectX::SimpleMath::Vector3( HALF_SIZE, 0.0f, -HALF_SIZE), DirectX::SimpleMath::Vector2(1.0f, 1.0f) },
 	};
 
 	//頂点バッファの作成
@@ -94,16 +90,11 @@ ShadowRenderer::ShadowRenderer(
 	device->CreateRasterizerState(&rd, m_shadowState.GetAddressOf());
 
 	//ベーシックエフェクトの初期化
-	m_shadowEffect = std::make_unique<BasicEffect>(device);
+	m_shadowEffect = std::make_unique<DirectX::BasicEffect>(device);
 	//ライティングは不要
 	m_shadowEffect->SetLightingEnabled(false); 
 	//テクスチャを使用
 	m_shadowEffect->SetTextureEnabled(true);  
-
-	//m_shadowEffect->SetDiffuseColor(Colors::Red);
-	//m_shadowEffect->SetAlpha(1.0f);
-	//// ライティング無効などはそのまま
-	//m_shadowEffect->SetLightingEnabled(false);
 
 	//読み込んだテクスチャをセット
 	m_shadowEffect->SetTexture(m_textureSRV.Get()); 
@@ -113,11 +104,10 @@ ShadowRenderer::ShadowRenderer(
 	size_t byteCodeLength;
 	m_shadowEffect->GetVertexShaderBytecode(&shaderByteCode, &byteCodeLength);
 
-	//
+	//頂点レイアウトの定義
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{ "SV_Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		/*{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },*/
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
@@ -127,8 +117,6 @@ ShadowRenderer::ShadowRenderer(
 		shaderByteCode, byteCodeLength,
 		m_shadowInputLayout.GetAddressOf()
 	);
-
-
 }
 
 //----------------------------------------------------------
@@ -153,27 +141,24 @@ void ShadowRenderer::Render(
 	//-------------------------------------------------------
 	
 	//拡大縮小
-	SimpleMath::Matrix matScale = SimpleMath::Matrix::CreateScale(scale);
+	DirectX::SimpleMath::Matrix matScale = DirectX::SimpleMath::Matrix::CreateScale(scale);
 
 	//回転
-	SimpleMath::Matrix matRotX = SimpleMath::Matrix::CreateRotationX(rotateX);
-	SimpleMath::Matrix matRotZ = SimpleMath::Matrix::CreateRotationZ(rotateZ);
-
+	DirectX::SimpleMath::Matrix matRotX = DirectX::SimpleMath::Matrix::CreateRotationX(rotateX);
+	DirectX::SimpleMath::Matrix matRotZ = DirectX::SimpleMath::Matrix::CreateRotationZ(rotateZ);
 	//回転を合わせる
-	SimpleMath::Matrix matRot = matRotZ * matRotX;
+	DirectX::SimpleMath::Matrix matRot = matRotZ * matRotX;
 
 	//垂直方向を計算する
-	SimpleMath::Vector3 upVector = SimpleMath::Vector3::Up;
-	SimpleMath::Vector3 normal = SimpleMath::Vector3::TransformNormal(upVector, matRot);
+	DirectX::SimpleMath::Vector3 upVector = DirectX::SimpleMath::Vector3::Up;
+	DirectX::SimpleMath::Vector3 normal = DirectX::SimpleMath::Vector3::TransformNormal(upVector, matRot);
 
 	//描画位置 モデルにピッタリつく
-	SimpleMath::Vector3 drawPos = position + (normal * 0.02f);
-
+	DirectX::SimpleMath::Vector3 drawPos = position + (normal * 0.02f);
 	//平行移動
-	SimpleMath::Matrix matTrans = SimpleMath::Matrix::CreateTranslation(drawPos);
-
+	DirectX::SimpleMath::Matrix matTrans = DirectX::SimpleMath::Matrix::CreateTranslation(drawPos);
 	//計算 合体
-	SimpleMath::Matrix shadowWorld = matScale * matRot * matTrans;
+	DirectX::SimpleMath::Matrix shadowWorld = matScale * matRot * matTrans;
 
 	//-------------------------------------------------------
 	//ステートの保持と設定
@@ -216,7 +201,6 @@ void ShadowRenderer::Render(
 	context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
 	context->IASetInputLayout(m_shadowInputLayout.Get());
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 	//描画
 	context->DrawIndexed(6, 0, 0);
 
@@ -226,6 +210,5 @@ void ShadowRenderer::Render(
 	context->RSSetState(oldRasterizerState.Get());
 	context->OMSetBlendState(oldBlendState.Get(), oldBlendFactor, oldSampleMask);
 	context->OMSetDepthStencilState(oldDepthState.Get(), oldStencilRef);
-
 }
 

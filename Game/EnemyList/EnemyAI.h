@@ -3,7 +3,7 @@
  * @file   EnemyAI.h
  * @brief  敵AIの動きの管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/05
+ * @date   2026/07/01
  */
 
 #pragma once
@@ -16,10 +16,8 @@ private:
 
 	//接地する足場の位置の高さ
 	static constexpr float STAGE_BOUNDARY_Y = -4.9f;
-
 	//穴を避ける距離
 	static constexpr float FALL_CHECK_DISTANC = 3.0f;
-
 	//微小値
 	static constexpr float VECTOR_EPSILON = 0.0001f;
 

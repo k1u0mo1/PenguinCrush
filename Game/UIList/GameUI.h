@@ -3,21 +3,15 @@
  * @file   GameUI.h
  * @brief  画面のプレイヤーと敵のUIを表示を管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/09
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "pch.h"
 #include "Game/Common/DeviceResources.h"
-
 #include "Game/PlayerList/Player.h"
 #include "Game/EnemyList/BossEnemy.h"
-
 #include <SpriteBatch.h>
-
-using namespace DirectX;
-using namespace DirectX::SimpleMath;
 
 /// <summary>
 /// 画面のプレイヤーと敵のUIを表示するクラス
@@ -31,8 +25,8 @@ private:
 
     //プレイヤーUIの配置パラメータ
     const float   PLAYER_UI_X = 50.0f;
-    const Vector2 PLAYER_HP_SIZE = Vector2(300.0f, 30.0f);
-    const Vector2 PLAYER_STAMINA_SIZE = Vector2(200.0f, 20.0f);
+    const DirectX::SimpleMath::Vector2 PLAYER_HP_SIZE      = DirectX::SimpleMath::Vector2(300.0f, 30.0f);
+    const DirectX::SimpleMath::Vector2 PLAYER_STAMINA_SIZE = DirectX::SimpleMath::Vector2(200.0f, 20.0f);
 
     //プレイヤーの最大体力
     const float PLAYER_MAX_HP = 300.0f;
@@ -42,7 +36,7 @@ private:
     const float   PLAYER_STAMINA_BOTTOM_OFFSET = 50.0f;
 
     //ボスUIの配置パラメータ
-    const Vector2 BOSS_HP_SIZE = Vector2(400.0f, 30.0f);
+    const DirectX::SimpleMath::Vector2 BOSS_HP_SIZE = DirectX::SimpleMath::Vector2(400.0f, 30.0f);
     const float   BOSS_HP_Y = 10.0f;
 
     //ゲージを満タンで表示するための固定値
@@ -101,7 +95,5 @@ private:
 
     // テクスチャ
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
-
-    
 };
 

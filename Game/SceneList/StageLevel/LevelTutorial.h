@@ -3,9 +3,8 @@
  * @file   LevelTutorial.h
  * @brief  チュートリアルステージの管理とUI表示を行うクラス
  * @author 國田知睦
- * @date   2026/06/22
+ * @date   2026/07/01
  */
-
 
 #pragma once
 #include "LevelBase.h"
@@ -15,7 +14,6 @@
 #include "SpriteBatch.h"
 #include "CommonStates.h"
 #include "Game/EnemyList/EnemyBaseParameter.h"
-
 #include "Game/WeatherList/Rain.h"
 #include "Game/WeatherList/Snow.h"
 #include "Game/SoundList/AudioManager.h"
@@ -33,6 +31,10 @@ private:
 	//敵が出る座標
 	static constexpr float ENEMY_POS_X = 10.0f;
 	static constexpr float ENEMY_POS_Z = 10.0f;
+
+	//画面サイズ
+	static constexpr int SCREEN_SIZE_WIDTH = 1280;
+	static constexpr int SCREEN_SIZE_HEIGHT = 720;
 
 	//表示フラグ
 	bool m_isShowHelp = true;
@@ -79,32 +81,28 @@ public:
 			m_textureUI.GetAddressOf()
 		);
 
-		//ステージ共通の初期化
-		//LevelBase::Initialize(deviceResources, stageManager, enemyManager, fishManager, displayCollision);
-
 		//---------------------------------------
 		// 個別のステージの登録
 		//---------------------------------------
 
 		stageManager->AddStage(L"TutorialStage",
 			deviceResources->GetWindow(),
-			1280, 720,
+			SCREEN_SIZE_WIDTH, SCREEN_SIZE_HEIGHT,
 			"Resources\\Stages\\TutorialStage.bmp");
 
 		stageManager->SetCurrentStage(L"TutorialStage");
 
-
-
 		//天候　2択
 		if (rand() % 2 == 0)
 		{
+			//雨
 			m_weather = std::make_unique<Rain>();
 		}
 		else
 		{
+			//雪
 			m_weather = std::make_unique<Snow>();
 		}
-
 		//天候の初期化
 		m_weather->Initialize(deviceResources->GetD3DDevice());
 
@@ -120,13 +118,10 @@ public:
 		//敵の出現位置と敵の種類
 		enemyManager->SpawnNormalEnemy(enemySpawnPos,EnemyData::NormalEnemy);
 
-		
 		//---------------------------------------
 		// 魚（ギミック）の配置
 		//---------------------------------------
-
 		fishManager->SetStage(stageManager->GetCurrentStage());
-
 	}
 
 	/// <summary>
@@ -136,6 +131,7 @@ public:
 	/// <param name="resources">ユーザーリソース</param>
 	void Update(float /*dt*/, UserResources* resources) override
 	{
+		//キーボード用
 		auto input = resources->GetInputManager();
 
 		// [2]キーを押すと、表示/非表示を反転させる
@@ -144,15 +140,14 @@ public:
 			m_isShowHelp = !m_isShowHelp;
 		}
 	}
-
 	
 	/// <summary>
 	/// チュートリアルレベルの描画
 	/// </summary>
-	/// <param name="context"></param>
-	/// <param name="view"></param>
-	/// <param name="proj"></param>
-	/// <param name="camPos"></param>
+	/// <param name="context">デバイスコンテキスト</param>
+	/// <param name="view">ビュー行列</param>
+	/// <param name="proj">射影行列</param>
+	/// <param name="camPos">カメラの位置</param>
 	void Render(
 		ID3D11DeviceContext* context,
 		const DirectX::SimpleMath::Matrix& view,
@@ -160,11 +155,11 @@ public:
 		const DirectX::SimpleMath::Vector3& camPos
 	) override
 	{
+		//使用していない引数をおいておく
 		UNREFERENCED_PARAMETER(context);
 		UNREFERENCED_PARAMETER(view);
 		UNREFERENCED_PARAMETER(proj);
 		UNREFERENCED_PARAMETER(camPos);
-		
 
 		//フラグがfalseなら何も描画しない
 		if (!m_isShowHelp) return;
@@ -176,7 +171,6 @@ public:
 				DirectX::SpriteSortMode_Deferred,
 				m_states->NonPremultiplied()
 			);
-
 			//描画
 			m_spriteBatch->Draw(m_textureUI.Get(), DirectX::SimpleMath::Vector2(0, 0));
 

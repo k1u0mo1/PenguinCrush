@@ -3,21 +3,18 @@
  * @file   FishManager.h
  * @brief  魚の描画・管理を行うマネージャークラス
  * @author 國田知睦
- * @date   2026/06/22
+ * @date   2026/07/01
  */
-
 
 #pragma once
 #include "pch.h"
 #include <Game/Common/DeviceResources.h>
 #include <Game/Collision/DisplayCollision.h>
-
 #include "Game/GimmickList/Stage.h"
 #include "Game/GimmickList/Fish.h"
 
 class ShadowRenderer;
 class Player;
-
 
 class FishManager
 {
@@ -100,7 +97,9 @@ private:
     void SpawnFish();
 
 private:
+    //デバイスリソース
     DX::DeviceResources* m_deviceResources;
+    //当たり判定の表示用
     std::shared_ptr<DisplayCollision> m_displayCollision;
     Stage* m_stage;
 

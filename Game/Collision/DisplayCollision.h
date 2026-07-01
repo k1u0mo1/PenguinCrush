@@ -3,11 +3,10 @@
  * @file   DisplayCollision.h
  * @brief  ゲームの衝突判定を行うクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include <vector>
 #include "SimpleMath.h"
 #include "CommonStates.h"
@@ -244,7 +243,5 @@ public:
 	/// </summary>
 	/// <param name="active">trueでラインを表示、falseで非表示</param>
 	void SetLineActive(bool active) { m_lineActive = active; }
-
-
 };
 

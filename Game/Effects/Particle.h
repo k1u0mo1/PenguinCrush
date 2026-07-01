@@ -3,11 +3,10 @@
  * @file   Particle.h
  * @brief  シェーダ用エフェクトのパーティクル管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "Game/Common/StepTimer.h"
 #include "Game/Common/DeviceResources.h"
 #include <SimpleMath.h>
@@ -17,7 +16,6 @@
 #include <WICTextureLoader.h>
 #include <CommonStates.h>
 #include <vector>
-
 #include <algorithm>
 
 class Particle
@@ -35,24 +33,23 @@ public:
 		Dash
 	};
 
-	//パーティクル1粒の情報
-	struct ParticleInfo
-	{
-		//位置
-		DirectX::SimpleMath::Vector3 Position;
-		//速度
-		DirectX::SimpleMath::Vector3 Velocity;
-		//色
-		DirectX::SimpleMath::Vector4 Color;
+    // パーティクル1粒の情報
+    struct ParticleInfo
+    {
+        //位置
+        DirectX::SimpleMath::Vector3 Position = DirectX::SimpleMath::Vector3::Zero;
+        //速度
+        DirectX::SimpleMath::Vector3 Velocity = DirectX::SimpleMath::Vector3::Zero;
+        //色
+        DirectX::SimpleMath::Vector4 Color = DirectX::SimpleMath::Vector4::One;
 
-		//経過時間
-		float Age;
-		//寿命
-		float Lifetime;
-		//サイズ
-		float Size;
-
-	};
+        //経過時間
+		float Age ;
+        //寿命
+        float Lifetime;
+        //サイズ
+        float Size;
+    };
 
 	/// <summary>
 	/// シェーダに渡す定数バッファ用構造体
@@ -202,27 +199,26 @@ private:
 
 	//デバイスリソースへのポインタ
 	DX::DeviceResources* m_pDR;
-
+	//バッファ
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	m_CBuffer;
 
 	DX::StepTimer  m_timer;
 
-	//	入力レイアウト
+	//入力レイアウト
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
-
-	//	プリミティブバッチ
+	//プリミティブバッチ
 	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColorTexture>> m_batch;
-	//	コモンステート
+	//コモンステート
 	std::unique_ptr<DirectX::CommonStates> m_states;
-	//	テクスチャハンドル
+	//テクスチャハンドル
 	std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> m_texture;
-	//	テクスチャハンドル
+	//テクスチャハンドル
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture2;
-	//	頂点シェーダ
+	//頂点シェーダ
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-	//	ピクセルシェーダ
+	//ピクセルシェーダ
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
-	//	ジオメトリシェーダ
+	//ジオメトリシェーダ
 	Microsoft::WRL::ComPtr<ID3D11GeometryShader> m_geometryShader;
 
 	DirectX::SimpleMath::Matrix m_world;

@@ -4,14 +4,11 @@
  * @file   WaveManager.cpp
  * @brief  波の生成と描画を管理するマネージャークラス
  * @author 國田知睦
- * @date   2026/06/11
+ * @date   2026/07/01
  */
 
 #include "pch.h"
-
 #include "Game/GimmickList/WaveManager.h"
-
-using namespace DirectX;
 
 /// 波のモード　trueなら立方体、falseなら通常の波
 bool WaveManager::ms_isCubeMode = false;
@@ -73,7 +70,6 @@ void WaveManager::ToggleMode()
 	{
 		//モードを切り替えるフラグを反転
 		ms_isCubeMode = !ms_isCubeMode;
-
 		//モードを切り替える
 		m_wave->ToggleDotMode();
 	}
@@ -87,7 +83,6 @@ DirectX::SimpleMath::Vector2 WaveManager::GetCurrentWaveAngle(float x, float z) 
 {
 	//波の角度を取得
 	return m_wave->GetWaveAngle(x, z);
-	
 }
 
 //----------------------------------------------------------
@@ -98,5 +93,4 @@ float WaveManager::GetCurrentHeight(float x, float z) const
 {
 	//波の高さを取得
 	return m_wave->GetHeight(x, z);
-
 }

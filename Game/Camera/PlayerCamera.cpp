@@ -3,37 +3,36 @@
  * @file   PlayerCamera.cpp
  * @brief  プレイヤーカメラの動きの管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/19
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "PlayerCamera.h"
 #include "Mouse.h"
 
-using namespace DirectX;
-
 //--------------------------------------------------------------------------------------
 // コンストラクタ
 //--------------------------------------------------------------------------------------
 
 PlayerCamera::PlayerCamera(int windowWidth, int windowHeight, HWND hwnd)
-	: m_yAngle(0.0f)
-	, m_yTmp(0.0f)
-	, m_xAngle(0.0f)
-	, m_xTmp(0.0f)
-	, m_x(0)
-	, m_y(0)
-	, m_scrollWheelValue(0)
-	, m_screenW(windowWidth)
-	, m_screenH(windowHeight)
-	, m_hwnd(hwnd)
-	, m_targetY(NORMAL_TARGET_Y)
-	, m_currentDist(DEFAULT_CAMERA_DISTANCE)
+	: 
+	m_yAngle(0.0f),
+	m_yTmp(0.0f),
+	m_xAngle(0.0f),
+	m_xTmp(0.0f),
+	m_x(0),
+	m_y(0),
+	m_scrollWheelValue(0),
+	m_screenW(windowWidth),
+	m_screenH(windowHeight),
+	m_hwnd(hwnd),
+	m_targetY(NORMAL_TARGET_Y),
+	m_currentDist(DEFAULT_CAMERA_DISTANCE)
 {
 	SetWindowSize(windowWidth, windowHeight);
 
 	// マウスのフォイール値をリセット
-	Mouse::Get().ResetScrollWheelValue();
+	DirectX::Mouse::Get().ResetScrollWheelValue();
 
 	HideCursor();
 }
@@ -53,10 +52,8 @@ void PlayerCamera::Update(
 
 		// クライアント座標（ウィンドウ内の座標）をスクリーン座標（画面全体の座標）に変換
 		ClientToScreen(m_hwnd, &pt);
-
 		// マウスカーソルを画面中央に移動
 		SetCursorPos(pt.x, pt.y);
-
 		// 次フレームの基準点 m_prevMouseX/Y をウィンドウ中央に設定
 		m_prevMouseX = m_screenW / 2;
 		m_prevMouseY = m_screenH / 2;
@@ -64,7 +61,6 @@ void PlayerCamera::Update(
 
 	// 前フレームとの差分（X軸のみ）
 	float dx = float(mouseState.x - m_prevMouseX);
-
 	// 次フレーム用に保存
 	m_prevMouseX = mouseState.x;
 
@@ -95,25 +91,20 @@ void PlayerCamera::Update(
 
 	//新しい値＝現在の値 ＋（ 　　目標までの距離　　）× 移動する割合
 	m_targetY = m_targetY + (goalTargetY - m_targetY) * CAMERA_LERP_SPEED;
-
 	//新しい値　　＝　現在の値 　＋（ 　　目標までの距離　　）× 移動する割合
 	m_currentDist = m_currentDist + (goalDist - m_currentDist) * CAMERA_LERP_SPEED;
-
 	// 注視点
-	m_target = playerPos + SimpleMath::Vector3(0.0f, m_targetY, 0.0f);
-
+	m_target = playerPos + DirectX::SimpleMath::Vector3(0.0f, m_targetY, 0.0f);
 	// カメラ後方オフセット
-	SimpleMath::Vector3 offset(0.0f, CAMERA_OFFSET_Y, m_currentDist);
-
+	DirectX::SimpleMath::Vector3 offset(0.0f, CAMERA_OFFSET_Y, m_currentDist);
 	// Y軸回転のみ
-	SimpleMath::Matrix rotY = SimpleMath::Matrix::CreateRotationY(m_yTmp);
+	DirectX::SimpleMath::Matrix rotY = DirectX::SimpleMath::Matrix::CreateRotationY(m_yTmp);
 	offset = DirectX::SimpleMath::Vector3::Transform(offset, rotY);
 
 	// カメラ位置
 	m_eye = m_target + offset;
-
 	// ビュー行列
-	m_view = SimpleMath::Matrix::CreateLookAt(m_eye, m_target, SimpleMath::Vector3::UnitY);
+	m_view = DirectX::SimpleMath::Matrix::CreateLookAt(m_eye, m_target, DirectX::SimpleMath::Vector3::UnitY);
 }
 
 //--------------------------------------------------------------------------------------
@@ -129,11 +120,7 @@ void PlayerCamera::Motion(int x, int y)
 	if (dx != 0.0f || dy != 0.0f)
 	{
 		// Ｙ軸の回転
-		float yAngle = dx * XM_PI;
-		// Ｘ軸の回転
-		//float xAngle = dy * XM_PI;
-
-		//m_xTmp = m_xAngle + xAngle;
+		float yAngle = dx * DirectX::XM_PI;
 		m_yTmp = m_yAngle + yAngle;
 	}
 }

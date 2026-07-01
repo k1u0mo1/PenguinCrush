@@ -3,16 +3,14 @@
  * @file   AttackManager.h
  * @brief  攻撃の管理クラス
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "AttackBase.h"
 #include <memory>
 #include <vector>
 #include <Model.h>
-
 #include "Game/Collision/DisplayCollision.h"
 
 class EnemyBase;
@@ -33,10 +31,8 @@ private:
 	
 	//ダメージ量
 	static constexpr float ATTACK_DAMAGE = 100.0f;
-
 	//ダッシュのノックバックの強さ
 	static constexpr float RUSH_KNOCKBACK_POWER = 10.0f;
-
 	//ヒットストップの時間
 	static constexpr float HIT_STOP_DURATION = 0.1f;
 
@@ -83,7 +79,6 @@ public:
 		const DirectX::SimpleMath::Matrix& proj
 	);
 
-	
 	/// <summary>
 	/// 描画ステートを設定
 	/// </summary>
@@ -100,13 +95,11 @@ public:
 	}
 
 private:
-
+	//攻撃リスト
 	std::vector<std::shared_ptr<AttackBase>> m_attacks;
 
-	
 	DirectX::CommonStates* m_states = nullptr;
 
 	//コリジョン消す
 	std::shared_ptr<DisplayCollision> m_displayCollision;
-
 };

@@ -3,12 +3,11 @@
  * @file   NormalEnemy.h
  * @brief  通常敵の管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/24
+ * @date   2026/07/01
  */
 
 #pragma once
 #include "pch.h"
-
 #include "EnemyBase.h"
 #include "Game/Common/DeviceResources.h"
 #include "Game/Collision/DisplayCollision.h"
@@ -44,7 +43,6 @@ private:
 	static constexpr float ATTACK_DISTANCE = 2.0f;
 	//復活する時の判定の高さ
 	static constexpr float RESPAWN_HEIGHT = 10.0f;
-
 	//攻撃ステートのタイマー
 	static constexpr float ATTACK_STATE_DURATION = 1.0f;
 	//クールダウン
@@ -211,7 +209,7 @@ private:
 	float m_rotationY = 0.0f;
 	DirectX::SimpleMath::Vector3 m_forward = { 0.0f, 0.0f, 0.0f };
 
-	//
+	//敵の攻撃パターン
 	std::vector<std::shared_ptr<EnemyAttackPattern>> m_attackPattern;
 	float m_meleeAttackCooldownTimer = 0.0f;
 
@@ -221,5 +219,4 @@ private:
 
 	//敵の個体差によってプレイヤーとの距離を変える
 	float m_stopDistance;
-
 };

@@ -3,16 +3,13 @@
  * @file   PlayerRenderer.cpp
  * @brief  プレイヤーキャラクターの描画を行うクラス
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "PlayerRenderer.h"
 #include "Game/Common/ObjectCharacter/ModelManager.h"
-
 #include "DDSTextureLoader.h"
-
-using namespace DirectX;
 
 //-----------------------------------------------------------------
 // コンストラクタ
@@ -29,11 +26,10 @@ PlayerRenderer::PlayerRenderer()
 void PlayerRenderer::Initialize(ID3D11Device* device)
 {
 	//共通ステートの初期化
-    m_states = std::make_unique<CommonStates>(device);
+    m_states = std::make_unique<DirectX::CommonStates>(device);
 
     DirectX::EffectFactory fx(device);
     fx.SetDirectory(L"Resources\\Models");
-
     
 	//モデルマネージャーからモデルを取得
     m_modelIdle = ModelManager::GetInstance()->GetIdleModel();
@@ -42,7 +38,7 @@ void PlayerRenderer::Initialize(ID3D11Device* device)
     m_materialDizzy = ModelManager::GetInstance()->GetDizzyMaterial();
 
     //影用テクスチャの読み込み
-    CreateDDSTextureFromFile(device, L"Resources\\Textures\\Shadow.dds", nullptr, m_shadowTexture.GetAddressOf());
+    DirectX::CreateDDSTextureFromFile(device, L"Resources\\Textures\\Shadow.dds", nullptr, m_shadowTexture.GetAddressOf());
 }
 
 //-----------------------------------------------------------------
@@ -62,7 +58,7 @@ void PlayerRenderer::Render(
     ShadowRenderer* shadowRenderer)
 {
 	//状態に応じたモデルを選択
-    Model* currentModel = m_modelIdle;
+    DirectX::Model* currentModel = m_modelIdle;
 
 	//ふらつき状態は通常モデルを使用
     switch (state)
@@ -78,10 +74,10 @@ void PlayerRenderer::Render(
 	//前方向ベクトルからY軸の回転角を計算
     float angleY = atan2(forward.x, forward.z);
 	//モデルの向きを調整するために180度回転
-    SimpleMath::Matrix rot = SimpleMath::Matrix::CreateRotationY(angleY + DirectX::XM_PI);
+    DirectX::SimpleMath::Matrix rot = DirectX::SimpleMath::Matrix::CreateRotationY(angleY + DirectX::XM_PI);
 
 	//ふらつき状態の揺れの計算
-    SimpleMath::Matrix dizzySway = SimpleMath::Matrix::Identity;
+    DirectX::SimpleMath::Matrix dizzySway = DirectX::SimpleMath::Matrix::Identity;
 	//ふらつき状態のときは、サイン波を使ってZ軸回りに揺れる行列を作成
     if (state == Player::PlayerState::Dizzy)
     {
@@ -89,18 +85,18 @@ void PlayerRenderer::Render(
         float swayAngle = sinf(dizzyRotationY * DIZZY_SWAY_SPEED) * DIZZY_SWAY_ANGLE;
 		
         //Z軸回りの回転行列を作成
-        dizzySway = SimpleMath::Matrix::CreateRotationZ(swayAngle);
+        dizzySway = DirectX::SimpleMath::Matrix::CreateRotationZ(swayAngle);
     }
 
 	//ワールド行列の計算
-    SimpleMath::Matrix world = 
-        rotationMatrix * dizzySway * rot * SimpleMath::Matrix::CreateTranslation(position);
+    DirectX::SimpleMath::Matrix world =
+        rotationMatrix * dizzySway * rot * DirectX::SimpleMath::Matrix::CreateTranslation(position);
 
     //影の描画
     if (stage && shadowRenderer && m_shadowTexture)
     {
 		//影の位置はプレイヤーの位置と同じX,ZでYを少し下げる
-        SimpleMath::Vector3 shadowPos = position;
+        DirectX::SimpleMath::Vector3 shadowPos = position;
 
 		//ステージの傾きに合わせて影も回転させる
         shadowRenderer->Render(
@@ -121,17 +117,16 @@ void PlayerRenderer::Render(
     if (state == Player::PlayerState::Dizzy && m_materialDizzy)
     {
 		//エフェクトの位置はプレイヤーの位置と同じX,ZでYを少し上げる
-        SimpleMath::Matrix birdTrans = SimpleMath::Matrix::CreateTranslation(position.x, position.y + DIZZY_EFFECT_OFFSET_Y, position.z);
-		
+        DirectX::SimpleMath::Matrix birdTrans = 
+            DirectX::SimpleMath::Matrix::CreateTranslation(position.x, position.y + DIZZY_EFFECT_OFFSET_Y, position.z);
         //エフェクトの大きさ
-        SimpleMath::Matrix birdScale = SimpleMath::Matrix::CreateScale(DIZZY_EFFECT_SCALE);
-		
+        DirectX::SimpleMath::Matrix birdScale = 
+            DirectX::SimpleMath::Matrix::CreateScale(DIZZY_EFFECT_SCALE);
         //エフェクトの回転はY軸でふらつきの回転に加えてさらに回転させる
-        SimpleMath::Matrix birdRot = SimpleMath::Matrix::CreateRotationY(dizzyRotationY);
-		
+        DirectX::SimpleMath::Matrix birdRot =
+            DirectX::SimpleMath::Matrix::CreateRotationY(dizzyRotationY);
         //ワールド行列の計算
-        SimpleMath::Matrix birdWorld = birdScale * birdRot * birdTrans;
-		
+        DirectX::SimpleMath::Matrix birdWorld = birdScale * birdRot * birdTrans;
         //エフェクトの描画
         m_materialDizzy->Draw(context, *m_states, birdWorld, view, proj);
     }

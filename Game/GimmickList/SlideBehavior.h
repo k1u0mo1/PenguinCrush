@@ -3,9 +3,8 @@
  * @file   SlideBehavior.h
  * @brief  滑る挙動のコンポーネントクラス
  * @author 國田知睦
- * @date   2026/06/11
+ * @date   2026/07/01
  */
-
 
 #pragma once
 #include "pch.h"
@@ -20,16 +19,10 @@ class SlideBehavior
 {
 private:
 
-	//--------------------------------
-	//定数
-	//--------------------------------
-	
 	//加速度
 	static constexpr float ACCELERATION_FORCE = 0.5f;
-
 	//摩擦力
 	static constexpr float FRICTION_FORCE = 2.0f;
-
 	//最小の値の大きさ
 	static constexpr float VELOCITY_THRESHOLD = 0.01f;
 
@@ -54,8 +47,6 @@ private:
 	
 	//自発的な移動に対する慣性
 	DirectX::SimpleMath::Vector3 m_slidingInertia = DirectX::SimpleMath::Vector3::Zero;
-
 	//傾斜による滑りの慣性
 	DirectX::SimpleMath::Vector3 m_currentSlideVelocity = DirectX::SimpleMath::Vector3::Zero;
-
 };

@@ -3,11 +3,10 @@
  * @file   Object.h
  * @brief  衝突判定用の座標・回転と、各種判定ボリュームをまとめた構造体のクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "SimpleMath.h"
 
 /// <summary>
@@ -18,10 +17,8 @@ struct  Object
 {
 	//位置
 	DirectX::SimpleMath::Vector3 position;
-
 	//回転
 	DirectX::SimpleMath::Quaternion rotate;
-
 	//衝突判定（球）
 	DirectX::BoundingSphere boundingSphere;
 
@@ -58,7 +55,6 @@ struct  Object
 	/// <returns>ワールド空間に変換 BoundingOrientedBox</returns>
 	DirectX::BoundingOrientedBox GetBoundingOrientedBox() const
 	{
-
 		DirectX::BoundingOrientedBox tmp;
 		DirectX::BoundingOrientedBox::CreateFromBoundingBox(tmp, boundingBox);
 		tmp.Center = DirectX::SimpleMath::Vector3::Transform(boundingBox.Center, rotate) + position;

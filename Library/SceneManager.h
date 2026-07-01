@@ -3,14 +3,11 @@
  * @file   StageManager.h
  * @brief  シーンを管理するマネージャークラス　
  * @author 國田知睦
- * @date   2026/06/10
+ * @date   2026/07/01
  */
 
 #pragma once
-
-//
 #define ESC_QUIT_ENABLE
-
 #ifdef ESC_QUIT_ENABLE
 #include "Keyboard.h"
 #endif
@@ -26,7 +23,6 @@ private:
 
 	// シーンマネージャーへのポインタ
 	SceneManager<T>* m_sceneManager;
-
 public:
 
 	/// <summary>
@@ -92,7 +88,6 @@ public:
 	/// </summary>
 	/// <returns>m_sceneManager</returns>
 	T* GetUserResources();
-
 };
 
 // シーンマネージャークラス
@@ -103,10 +98,8 @@ private:
 
 	// 共通でアクセスしたいオブジェクトへのポインタ
 	T* m_userResources;
-
 	// 実行中のシーンへのポインタ
 	Scene<T>* m_scene;
-
 	// 次のシーンへのポインタ
 	Scene<T>* m_nextScene;
 
@@ -120,7 +113,7 @@ public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	/// <param name="userResources"></param>
+	/// <param name="userResources">ユーザーリソース</param>
 	SceneManager(T* userResources = nullptr)
 		: m_userResources(userResources)
 		, m_scene(nullptr)
@@ -178,7 +171,6 @@ public:
 	/// </summary>
 	/// <returns>m_userResources</returns>
 	T* GetUserResources() { return m_userResources; }
-
 };
 
 // シーンの切り替え関数
@@ -249,19 +241,16 @@ void SceneManager<T>::Update(float elapsedTime)
 
 		// シーンを切り替え
 		m_scene = m_nextScene;
-
+		//次のシーンへのポインタをリセット
 		m_nextScene = nullptr;
-
 		// シーンにシーンマネージャーへのポインタを設定
 		m_scene->SetSceneManager(this);
-
 		// シーンの初期化処理
 		m_scene->Initialize();
 	}
 
 	// シーンの更新
 	if (m_scene) m_scene->Update(elapsedTime);
-
 }
 
 // 描画関数
@@ -299,6 +288,7 @@ void SceneManager<T>::DeleteScene()
 {
 	if (m_scene)
 	{
+		//シーン終了の処理
 		m_scene->Finalize();
 
 		delete m_scene;

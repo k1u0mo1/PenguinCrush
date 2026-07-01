@@ -3,18 +3,15 @@
  * @file   LevelNormal.h
  * @brief  ノーマルステージの管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/22
+ * @date   2026/07/01
  */
-
 
 #pragma once
 #include "LevelBase.h"
 #include "Game/EnemyList/EnemyBaseParameter.h"
-
 #include "Game/WeatherList/Rain.h"
 #include "Game/WeatherList/Snow.h"
 #include "Game/SoundList/AudioManager.h"
-
 
 /// <summary>
 /// ノーマルステージの管理を行うクラス
@@ -26,12 +23,15 @@ private:
     //敵の出現位置
     static constexpr float SPAWN_RANGE_MIN = -20.0f;
     static constexpr float SPAWN_RANGE_MAX = 20.0f;
-
     //敵の数
     static constexpr int ENEMY_COUNT = 2;
 
     //BGMの大きさ
     static constexpr float DEFAULT_BGM_VOLUME = 0.2f;
+
+    //画面サイズ
+    static constexpr int SCREEN_SIZE_WIDTH = 1280;
+    static constexpr int SCREEN_SIZE_HEIGHT = 720;
 
 public:
 
@@ -60,7 +60,7 @@ public:
 
         stageManager->AddStage(L"NormalStage",
             deviceResources->GetWindow(),
-            1280, 720,
+            SCREEN_SIZE_WIDTH, SCREEN_SIZE_HEIGHT,
             "Resources\\Stages\\NormalStage.bmp");
 
         stageManager->SetCurrentStage(L"NormalStage");
@@ -68,16 +68,16 @@ public:
         //天候　2択
         if (rand() % 2 == 0)
         {
+            //雨
             m_weather = std::make_unique<Rain>();
         }
         else
         {
+            //雪
             m_weather = std::make_unique<Snow>();
         }
-
         //天候の初期化
         m_weather->Initialize(deviceResources->GetD3DDevice());
-
 
         //ステージのBGM
         AudioManager* audio = AudioManager::GetInstance();
@@ -92,7 +92,6 @@ public:
         std::uniform_real_distribution<float> disX(SPAWN_RANGE_MIN, SPAWN_RANGE_MAX);
         std::uniform_real_distribution<float> disZ(SPAWN_RANGE_MAX, SPAWN_RANGE_MIN);
 
-
         //ループしてランダムな座標に入れていく
         for (int i = 0; i < ENEMY_COUNT; i++)
         {
@@ -105,9 +104,6 @@ public:
             //敵の呼び出し
             enemyManager->SpawnNormalEnemy(randomPos,EnemyData::BigNormalEnemy);
         }
-
-
-        
 
         //---------------------------------------
         // 魚（ギミック）の配置

@@ -1,61 +1,76 @@
 
-
 /**
  * @file   ModelCollision.cpp
  * @brief  ゲームのモデルの衝突判定を行うクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/01
  */
-
 
 #include "pch.h"
 #include "ModelCollision.h"
 
-using namespace DirectX;
+ //----------------------------------------------------------
+ // 別の衝突判定オブジェクトと衝突しているか判定
+ //----------------------------------------------------------
 
 bool ModelCollision::Intersects(const ModelCollision& other) const
 {
 	return m_boundingOrientedBox.Intersects(other.m_boundingOrientedBox);
 }
 
+//----------------------------------------------------------
+// 衝突判定全体を囲むAABBの最小座標を取得
+//----------------------------------------------------------
+
 DirectX::SimpleMath::Vector3 ModelCollision::GetAABBMin() const
 {
 	return DirectX::SimpleMath::Vector3();
 }
+//----------------------------------------------------------
+// 衝突判定全体を囲むAABBの最大座標を取得
+//----------------------------------------------------------
 
 DirectX::SimpleMath::Vector3 ModelCollision::GetAABBMax() const
 {
 	return DirectX::SimpleMath::Vector3();
 }
 
-//ModelCollision::ModelCollision(const DirectX::SimpleMath::Vector3& size)
-//{
-//}
+//----------------------------------------------------------
+// 衝突判定の中心座標を取得
+//----------------------------------------------------------
 
-
-
-//気を付ける
 const DirectX::SimpleMath::Vector3& ModelCollision::GetCenter() const
 {
 	return m_boundingOrientedBox.Center;
 }
-//気を付ける
+//----------------------------------------------------------
+// 衝突判定の中心座標を取得
+//----------------------------------------------------------
+
 const DirectX::SimpleMath::Vector3& ModelCollision::GetExtents() const
 {
 	return m_boundingOrientedBox.Extents;
 }
 
+//----------------------------------------------------------
 // コンストラクタ
+//----------------------------------------------------------
+
 ModelCollision::ModelCollision(CollisionType type)
-	: m_type(type)
+	: 
+	m_type(type)
 {
 }
 
 // ------------------------------------------------------------------------------- //
 
+//----------------------------------------------------------
 // コンストラクタ
+//----------------------------------------------------------
+
 ModelCollisionSphere::ModelCollisionSphere(DirectX::Model* pModel)
-	: ModelCollision(ModelCollision::CollisionType::Sphere)
+	: 
+	ModelCollision(ModelCollision::CollisionType::Sphere)
 {
 	// コリジョン情報をモデルデータから取得
 	for (auto& mesh : pModel->meshes) {
@@ -65,7 +80,10 @@ ModelCollisionSphere::ModelCollisionSphere(DirectX::Model* pModel)
 	m_dstSpheres.resize(pModel->meshes.size());
 }
 
+//----------------------------------------------------------
 // 衝突判定情報の更新
+//----------------------------------------------------------
+
 void ModelCollisionSphere::UpdateBoundingInfo(
 	DirectX::SimpleMath::Vector3 position,
 	DirectX::SimpleMath::Quaternion rotate,
@@ -81,6 +99,9 @@ void ModelCollisionSphere::UpdateBoundingInfo(
 		m_dstSpheres[i] = dst;
 	}
 }
+//----------------------------------------------------------
+// 境界情報
+//----------------------------------------------------------
 
 void ModelCollisionSphere::UpdateBoundingInfo(const DirectX::SimpleMath::Matrix& world)
 {
@@ -92,19 +113,28 @@ void ModelCollisionSphere::UpdateBoundingInfo(const DirectX::SimpleMath::Matrix&
 	}
 }
 
+//----------------------------------------------------------
 // 衝突判定を行う関数
+//----------------------------------------------------------
+
 bool ModelCollisionSphere::Intersects(ModelCollision* collision)
 {
 	return ModelCollision::Intersects<ModelCollisionSphere, DirectX::BoundingSphere>(this, collision);
 }
 
+//----------------------------------------------------------
 // 内包判定を行う関数
+//----------------------------------------------------------
+
 bool ModelCollisionSphere::Contains(ModelCollision* collision)
 {
 	return ModelCollision::Contains<ModelCollisionSphere, DirectX::BoundingSphere>(this, collision);
 }
 
+//----------------------------------------------------------
 // 衝突判定の表示に登録する関数
+//----------------------------------------------------------
+
 void ModelCollisionSphere::AddDisplayCollision(DisplayCollision* displayCollision)
 {
 	for (auto& data : GetBoundingInfo())
@@ -115,9 +145,13 @@ void ModelCollisionSphere::AddDisplayCollision(DisplayCollision* displayCollisio
 
 // ------------------------------------------------------------------------------- //
 
+//----------------------------------------------------------
 // コンストラクタ
+//----------------------------------------------------------
+
 ModelCollisionBox::ModelCollisionBox(DirectX::Model* pModel)
-	: ModelCollision(ModelCollision::CollisionType::AABB)
+	: 
+	ModelCollision(ModelCollision::CollisionType::AABB)
 {
 	// コリジョン情報をモデルデータから取得
 	for (auto& mesh : pModel->meshes) {
@@ -127,7 +161,10 @@ ModelCollisionBox::ModelCollisionBox(DirectX::Model* pModel)
 	m_dstBoxes.resize(pModel->meshes.size());
 }
 
+//----------------------------------------------------------
 // 衝突判定情報の更新
+//----------------------------------------------------------
+
 void ModelCollisionBox::UpdateBoundingInfo(
 	DirectX::SimpleMath::Vector3 position,
 	DirectX::SimpleMath::Quaternion rotate,
@@ -143,6 +180,9 @@ void ModelCollisionBox::UpdateBoundingInfo(
 		m_dstBoxes[i] = dst;
 	}
 }
+//----------------------------------------------------------
+// 境界情報
+//----------------------------------------------------------
 
 void ModelCollisionBox::UpdateBoundingInfo(const DirectX::SimpleMath::Matrix& world)
 {
@@ -154,19 +194,28 @@ void ModelCollisionBox::UpdateBoundingInfo(const DirectX::SimpleMath::Matrix& wo
 	}
 }
 
+//----------------------------------------------------------
 // 衝突判定を行う関数
+//----------------------------------------------------------
+
 bool ModelCollisionBox::Intersects(ModelCollision* collision)
 {
 	return ModelCollision::Intersects<ModelCollisionBox, DirectX::BoundingBox>(this, collision);
 }
 
+//----------------------------------------------------------
 // 内包判定を行う関数
+//----------------------------------------------------------
+
 bool ModelCollisionBox::Contains(ModelCollision* collision)
 {
 	return ModelCollision::Contains<ModelCollisionBox, DirectX::BoundingBox>(this, collision);
 }
 
+//----------------------------------------------------------
 // 衝突判定の表示に登録する関数
+//----------------------------------------------------------
+
 void ModelCollisionBox::AddDisplayCollision(DisplayCollision* displayCollision)
 {
 	for (auto& data : GetBoundingInfo())
@@ -176,6 +225,9 @@ void ModelCollisionBox::AddDisplayCollision(DisplayCollision* displayCollision)
 }
 
 // ------------------------------------------------------------------------------- //
+//----------------------------------------------------------
+// 現在の中心座標を取得
+//----------------------------------------------------------
 
 DirectX::SimpleMath::Vector3 ModelCollisionOrientedBox::GetCenter() const
 {
@@ -183,6 +235,9 @@ DirectX::SimpleMath::Vector3 ModelCollisionOrientedBox::GetCenter() const
 		return m_dstOrientedBoxes[0].Center;
 	return DirectX::SimpleMath::Vector3::Zero;
 }
+//----------------------------------------------------------
+// 現在のサイズを取得
+//----------------------------------------------------------
 
 DirectX::SimpleMath::Vector3 ModelCollisionOrientedBox::GetExtents() const
 {
@@ -190,9 +245,13 @@ DirectX::SimpleMath::Vector3 ModelCollisionOrientedBox::GetExtents() const
 		return m_dstOrientedBoxes[0].Extents;
 	return DirectX::SimpleMath::Vector3::Zero;
 }
+//----------------------------------------------------------
+// デフォルトコンストラクタ
+//----------------------------------------------------------
 
 ModelCollisionOrientedBox::ModelCollisionOrientedBox()
-	: ModelCollision(ModelCollision::CollisionType::OBB)
+	: 
+	ModelCollision(ModelCollision::CollisionType::OBB)
 {
 	DirectX::BoundingOrientedBox box;
 	box.Center = DirectX::SimpleMath::Vector3::Zero;
@@ -202,9 +261,13 @@ ModelCollisionOrientedBox::ModelCollisionOrientedBox()
 	m_dstOrientedBoxes.push_back(box);
 }
 
+//----------------------------------------------------------
 // コンストラクタ
+//----------------------------------------------------------
+
 ModelCollisionOrientedBox::ModelCollisionOrientedBox(DirectX::Model* pModel)
-	: ModelCollision(ModelCollision::CollisionType::OBB)
+	: 
+	ModelCollision(ModelCollision::CollisionType::OBB)
 {
 	// コリジョン情報をモデルデータから取得
 	for (auto& mesh : pModel->meshes) {
@@ -214,7 +277,10 @@ ModelCollisionOrientedBox::ModelCollisionOrientedBox(DirectX::Model* pModel)
 	m_dstOrientedBoxes.resize(pModel->meshes.size());
 }
 
+//----------------------------------------------------------
 // 衝突判定情報の更新
+//----------------------------------------------------------
+
 void ModelCollisionOrientedBox::UpdateBoundingInfo(
 	DirectX::SimpleMath::Vector3 position,
 	DirectX::SimpleMath::Quaternion rotate,
@@ -230,11 +296,13 @@ void ModelCollisionOrientedBox::UpdateBoundingInfo(
 
 		dst.Orientation = rotate;
 		m_dstOrientedBoxes[i] = dst;
-
 	}
 }
 
-//ステージの大きさを揃える用
+///----------------------------------------------------------
+// 境界情報
+//----------------------------------------------------------
+
 void ModelCollisionOrientedBox::UpdateBoundingInfo(
 	const DirectX::SimpleMath::Matrix& world)
 {
@@ -253,19 +321,27 @@ void ModelCollisionOrientedBox::UpdateBoundingInfo(
 	}
 }
 
+//----------------------------------------------------------
 // 衝突判定を行う関数
+//----------------------------------------------------------
+
 bool ModelCollisionOrientedBox::Intersects(ModelCollision* collision)
 {
 	return ModelCollision::Intersects<ModelCollisionOrientedBox, DirectX::BoundingOrientedBox>(this, collision);
 }
 
+//----------------------------------------------------------
 // 内包判定を行う関数
+//----------------------------------------------------------
 bool ModelCollisionOrientedBox::Contains(ModelCollision* collision)
 {
 	return ModelCollision::Contains<ModelCollisionOrientedBox, DirectX::BoundingOrientedBox>(this, collision);
 }
 
+//----------------------------------------------------------
 // 衝突判定の表示に登録する関数
+//----------------------------------------------------------
+
 void ModelCollisionOrientedBox::AddDisplayCollision(DisplayCollision* displayCollision)
 {
 	for (auto& data : GetBoundingInfo())
@@ -273,6 +349,9 @@ void ModelCollisionOrientedBox::AddDisplayCollision(DisplayCollision* displayCol
 		displayCollision->AddBoundingOrientedBox(data);
 	}
 }
+//----------------------------------------------------------
+// 中心座標を直接設定
+//----------------------------------------------------------
 
 void ModelCollisionOrientedBox::SetCenter(const DirectX::SimpleMath::Vector3& center)
 {
@@ -281,6 +360,9 @@ void ModelCollisionOrientedBox::SetCenter(const DirectX::SimpleMath::Vector3& ce
 		box.Center = center;
 	}
 }
+//----------------------------------------------------------
+// サイズを直接設定
+//----------------------------------------------------------
 
 void ModelCollisionOrientedBox::SetExtents(const DirectX::SimpleMath::Vector3& extents)
 {

@@ -200,10 +200,10 @@ private:
 	std::unique_ptr<Rain> m_rain;
 
 private:
+
 	//シーン移動中のフラグ
 	bool m_isChangingScene = false;
 	//ステージ
 	int m_nextScene = 0;
-
 };
 

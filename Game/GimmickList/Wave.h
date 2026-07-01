@@ -3,22 +3,17 @@
  * @file   Wave.h
  * @brief  水面の波を動的に生成・描画し、物理的な高さや傾きを提供するギミッククラス
  * @author 國田知睦
- * @date   2026/06/12
+ * @date   2026/07/01
  */
 
-
 #pragma once
-
 #include "pch.h"
-
 #include "Game/Common/DeviceResources.h"
 #include "Game/Common/StepTimer.h"
 #include "Effects.h"
-
 //継承/////////////////////////
 #include "Game/GimmickList/IGimmick.h"
 ///////////////////////////////
-
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -30,19 +25,19 @@
 /// </summary>
 struct WaveConstantBuffer
 {
+    //ワールド行列
     DirectX::SimpleMath::Matrix matWorld;
-
+    //ビュー行列
     DirectX::SimpleMath::Matrix matView;
-
+    //射影行列
     DirectX::SimpleMath::Matrix matProj;
-
+    //時間
     float time;
-
+    //波の高さ
     int isCubeMode;
-
+    //補助データ
     DirectX::SimpleMath::Vector2 padding;
 };
-
 
 /// <summary>
 /// 水面の波を動的に生成・描画し、物理的な高さや傾きを提供するギミッククラス
@@ -54,7 +49,6 @@ private:
     //------------------------------------------------------
     //波の描画スケール＆位置関連
     //------------------------------------------------------
-
     //波のX軸スケール
     static constexpr float WAVE_SCALE_X = 10.0f;
     //波のY軸スケール
@@ -105,6 +99,13 @@ private:
     //波4の高さ（振幅）の倍率
     static constexpr float WAVE4_AMP_SCALE = 0.5f;   
 
+    //波の傾き計算用のオフセット
+    static constexpr float GRADIENT_CALC_OFFSET = 0.1f;
+    //波の傾き計算用の分母
+    static constexpr float GRADIENT_CALC_DENOMINATOR = GRADIENT_CALC_OFFSET * 2.0f;
+    //波の傾き計算用の半分の係数
+    static constexpr float HALF_COEFFICIENT = 0.5f;
+
 private:
 
     /// <summary>
@@ -116,7 +117,6 @@ private:
         DirectX::SimpleMath::Vector3 position;
         //色
         DirectX::SimpleMath::Vector4 color;
-        
     };
 
     //形状と解像度に関する定数-------------
@@ -137,7 +137,6 @@ private:
     static constexpr float WORLD_Y = -2.0f;
     //波のスケール
     static constexpr float WORLD_SCALE = 10.0f;
-
     
     /// <summary>
     /// 波の高さ Y を計算 
@@ -152,33 +151,26 @@ private:
         float time
         )const 
     {
-
         //頂点のインデックスをワールド座標のスケールに合わせる
         float localX = x * GRID_SPACING;
         float localZ = z * GRID_SPACING;
-
         //-------------------------------------------
         //複数の波の計算を合成してリアルな波にする
         //-------------------------------------------
 
         //波１　ベースとなる揺れが大きくゆったり
         float waveSlowly = sinf(localX * WAVE_FREQUENCY + time * WAVE1_SPEED);
-
         //波２　少し細かく動きが速い
         float waveQuick = cosf(localZ * WAVE_AMPLIYUDE * WAVE2_FREQ_SCALE + time * WAVE2_SPEED) * WAVE2_AMP_SCALE;
-
         //波３　斜めの方向へ細かい波
         float waveSlanting = sinf((localX + localZ) * WAVE3_FREQ_SCALE + time * WAVE3_SPEED) * WAVE3_AMP_SCALE;
-
         //波４　逆斜めの方向の細かい波
         float waveReverse = cosf((localX - localZ)   * WAVE4_FREQ_SCALE + time * WAVE4_SPEED) * WAVE4_AMP_SCALE;
-
         //すべての波を合成
         float wave = waveSlowly + waveQuick + (waveSlanting - waveReverse);
 
         //波を返す
         return wave * WAVE_AMPLIYUDE ;
-        
     }
 
     /// <summary>
@@ -199,7 +191,6 @@ private:
             DirectX::Colors::Cyan.v, t
         );
     }
-
 
 public:
 
@@ -295,8 +286,7 @@ private:
 
     //リソース
     DX::DeviceResources* m_deviceResources;
-
-    //  射影行列
+    //射影行列
     DirectX::SimpleMath::Matrix m_proj;
 
     std::unique_ptr<DirectX::CommonStates> m_states;
@@ -308,15 +298,13 @@ private:
 
     //波の生成用で使うやつ
     std::vector<WaveVertex> m_waveVertices;
-
     //揺れの時間
     float m_time = 0.0f;
 
     //PrimitiveBatchで描画用で使うやつ
     std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> m_batch;
-
+    
     Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
-
 
     //頂点バッファ
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
@@ -331,12 +319,10 @@ private:
 
     //自作シェーダを扱うためのポインタ
     Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-
     Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
     //定数バッファ
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
     
     //波の切り替え
     bool m_isDotMode = false;
-
 };

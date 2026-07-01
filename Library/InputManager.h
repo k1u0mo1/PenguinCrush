@@ -3,14 +3,13 @@
  * @file   InputManager.h
  * @brief  入力関連をまとめて管理するマネージャークラス　
  * @author 國田知睦
- * @date   2026/06/10
+ * @date   2026/07/01
  */
 
 #pragma once
 
 #include <Keyboard.h>
 #include <Mouse.h>
-
 
 /// <summary>
 /// ゲーム全体のキーボード＆マウスの入力を更新・管理するマネージャークラス
@@ -20,23 +19,17 @@ class InputManager
 public:
 
 	//キーボード/////////////////////////////////////////////
-
 	//キーボードの現在の状態
 	DirectX::Keyboard::State kb = {};
-
 	//キーボードの判定をするトラッカー
 	DirectX::Keyboard::KeyboardStateTracker kbTracker;
-
 	/////////////////////////////////////////////////////////
 
 	//マウス/////////////////////////////////////////////////
-
 	//マウスの現在の状態
 	DirectX::Mouse::State mouse = {};
-
 	//マウスの判定をするトラッカー
 	DirectX::Mouse::ButtonStateTracker mouseTracker;
-
 	//////////////////////////////////////////////////////////
 
 	/// <summary>
@@ -47,16 +40,12 @@ public:
 	{
 		//キーボードの状態を取得
 		kb = DirectX::Keyboard::Get().GetState();
-		
 		//押したor離した 更新
 		kbTracker.Update(kb);
-
 		//マウスの状態を取得
 		mouse = DirectX::Mouse::Get().GetState();
-
 		//押したor離した 更新
 		mouseTracker.Update(mouse);
-
 	}
 
 	/// <summary>
@@ -66,10 +55,8 @@ public:
 	{
 		//キーボードの更新をリセット
 		kbTracker.Reset();
-
 		//マウスの更新をリセット
 		mouseTracker.Reset();
-
 	}
 
 	//-----------------------------------------------------
@@ -113,6 +100,4 @@ public:
 	{
 		return kbTracker.pressed.Enter;
 	}
-
-
 };

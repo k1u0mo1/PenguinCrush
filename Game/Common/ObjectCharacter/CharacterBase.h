@@ -3,12 +3,11 @@
  * @file   CharacterBase.h
  * @brief  キャラクター共通の情報の管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/17
+ * @date   2026/07/01
  */
 
 #pragma once
 #include "pch.h"
-
 #include <memory>
 
 class ModelCollision;
@@ -23,16 +22,12 @@ protected:
 	static constexpr float GRAVITY_FORCE = -100.8f;
 	//ノックバックの力
 	static constexpr float KNOCKBACK_DRAG = 10.0f;
-
 	//落下しているとみなすY座標
 	static constexpr float FALL_LIMIT_Y = -5.0f;
-	
 	//落下ダメージ
 	static constexpr float FALL_DAMAGE = 20.0f;
-
 	//水しぶきの粒子数
 	static constexpr int SPLASH_PARTICLE_COUNT = 20;
-
 	//水面の基本的な高さ
 	static constexpr float WATER_SURFACE_Y = 0.0f;
 
@@ -51,20 +46,20 @@ public:
 	/// <summary>
 	/// オブジェクトの座標を取得
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>現在の座標</returns>
 	const DirectX::SimpleMath::Vector3& GetPosition() const { return m_position;}
 
 	/// <summary>
 	/// オブジェクトの体力が０かどうか
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>体力が０以下ならtrue　生存していたらfalse</returns>
 	bool IsDead() const { return m_hp <= 0.0f; }
 
 	/// <summary>
 	/// 共通
 	/// </summary>
-	/// <param name="dt"></param>
-	/// <param name="stage"></param>
+	/// <param name="dt">経過時間</param>
+	/// <param name="stage">ステージオブジェクトのポインタ</param>
 	void UpdatePhysice(float dt, Stage* stage);
 
 	/// <summary>

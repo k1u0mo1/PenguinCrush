@@ -3,13 +3,12 @@
  * @file   SelectScene.h
  * @brief  選択画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/06/25
+ * @date   2026/07/01
  */
 
 #pragma once
 
 //使用クラス----------------
-
 #include "pch.h"
 #include "UserResources.h"
 #include "Library/SceneManager.h"
@@ -18,7 +17,7 @@
 //波
 #include "Game/GimmickList/WaveManager.h"
 
-//モデル出すよう
+//モデル
 #include "Model.h"
 #include "Effects.h"
 #include <CommonStates.h>
@@ -147,7 +146,6 @@ public:
 		DirectX::SpriteEffects effects = DirectX::SpriteEffects_None
 	);
 
-	
 private:
 
 	//ステージ情報をまとめる
@@ -170,7 +168,7 @@ private:
 	/// ステージが解放されているかを判定するヘルパー関数
 	/// </summary>
 	/// <param name="stageUndex">ステージ番号</param>
-	/// <returns></returns>
+	/// <returns>ステージ番号を返す</returns>
 	bool IsStageUnlocked(int stageIndex) const;
 
 private:
@@ -193,7 +191,6 @@ private:
 	
 	//２D描画
 	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
-	
 	// 描画ステート
 	std::unique_ptr<DirectX::CommonStates> m_states;
 
@@ -219,5 +216,4 @@ private:
 private:
 	//シーン移動中のフラグ
 	bool m_isChangingScene = false;
-
 };

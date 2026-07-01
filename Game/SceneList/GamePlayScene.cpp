@@ -115,6 +115,15 @@ void GamePlayScene::Update(float elapsedTime)
 	//BGMの更新
 	AudioManager::GetInstance()->Update();
 
+	//-------------------------------------------------
+	//カメラの更新
+	//-------------------------------------------------
+
+	if (UpdateCamera())
+	{
+		return;
+	}
+
 	//ヒットストップの更新
 	m_hitStop->HitStopUpdate(elapsedTime);
 	//ヒットストップが有効なときは時間を止める
@@ -291,12 +300,6 @@ void GamePlayScene::Update(float elapsedTime)
 	}
 
 	//-------------------------------------------------
-	//カメラの更新
-	//-------------------------------------------------
-
-	UpdateCamera();
-
-	//-------------------------------------------------
 	//魚の更新
 	//-------------------------------------------------
 
@@ -368,7 +371,7 @@ void GamePlayScene::Update(float elapsedTime)
 void GamePlayScene::Render()
 {
 	auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
-	SimpleMath::Matrix view;
+	DirectX::SimpleMath::Matrix view;
 	//-------------------------------------------------
 	//カメラの取得
 	//-------------------------------------------------
@@ -473,17 +476,17 @@ void GamePlayScene::Render()
 	// ----------------------------------------------------
 	//  ボタンUIテクスチャの描画
 	// ----------------------------------------------------
-	m_spriteBatch->Begin(SpriteSortMode_Deferred, m_states->NonPremultiplied());
+	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_states->NonPremultiplied());
 
 	if (m_textureButtonUI1)
 	{
 		//ボタンUI1
-		m_spriteBatch->Draw(m_textureButtonUI1.Get(), SimpleMath::Vector2(0, 0));
+		m_spriteBatch->Draw(m_textureButtonUI1.Get(), DirectX::SimpleMath::Vector2(0, 0));
 	}
 	if (m_textureButtonUI2)
 	{
 		//ボタンUI2
-		m_spriteBatch->Draw(m_textureButtonUI2.Get(), SimpleMath::Vector2(0, 0));
+		m_spriteBatch->Draw(m_textureButtonUI2.Get(), DirectX::SimpleMath::Vector2(0, 0));
 	}
 
 	m_spriteBatch->End();
@@ -558,8 +561,8 @@ void GamePlayScene::CreateDeviceDependentResources()
 	//-------------------------------------------------
 	//テクスチャの読み込み
 	//-------------------------------------------------
-	CreateWICTextureFromFile(device, L"Resources\\Textures\\Try.png", nullptr, m_textureButtonUI1.GetAddressOf());
-	CreateWICTextureFromFile(device, L"Resources\\Textures\\Back.png", nullptr, m_textureButtonUI2.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Try.png", nullptr, m_textureButtonUI1.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Back.png", nullptr, m_textureButtonUI2.GetAddressOf());
 	//-------------------------------------------------
 	//ステージとステージレベルの構築
 	//-------------------------------------------------
@@ -604,8 +607,8 @@ void GamePlayScene::CreateWindowSizeDependentResources()
 	//-------------------------------------------------
 	//射影行列を作成
 	//-------------------------------------------------
-	m_proj = SimpleMath::Matrix::CreatePerspectiveFieldOfView(
-		XMConvertToRadians(CAMERA_FOV),
+	m_proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(
+		DirectX::XMConvertToRadians(CAMERA_FOV),
 		static_cast<float>(rect.right) / static_cast<float>(rect.bottom),
 		CAMERA_NEAR_CLIP, CAMERA_FAR_CLIP
 	);
@@ -726,10 +729,10 @@ void GamePlayScene::SceneChange()
 }
 
 //-----------------------------------------------------------------
-// カメラの更新
+// カメラの切り替え
 //-----------------------------------------------------------------
 
-void GamePlayScene::UpdateCamera()
+bool GamePlayScene::UpdateCamera()
 {
 	auto input = GetUserResources()->GetInputManager();
 	// [1] でカメラを切り替える
@@ -761,6 +764,7 @@ void GamePlayScene::UpdateCamera()
 			//デバッグカメラの更新
 			m_debugCamera->Update();
 		}
+		return true;
 	}
 	else // ゲーム用
 	{
@@ -773,4 +777,6 @@ void GamePlayScene::UpdateCamera()
 			);
 		}
 	}
+	//通常プレイ
+	return false;
 }

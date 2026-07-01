@@ -2,22 +2,16 @@
  * @file   RushE.h
  * @brief  敵の突進攻撃クラス
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "pch.h"
-
 #include "Game/Common/DeviceResources.h"
 #include "Game/Common/StepTimer.h"
-
 #include "Game/Camera/PlayerCamera.h"
-
 #include "Game/Collision/DisplayCollision.h"
-
 #include "Game/Collision/ModelCollision.h"
-
 #include "Game/EnemyList/EnemyAttackList/EnemyAttackBase.h"
 
 class EnemyBase;
@@ -46,14 +40,11 @@ private:
 
     //当たり判定のサイズ
     static constexpr float DEFAULT_BOUNDING_SIZE = 0.3f;
-
     //コリジョンの当たり判定のサイズ
     static constexpr DirectX::SimpleMath::Vector3 COLLISION_SIZE =
         DirectX::SimpleMath::Vector3(1.0f, 1.5f, 1.0f);
-
     //デバックの当たり判定の線の太さ
     static constexpr float DEBUG_COLLISION_LINE_THICKNESS = 0.5f;
-
     //サイズ
     static constexpr float SCALE_SIZE = 1.0f;
 
@@ -140,25 +131,23 @@ private:
     DirectX::BoundingBox GetBoundingBox() const;
 
 private:
-
+    //デバイスリソース
     DX::DeviceResources* m_deviceResources;
-
+    //突進モデル
     std::shared_ptr<DirectX::Model> m_rushModel;
-
+    //座標
     DirectX::SimpleMath::Vector3 m_position;
-
+    //方向（前方）
     DirectX::SimpleMath::Vector3 m_forward;
 
     std::unique_ptr<DirectX::CommonStates> m_states;
 
     //長さ
     float m_lifetime;
-
+    //当たり判定
     std::unique_ptr<ModelCollisionOrientedBox> m_collision;
-
     std::shared_ptr<DisplayCollision> m_displayCollision;
 
     //攻撃を行う敵のポインタ
     EnemyBase* m_enemy;
-
 };

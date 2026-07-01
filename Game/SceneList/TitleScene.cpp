@@ -3,30 +3,26 @@
  * @file   TitleScene.h
  * @brief  タイトル画面の初期化・更新・描画を管理するシーンクラス
  * @author 國田知睦
- * @date   2026/06/11
+ * @date   2026/07/01
  */
 
 #include "pch.h"
+#include <WICTextureLoader.h>
 #include "TitleScene.h"
 
 //タイトルシーンー＞選択シーンに移動
 #include "SelectScene.h"
 
-#include <WICTextureLoader.h>
-
 #include "Game/Common/ReadData.h"
-
-using namespace DirectX;
-using namespace DirectX::SimpleMath;
 
 //-----------------------------------------------------------------
 // コンストラクタ
 //-----------------------------------------------------------------
 
 TitleScene::TitleScene()
-	: m_deviceResources()
+	: 
+	m_deviceResources()
 {
-
 }
 
 //-----------------------------------------------------------------
@@ -35,6 +31,7 @@ TitleScene::TitleScene()
 
 void TitleScene::Initialize()
 {
+	//デバイスリソース
 	m_deviceResources = GetUserResources()->GetDeviceResources();
 
 	CreateDeviceDependentResources();
@@ -42,10 +39,8 @@ void TitleScene::Initialize()
 
 	//カーソルの位置をリセット
 	m_currentCursor = MenuType::Start;
-
 	// フェードイン
 	GetUserResources()->GetTransitionMask()->Open();
-
 }
 
 //-----------------------------------------------------------------
@@ -54,21 +49,14 @@ void TitleScene::Initialize()
 
 void TitleScene::Update(float elapsedTime)
 {
-	
+	//キーボード用
 	auto input = GetUserResources()->GetInputManager();
-
-	////エンターキーを押すとシーンが変わる
-	//if (input->kbTracker.pressed.Enter)
-	//{
-	//	ChangeScene<SelectScene>();
-	//}
 	
 	//波を変更
 	if (input->kbTracker.pressed.Tab)
 	{
 		m_waveManager->ToggleMode();
 	}
-
 
 	//計算しやすいようにintに変換
 	//カーソルの位置
@@ -95,9 +83,8 @@ void TitleScene::Update(float elapsedTime)
 	//計算したintを戻す
 	m_currentCursor = static_cast<MenuType>(cursorInt);
 
-
+	//フェードアウト
 	auto transitionMask = GetUserResources()->GetTransitionMask();
-
 	//フェード
 	if (m_isChangingScene)
 	{
@@ -113,16 +100,11 @@ void TitleScene::Update(float elapsedTime)
 	{
 		//決定音
 		AudioManager::GetInstance()->Play("SE_Click");
-
-		
         if (m_currentCursor == MenuType::Start)
 		{
-			// スタート -> セレクト画面へ
-			//ChangeScene<SelectScene>();
-
+			//シーンの変更を可
 			m_isChangingScene = true;
 			transitionMask->Close();
-			
 		}
 		else
 		{
@@ -136,7 +118,7 @@ void TitleScene::Update(float elapsedTime)
 	{
 		m_waveManager->Update(elapsedTime);
 	}
-
+	//雪（エフェクト）
 	if (m_snow)
 	{
 		m_snow->Update(elapsedTime);
@@ -147,7 +129,6 @@ void TitleScene::Update(float elapsedTime)
 	{
 		m_backgroundStage->Update(elapsedTime, m_waveManager.get());
 	}
-
 }
 
 //-----------------------------------------------------------------
@@ -156,28 +137,17 @@ void TitleScene::Update(float elapsedTime)
 
 void TitleScene::Render()
 {
-	/*auto debugFont = GetUserResources()->GetDebugFont();*/
-
-	////どのシーンか描画する
-	//debugFont->AddString(L"TitleScene", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight()));
-	//debugFont->AddString(L"ChangeScene: Enter", SimpleMath::Vector2(0.0f, 60.0f));
-
 	auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
-	/*auto states = GetUserResources()->GetCommonStates();*/
-
 	auto size = GetUserResources()->GetDeviceResources()->GetOutputSize();
-
 
 	//----------------------------------------------
 	//３D背景を描画
 	//----------------------------------------------
-
 	//波
 	if (m_waveManager)
 	{
 		m_waveManager->Render(context, m_view, m_proj);
 	}
-
 	//ステージ
 	if (m_backgroundStage)
 	{
@@ -187,25 +157,23 @@ void TitleScene::Render()
 	if (m_snow)
 	{
 		// カメラの位置を渡す必要がある
-		Vector3 eyePos(0.0f, 5.0f, -15.0f);
+		DirectX::SimpleMath::Vector3 eyePos(0.0f, 5.0f, -15.0f);
 		m_snow->Render(context, m_view, m_proj, eyePos);
 	}
-
 
 	float screenW = float(size.right - size.left);
 	float screenH = float(size.bottom - size.top);
 	float centerX = screenW / 2.0f;
 
 	//2D画像を描画
-	m_spriteBatch->Begin(SpriteSortMode_Deferred, m_states->NonPremultiplied());
+	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_states->NonPremultiplied());
 	
 	if (m_textureButtonUI)
 	{
 		//ボタンUI
-		m_spriteBatch->Draw(m_textureButtonUI.Get(), SimpleMath::Vector2(0, 0));
+		m_spriteBatch->Draw(m_textureButtonUI.Get(), DirectX::SimpleMath::Vector2(0, 0));
 	}
 
-	
 	//--------------------------------------
 	//タイトル
 	//--------------------------------------
@@ -216,13 +184,13 @@ void TitleScene::Render()
 		m_textureTitle->GetResource(&res);
 		CD3D11_TEXTURE2D_DESC desc;
 		Microsoft::WRL::ComPtr<ID3D11Texture2D>(reinterpret_cast<ID3D11Texture2D*>(res.Get()))->GetDesc(&desc);
-		Vector2 origin(desc.Width / 2.0f, desc.Height / 2.0f);
+		DirectX::SimpleMath::Vector2 origin(desc.Width / 2.0f, desc.Height / 2.0f);
 
 		m_spriteBatch->Draw(
 			m_textureTitle.Get(),
-			Vector2(centerX, screenH * 0.3f), // 上から30%の位置
-			nullptr, Colors::White, 0.0f, origin,
-			1.0f // スケール
+			DirectX::SimpleMath::Vector2(centerX, screenH * TITLE_POSITION),
+			nullptr, DirectX::Colors::White, 0.0f, origin,
+			TITLE_SIZE // スケール
 		);
 	}
 
@@ -242,16 +210,14 @@ void TitleScene::Render()
 	{
 		//現在の回数とカーソルの位置が一致しているか
 		bool isSelected = (static_cast<int>(m_currentCursor) == i);
-
 		//選択されていたらサイズを大きく
 		float buttonScale = isSelected ? BUTTON_SCALE_SELECTED : BUTTON_SCALE_NORMAL;
-
 		//選択されていたら色を変更
-		XMVECTOR color = isSelected ? Colors::White : Colors::Gray;
+		DirectX::XMVECTOR color = isSelected ? DirectX::Colors::White : DirectX::Colors::Gray;
 
 		DrawTextureCenter(
 			buttonTextures[i],
-			Vector2(centerX, startY + (stepY * i)),
+			DirectX::SimpleMath::Vector2(centerX, startY + (stepY * i)),
 			buttonScale, color);
 	}
 
@@ -264,16 +230,17 @@ void TitleScene::Render()
 		int cursorIndex = static_cast<int>(m_currentCursor);
 		//カーソルに応じたY座標を出す
 		float cursorY = startY + (stepY * cursorIndex);
-
 		//左側の矢印
-		DrawTextureCenter(m_textureCursor.Get(), SimpleMath::Vector2(centerX - CURSOR_OFFSET_X, cursorY), CURSOR_SCALE);
+		DrawTextureCenter(m_textureCursor.Get(),
+			DirectX::SimpleMath::Vector2(centerX - CURSOR_OFFSET_X, cursorY),
+			CURSOR_SCALE);
 		//右側の矢印 反転
-		DrawTextureCenter(m_textureCursor.Get(), SimpleMath::Vector2(centerX + CURSOR_OFFSET_X, cursorY), CURSOR_SCALE, Colors::White, SpriteEffects_FlipHorizontally);
-
+		DrawTextureCenter(m_textureCursor.Get(),
+			DirectX::SimpleMath::Vector2(centerX + CURSOR_OFFSET_X, cursorY),
+			CURSOR_SCALE, DirectX::Colors::White,
+			DirectX::SpriteEffects_FlipHorizontally);
 	}
-
 	m_spriteBatch->End();
-
 }
 
 //-----------------------------------------------------------------
@@ -282,7 +249,6 @@ void TitleScene::Render()
 
 void TitleScene::Finalize()
 {
-
 }
 
 //-----------------------------------------------------------------
@@ -298,18 +264,18 @@ void TitleScene::CreateDeviceDependentResources()
 	//基本リソース
 	//---------------------------------------------------
 	//スプライトバッチ
-	m_spriteBatch = std::make_unique<SpriteBatch>(context);
+	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(context);
 	//ステート
-	m_states = std::make_unique<CommonStates>(device);
+	m_states = std::make_unique<DirectX::CommonStates>(device);
 
 	//---------------------------------------------------
 	//テクスチャの読み込み
 	//---------------------------------------------------
 
-	CreateWICTextureFromFile(device, L"Resources\\Textures\\Title.png", nullptr, m_textureTitle.GetAddressOf());
-	CreateWICTextureFromFile(device, L"Resources\\Textures\\Start.png", nullptr, m_textureStart.GetAddressOf());
-	CreateWICTextureFromFile(device, L"Resources\\Textures\\Quit.png", nullptr, m_textureQuit.GetAddressOf());
-	CreateWICTextureFromFile(device, L"Resources\\Textures\\Cursor.png", nullptr, m_textureCursor.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Title.png",  nullptr, m_textureTitle.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Start.png",  nullptr, m_textureStart.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Quit.png",   nullptr, m_textureQuit.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Cursor.png", nullptr, m_textureCursor.GetAddressOf());
 
 	//---------------------------------------------------
 	//演出
@@ -326,15 +292,15 @@ void TitleScene::CreateDeviceDependentResources()
 	AudioManager* audio = AudioManager::GetInstance();
 	audio->Initialize();
 	audio->LoadSound("Title", L"Resources/Sounds/BGM_Title.wav");
-	audio->SetBGMVolume(0.2f);
+	audio->SetBGMVolume(DEFAULT_BGM_VOLUME);
 	audio->PlayBGM("Title");
 
 	//SE 決定音
-	audio->SetSEVolume(1.0f);
+	audio->SetSEVolume(DEFAULT_SE_CLICK_VOLUME);
 	audio->LoadSound("SE_Click", L"Resources/Sounds/SE_Click.wav");
 
 	//SE 移動音
-	audio->SetSEVolume(0.2f);
+	audio->SetSEVolume(DEFAULT_SE_VOLUME);
 	audio->LoadSound("SE_Move", L"Resources/Sounds/SE_MoveCursor.wav");
 }
 
@@ -350,28 +316,22 @@ void TitleScene::CreateWindowSizeDependentResources()
 	int height = size.bottom - size.top;
 	float aspectRatio = float(width) / float(height);
 
-	//行列
-	m_view = SimpleMath::Matrix::CreateLookAt(
-		Vector3(0.0f, 5.0f, -10.0f),
-		Vector3(0, 0.0f, 0),
-		Vector3::Up
-	);
-
-	m_proj = SimpleMath::Matrix::CreatePerspectiveFieldOfView(
-		XMConvertToRadians(45.0f),
+	//射影行列
+	m_proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(
+		DirectX::XMConvertToRadians(CAMERA_FOV),
 		aspectRatio,
-		0.1f, 1000.0f
+		CAMERA_NEAR, CAMERA_FAR
 	);
 
 	//---------------------------------------
 	//３Dカメラの設定（定点）
 	//---------------------------------------
-	//カメラの位置
-	Vector3 eyePos(0.0f, 15.0f, -30.0f);
-	Vector3 terget(0.0f, 0.0f, 0.0f);
+	//カメラの位置と注視点
+	DirectX::SimpleMath::Vector3 eyePos(0.0f, CAMERA_EYE_Y, CAMERA_EYE_Z);
+	DirectX::SimpleMath::Vector3 terget(0.0f, 0.0f, 0.0f);
 
-	m_view = SimpleMath::Matrix::CreateLookAt(eyePos, terget, Vector3::Up);
-
+	//ビュー行列
+	m_view = DirectX::SimpleMath::Matrix::CreateLookAt(eyePos, terget, DirectX::SimpleMath::Vector3::Up);
 
 	//---------------------------------------
 	//飾り
@@ -386,7 +346,6 @@ void TitleScene::CreateWindowSizeDependentResources()
 		GetUserResources()->GetDeviceResources()->GetWindow(),
 		width, height,
 		"Resources\\Stages\\TitleStage.bmp");
-
 }
 
 //-----------------------------------------------------------------

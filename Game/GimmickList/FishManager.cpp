@@ -2,16 +2,13 @@
  * @file   FishManager.cpp
  * @brief  魚の描画・管理を行うマネージャークラス
  * @author 國田知睦
- * @date   2026/06/11
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "Game/GimmickList/FishManager.h"
 #include "Game/PlayerList/Player.h"
-
 #include "Game/ShadowRenderer/ShadowRenderer.h"
-
-using namespace DirectX;
 
 //----------------------------------------------------------
 // インスタンスを生成
@@ -34,39 +31,40 @@ FishManager::FishManager(
 
 void FishManager::Update(float dt, Player* player)
 {
+    //魚のスポーンタイマーを更新
     m_spawnTimer += dt;
     if (m_spawnTimer >= FISH_SPAWN_INTERVAL)
     {
         m_spawnTimer = 0.0f;
         SpawnFish();
     }
-
+    //魚の更新とプレイヤーとの当たり判定
     for (auto& fish : m_fish)
     {
+        //魚の更新
         fish->Update(dt, m_stage);
-
+        //生きていなければ当たり判定を行わない
         if (!fish->IsAlive()) continue;
 
+        //プレイヤーのコリジョンを取得
         auto playerCol = player->GetCollision();
-        BoundingSphere col = fish->GetBoundingSphere();
+        DirectX::BoundingSphere col = fish->GetBoundingSphere();
 
+        //プレイヤーのコリジョンOBB型なら当たり判定を行う
         if (playerCol &&
             playerCol->GetType() == ModelCollision::CollisionType::OBB)
         {
             auto* obbCol =
                 dynamic_cast<ModelCollisionOrientedBox*>(playerCol);
-
+            //魚の当たり判定とプレイヤーの当たり判定を比較
             for (auto& obb : obbCol->GetBoundingInfo())
             {
                 if (col.Intersects(obb))
                 {
-                    
                     //HPを回復
                     player->Heal(FISH_HEAL_AMOUNT);
-                    
                     //回復音を再生
                     AudioManager::GetInstance()->Play("Heal");
-
                     //弾を消す
                     fish->BulletKill();
 
@@ -118,23 +116,15 @@ void FishManager::SpawnFish()
     // ランダム座標
     float x = static_cast<float>(rand() % SPAWN_AREA_SIZE - SPAWN_AREA_OFFSET);
     float z = static_cast<float>(rand() % SPAWN_AREA_SIZE - SPAWN_AREA_OFFSET);
-
     // ステージの高さ
     float y = m_stage->GetGroundHeight(x, z) + SPAWN_HEIGHT_OFFSET;
 
     auto fish = std::make_unique<Fish>(
         m_deviceResources,
-        SimpleMath::Vector3(x, y, z),
-        SimpleMath::Vector3(DEFAULT_DIR_X, DEFAULT_DIR_Y, DEFAULT_DIR_Z),
+        DirectX::SimpleMath::Vector3(x, y, z),
+        DirectX::SimpleMath::Vector3(DEFAULT_DIR_X, DEFAULT_DIR_Y, DEFAULT_DIR_Z),
         m_displayCollision
     );
-
-    //// Fish の初期化
-    //fish->Initialize(
-    //    m_deviceResources->GetWindow(),
-    //    m_deviceResources->GetOutputSize().right,
-    //    m_deviceResources->GetOutputSize().bottom
-    //);
 
     fish->Initialize();
 

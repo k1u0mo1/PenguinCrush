@@ -3,7 +3,7 @@
  * @file   AttackBase.h
  * @brief  プレイヤーの攻撃のベースとなるクラス
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/07/01
  */
 
 //攻撃の基底クラス-------------------------------
@@ -78,23 +78,24 @@ public:
 	/// <returns>現在の進行方向</returns>
 	DirectX::SimpleMath::Vector3 GetForward()const { return m_forward; }
 
-
 	/// <summary>
 	/// 攻撃の基本ダメージ量を取得
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>攻撃の基本ダメージ量</returns>
 	virtual float GetDamage() const = 0;
 
 protected:
 
-	//派生用
+	/// <summary>
+	/// 進行方向を設定する関数
+	/// </summary>
+	/// <param name="f">設定する進行方向</param>
 	void SetForward(const DirectX::SimpleMath::Vector3& f) { m_forward = f; }
 
 private:
 
 	//ノックバックを保持
 	float m_knockbackPower = 0.0f;
-
 	//ベクトル
 	DirectX::SimpleMath::Vector3 m_forward = DirectX::SimpleMath::Vector3::UnitZ;
 };

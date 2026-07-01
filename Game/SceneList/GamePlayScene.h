@@ -9,7 +9,6 @@
 #pragma once
 
 //使用クラス----------------
-
 #include "pch.h"
 #include "UserResources.h"
 
@@ -165,9 +164,9 @@ public:
 	void SceneChange();
 
 	/// <summary>
-	/// カメラの更新をまとめる
+	/// カメラの切り替え
 	/// </summary>
-	void UpdateCamera();
+	bool UpdateCamera();
 	
 private:
 

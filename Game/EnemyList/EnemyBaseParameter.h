@@ -3,7 +3,7 @@
  * @file   EnemyBaseParameter.h
  * @brief  敵の基本的なパラメーターをまとめるクラス
  * @author 國田知睦
- * @date   2026/06/24
+ * @date   2026/06/30
  */
 
 

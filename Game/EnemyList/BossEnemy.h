@@ -3,11 +3,10 @@
  * @file   BossEnemy.h
  * @brief  ボスの管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/24
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "pch.h"
 #include "Game/Common/DeviceResources.h"
 #include <SimpleMath.h>
@@ -17,12 +16,9 @@
 #include "Game/Collision/DisplayCollision.h"
 #include <Game/Collision/ModelCollision.h>
 #include <Game/GimmickList/Stage.h>
-
 #include "Game/Effects/Particle.h"
 #include <Game/Effects/Smoke.h>
-
 #include "Game/ShadowRenderer/ShadowRenderer.h"
-
 #include "Game/GimmickList/SlideBehavior.h"
 #include "Game/Common/ObjectCharacter/CharacterBase.h"
 #include "Game/EnemyList/EnemyAttackList/EnemyAttackPattern.h"
@@ -30,7 +26,6 @@
 
 class EnemyRenderer;
 class EnemyManager;
-
 
 /// <summary>
 /// 敵の種類　通常とボスで分けるため
@@ -60,7 +55,6 @@ private:
     static constexpr float RESPAWN_HEIGHT = 10.0f;
     //プレイヤーを追尾を開始する距離
     static constexpr float PLAYER_DISTANCE_THRESHOLD = 2.0f;
-
     //プレイヤーとの距離（近すぎないように）
     static constexpr float STOP_DISTANCE = 5.0f;
 
@@ -68,26 +62,20 @@ private:
     //ダメージ＆戦闘関連
     //------------------------------------------------------
 
-    
     //回避が発動する連続被弾回数
     static constexpr int EVADE_HIT_THRESHOLD = 3;
     //回避が発動しなかったらリセット
     static constexpr int EVADE_NOHIT_THRESHOLD = 1;
-
     //回避状態の持続時間
     static constexpr float EVADE_DURATION = 0.5f;
-
     //何回で気絶
 	static constexpr int STUN_HIT_THRESHOLD = 5;
     //気絶時間
-	static constexpr float STUN_TIME = 100.0f;
+	static constexpr float STUN_TIME = 10.0f;
 
-    
     //------------------------------------------------------
     //描画＆エフェクト関連
     //------------------------------------------------------
-
-    
     //着地煙の持続時間
     static constexpr float SMOKE_DURATION = 1.0f;
     //煙の初期サイズ
@@ -110,7 +98,7 @@ private:
     static constexpr float RUSH_SWITCH_DISTANCE = 20.0f;
 
     //近距離攻撃時間
-    static constexpr float ATTACK_TIMER = 1.5f;
+    static constexpr float ATTACK_TIMER = 2.5f;
     //突進攻撃時間
     static constexpr float RUSH_TIMER = 7.0f;
 
@@ -317,12 +305,13 @@ protected:
     }
 
 private:
+    //デバイスリソース
     DX::DeviceResources* m_deviceResources;
-
+    //方向
     DirectX::SimpleMath::Vector3 m_forward = { 0.0f,0.0f,0.0f };
 
     float m_rotationY = 0.0f;
-
+    //当たり判定
     std::shared_ptr<DisplayCollision> m_displayCollision;
     std::unique_ptr<ModelCollision> m_collision;
     std::unique_ptr<DirectX::Model> m_model;
@@ -337,28 +326,20 @@ private:
 
     //モデルの切り替えている時間
     float m_stateTimer = 0.0f;
-    
     //最後に食らった攻撃
     PlayerAttackType m_lastAttackType = PlayerAttackType::None;
-
     //連続で同じ攻撃かどうかカウントする
     int m_consecutiveHitCount = 0;
-
     //回避時の移動ベクトル
     DirectX::SimpleMath::Vector3 m_avoidVelocity = { 0,0,0 };
-
     //目標とする移動速度を保持
     DirectX::SimpleMath::Vector3 m_targetVelocity = DirectX::SimpleMath::Vector3::Zero;
-
     //プレイヤーの攻撃を数える
 	int m_playerAttackCounter = 0;
-
 	//気絶状態の揺れ用の回転角度
 	float m_dizzyRotationY = 0.0f;
-
 	//攻撃のクールダウンタイマー
 	float m_attackCooldownTimer = 0.0f;
-
 	//攻撃パターンのリスト
 	std::vector<std::shared_ptr<EnemyAttackPattern>> m_attackPatterns;
 
@@ -374,24 +355,19 @@ private:
     std::unique_ptr<Smoke> m_smokeEffect;
     //煙が出ているか
     bool m_isSmokeActive = false;
-
     //煙の経過時間
     float m_smokeTimer;
     //煙の発生位置
     DirectX::SimpleMath::Vector3 m_smokePosition;
-
     //着地を覚える
     bool m_isGroundPrev;
-
     //着地を判定する
     bool m_isGroundNow;
-
     //一度だけ
     bool m_isLandingEffectDone = false;
 
     //描画
 	std::unique_ptr<EnemyRenderer> m_renderer;
-
 	//敵の種類
     EnemyType m_type = EnemyType::Boss;
 };

@@ -2,18 +2,12 @@
  * @file   Fish.cpp
  * @brief  魚オブジェクト
  * @author 國田知睦
- * @date   2026/06/17
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "Fish.h"
-
 #include <Effects.h>
-
-using namespace DirectX;
-
-using Microsoft::WRL::ComPtr;
-
 
 //----------------------------------------------------------
 // コンストラクタ
@@ -24,14 +18,14 @@ Fish::Fish(
     const DirectX::SimpleMath::Vector3& pos,
     const DirectX::SimpleMath::Vector3& dir,
     std::shared_ptr<DisplayCollision> displayCollision)
-    : m_deviceResources(deviceResources)
-    , m_position(pos)
-    , m_direction(dir)
-    , m_lifetime(0.0f)
-    , m_displayCollision(displayCollision)
-    , m_fishHeightOffset(0.0f)
+    :
+    m_deviceResources(deviceResources),
+    m_position(pos),
+    m_direction(dir),
+    m_lifetime(0.0f),
+    m_displayCollision(displayCollision),
+    m_fishHeightOffset(0.0f)
 {
-    
 }
 
 //----------------------------------------------------------
@@ -43,10 +37,10 @@ void Fish::Initialize()
     auto device = m_deviceResources->GetD3DDevice();
 
     // モデル読み込み
-    EffectFactory fx(device);
+    DirectX::EffectFactory fx(device);
     fx.SetDirectory(L"Resources\\Models");
     m_model =
-        Model::CreateFromSDKMESH(
+        DirectX::Model::CreateFromSDKMESH(
             device,
             L"Resources\\Models\\Fish.sdkmesh",
             fx
@@ -59,21 +53,20 @@ void Fish::Initialize()
         {
             for (auto& effect : mesh->meshParts)
             {
-                auto lights = dynamic_cast<IEffectLights*>(effect.get());
+                auto lights = dynamic_cast<DirectX::IEffectLights*>(effect.get());
                 if (lights)
                 {
                     lights->SetLightingEnabled(true);
                      //環境光を「白」に設定
-                    lights->SetAmbientLightColor(Colors::White);
+                    lights->SetAmbientLightColor(DirectX::Colors::White);
                 }
             }
         }
     }
-   
+    //当たり判定の作成
     m_sphere = DirectX::BoundingSphere(m_position, 1.0f);
 
-    m_states = std::make_unique<CommonStates>(device);
-
+    m_states = std::make_unique<DirectX::CommonStates>(device);
 }
 
 //----------------------------------------------------------
@@ -88,7 +81,7 @@ void Fish::Update(
 	m_lifetime += deltaTime;
 
     //重力
-    m_velocity.y += m_gravity * deltaTime;
+    m_velocity.y += GRAVITY * deltaTime;
     m_position.y += m_velocity.y * deltaTime;
 
     //ステージの高さを取得して沈み込みを再現
@@ -110,21 +103,21 @@ void Fish::Update(
             if (m_velocity.y < 0)
             {
                 //地面に当たったら跳ねるように
-                m_velocity.y = -m_velocity.y * 0.5f;
+                m_velocity.y = -m_velocity.y * FISH_JUMP_STRENGTH;
             }
 
             //ペタペタ跳ねる演出
             //速度が下がると再度跳ねる
-            if (abs(m_velocity.y) < 1.0f)
+            if (abs(m_velocity.y) < FISH_JUMP_HEIGHT)
             {
-                //〇％で小さく跳ねる
-                if (rand() % 100 < 3)
+                //確率で小さく跳ねる
+                if (rand() % JUMP_PROBABILITY_MAX < JUMP_PROBABILITY_MIN)
                 {
-                    //3.0 ～ 5.0 の間
-                    m_velocity.y = 3.0f + (randomVal * 2.0f);
+                    //跳ねる高さをランダムにする
+                    m_velocity.y = JUMP_FORCE_MIN + (randomVal * JUMP_POWER_VARIANCE);
 
                     //高さだけでなく位置もずらす
-                    m_position.x += (randomVal - 5.0f) * 0.05f;
+                    m_position.x += (randomVal - JUMP_OFFSET_X_SLIDE) * JUMP_OFFSET_X_MUL;
                 }
                 else
                 {
@@ -137,26 +130,25 @@ void Fish::Update(
 
     // ステージの傾きを回転行列として適用
     //waveクラス→ステージ→魚へ傾きを取得（stage->GetRotateX()とstage->GetRotateZ()）
-    SimpleMath::Matrix stageRotation =
-        SimpleMath::Matrix::CreateRotationX(stage->GetRotateX()) *
-        SimpleMath::Matrix::CreateRotationZ(stage->GetRotateZ());
+    DirectX::SimpleMath::Matrix stageRotation =
+        DirectX::SimpleMath::Matrix::CreateRotationX(stage->GetRotateX()) *
+        DirectX::SimpleMath::Matrix::CreateRotationZ(stage->GetRotateZ());
 
     // Y軸上向きベクトルを回転
     //傾いたステージの法線ベクトルに変換
-    SimpleMath::Vector3 normal =
-        SimpleMath::Vector3::TransformNormal(
-            SimpleMath::Vector3::Up, stageRotation);
+    DirectX::SimpleMath::Vector3 normal =
+        DirectX::SimpleMath::Vector3::TransformNormal(
+            DirectX::SimpleMath::Vector3::Up, stageRotation);
     normal.Normalize();
 
     //重力ベクトルを定義　常に（0,-1,0）
-    SimpleMath::Vector3 gravity = SimpleMath::Vector3::Down;
-
+    DirectX::SimpleMath::Vector3 gravity = DirectX::SimpleMath::Vector3::Down;
 
     //接している平面方向（重力を法線に投影して引く）
     //gravity.Dot(normal)で重力のうち法線方向の成分を計算する
     //gravityで引いて接平面上の成分を取る
     //slideDir = 滑る方向
-    SimpleMath::Vector3 slideDir = gravity - (gravity.Dot(normal) * normal);
+    DirectX::SimpleMath::Vector3 slideDir = gravity - (gravity.Dot(normal) * normal);
     
     m_sligeBehavior.Update(
         m_position,
@@ -164,9 +156,6 @@ void Fish::Update(
         slideDir,
         deltaTime
     );
-
-
-
     m_sphere.Center = m_position;
 }
 
@@ -181,7 +170,6 @@ void Fish::Render(
     ShadowRenderer* shadowRenderer,
     const Stage* stage)
 {
-   
     //---------------------------------------------------
     //影の描画
     //---------------------------------------------------
@@ -197,9 +185,7 @@ void Fish::Render(
         //取得した地面の高さをセット
         shadowPos.y = groundY;
 
-        //影の大きさ
-        float shadowScale = 1.5f;
-
+        
         //ステージの傾き
         float rotX = stage->GetRotateX();
         float rotZ = stage->GetRotateZ();
@@ -211,49 +197,48 @@ void Fish::Render(
             view,
             proj,
             shadowPos,
-            shadowScale,
+            SHADOW_SCALE,
             rotX,    
             rotZ     
         );
     }
-
-
-    if (!m_model||!m_states) return; // 安全チェック
+    
+    // 安全チェック
+    if (!m_model||!m_states) return; 
 
     //正規化
-    SimpleMath::Vector3 forward = m_direction;
+    DirectX::SimpleMath::Vector3 forward = m_direction;
     forward.Normalize();
     
-    SimpleMath::Vector3 up = SimpleMath::Vector3(0, 1, 0);
-    SimpleMath::Vector3 right = up.Cross(forward);
+    //上方向と下方向のベクトル計算
+    DirectX::SimpleMath::Vector3 up = DirectX::SimpleMath::Vector3(0, 1, 0);
+    DirectX::SimpleMath::Vector3 right = up.Cross(forward);
     right.Normalize();
-    SimpleMath::Vector3 actualUp = forward.Cross(right);
+    DirectX::SimpleMath::Vector3 actualUp = forward.Cross(right);
 
-    SimpleMath::Matrix orientation = SimpleMath::Matrix(
+    DirectX::SimpleMath::Matrix orientation = DirectX::SimpleMath::Matrix(
         right.x, right.y, right.z, 0,
         actualUp.x, actualUp.y, actualUp.z, 0,
         forward.x, forward.y, forward.z, 0,
         0, 0, 0, 1
     );
 
-    // スケールと移動行列 0.4f, 0.3f, 0.3f
+    // スケールと移動行列
     DirectX::SimpleMath::Matrix scale = 
         DirectX::SimpleMath::Matrix::CreateScale(FISH_SCALE_X, FISH_SCALE_Y, FISH_SCALE_Z);
 
     //回転
-    SimpleMath::Matrix initRotX = SimpleMath::Matrix::CreateRotationZ(XMConvertToRadians(270.0f));
-    SimpleMath::Matrix initRotY = SimpleMath::Matrix::CreateRotationY(XMConvertToRadians(MODEL_ROTATION_OFFSET));
+    DirectX::SimpleMath::Matrix initRotX = DirectX::SimpleMath::Matrix::CreateRotationZ(DirectX::XMConvertToRadians(270.0f));
+    DirectX::SimpleMath::Matrix initRotY = DirectX::SimpleMath::Matrix::CreateRotationY(DirectX::XMConvertToRadians(MODEL_ROTATION_OFFSET));
 
     //ピチピチ動くアニメーション
     //sin波で時間経過でZ軸を振動させる
     //m_lifetime＊FLOP_SPEEDで高速に振動
-    float flopAngle = sinf(m_lifetime * FLOP_SPEED) * XMConvertToRadians(15.0f);
-
+    float flopAngle = sinf(m_lifetime * FLOP_SPEED) * DirectX::XMConvertToRadians(FISH_RADIAN);
     //揺れ 
-    SimpleMath::Matrix flopRot = SimpleMath::Matrix::CreateRotationX(flopAngle);
-
+    DirectX::SimpleMath::Matrix flopRot = DirectX::SimpleMath::Matrix::CreateRotationX(flopAngle);
     //揺れ 左右
-    SimpleMath::Matrix flopRotZ = SimpleMath::Matrix::CreateRotationZ(flopAngle);
+    DirectX::SimpleMath::Matrix flopRotZ = DirectX::SimpleMath::Matrix::CreateRotationZ(flopAngle);
 
     //座標
     DirectX::SimpleMath::Matrix trans =
@@ -270,23 +255,10 @@ void Fish::Render(
     //モデルの描画
     m_model->Draw(context, *m_states, world, view, proj);
 
-    //// デバッグ描画
-    //if (m_collision && m_displayCollision)
-    //{
-    //    BoundingBox box;
-    //    box.Center = m_collision->GetCenter();
-    //    box.Extents = m_collision->GetExtents();
-    //    
-    //    //コリジョン線
-    //    //m_displayCollision->AddBoundingBox(box, Colors::Red);
-    //    
-    //}
-
-
-    //当たり判定の描画-----------------------------------------
+    //当たり判定の描画
     if (m_displayCollision)
     {
-        m_displayCollision->AddBoundingSphere(m_sphere, Colors::Red);
+        m_displayCollision->AddBoundingSphere(m_sphere, DirectX::Colors::Red);
     }
 }
 
@@ -323,7 +295,7 @@ DirectX::SimpleMath::Vector3 Fish::GetPosition() const
 
 DirectX::BoundingBox Fish::GetBoundingBox() const
 {
-    BoundingBox box;
+    DirectX::BoundingBox box;
     if (m_collision)
     {
         box.Center = m_collision->GetCenter();
@@ -333,10 +305,7 @@ DirectX::BoundingBox Fish::GetBoundingBox() const
     {
         // デフォルト小さい箱
         box.Center = m_position;
-        box.Extents = SimpleMath::Vector3(1.0f, 1.0f, 2.0f);
+        box.Extents = DirectX::SimpleMath::Vector3(COLLISION_EXTENT_X, COLLISION_EXTENT_Y, COLLISION_EXTENT_Z);
     }
     return box;
 }
-
-
-

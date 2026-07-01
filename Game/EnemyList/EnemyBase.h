@@ -4,13 +4,11 @@
  * @file   EnemyBase.h
  * @brief  敵の管理を行う基底クラス
  * @author 國田知睦
- * @date   2026/06/05
+ * @date   2026/07/01
  */
-
 
 #pragma once
 #include "pch.h"
-
 #include <Game/Common/DeviceResources.h>
 #include "Game/Common/ObjectCharacter/CharacterBase.h"
 #include "Game/EnemyList/EnemyBaseParameter.h"
@@ -63,7 +61,6 @@ protected:
 
 	//ステージの範囲
 	static constexpr float CHECK_RANDE = 10.0f;
-
 	//確認する間隔の間
 	static constexpr float CHECK_INTERVAL = 2.0f;
 
@@ -187,13 +184,10 @@ protected:
 
 	//デバイスリソース
 	DX::DeviceResources* m_deviceResources;
-
 	//敵のパラメータ
 	EnemyBaseParameter m_param;
-
-	//
+	
 	float m_rotationY;
-
+	
 	std::unique_ptr<EnemyAI> m_enemyAI;
-
 };

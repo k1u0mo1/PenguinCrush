@@ -3,17 +3,14 @@
  * @file   Snow.cpp
  * @brief  天候(雪)のクラス
  * @author 國田知睦
- * @date   2026/06/10
+ * @date   2026/07/01
  */
-
 
 #include "pch.h"
 #include "Snow.h"
 #include <iterator>
 #include "Library/BinaryFile.h"
 #include <WICTextureLoader.h>
-
-using namespace DirectX;
 
 //----------------------------------------------------------
 // 初期化（オーバーライド）
@@ -31,6 +28,7 @@ void Snow::Initialize(ID3D11Device* device)
     BinaryFile GSData = BinaryFile::LoadFile(L"Resources/Shaders/SnowGS.cso");
     BinaryFile PSData = BinaryFile::LoadFile(L"Resources/Shaders/SnowPS.cso");
 
+    //シェーダ作成
     device->CreateVertexShader(VSData.GetData(), VSData.GetSize(), nullptr, m_vs.ReleaseAndGetAddressOf());
     device->CreateGeometryShader(GSData.GetData(), GSData.GetSize(), nullptr, m_gs.ReleaseAndGetAddressOf());
     device->CreatePixelShader(PSData.GetData(), PSData.GetSize(), nullptr, m_ps.ReleaseAndGetAddressOf());
@@ -43,7 +41,7 @@ void Snow::Initialize(ID3D11Device* device)
     device->CreateInputLayout(layout, std::size(layout), VSData.GetData(), VSData.GetSize(), m_layout.ReleaseAndGetAddressOf());
     
     //テクスチャ用
-    CreateWICTextureFromFile(device, L"Resources/Textures/White.png", nullptr, m_texture.ReleaseAndGetAddressOf());
+    DirectX::CreateWICTextureFromFile(device, L"Resources/Textures/White.png", nullptr, m_texture.ReleaseAndGetAddressOf());
 }
 
 //----------------------------------------------------------
@@ -64,15 +62,13 @@ void Snow::Render(
     //親クラスに渡す用 
     cb.time = 
         DirectX::SimpleMath::Vector4(m_time, WEATHER_TYPE_SNOW, 0, 0);
-
+    //カメラの座標
     cb.cameraPos = DirectX::SimpleMath::Vector4(camPos.x, camPos.y, camPos.z, 1);
-
     //カメラに追従しないように
     cb.params = DirectX::SimpleMath::Vector4(SNOW_PARAM_X, SNOW_PARAM_Y, 0.0f, 0.0f);
 
     context->UpdateSubresource(m_constBuffer.Get(), 0, nullptr, &cb, 0, 0);
 
-    
     UINT stride = sizeof(DirectX::SimpleMath::Vector3) + sizeof(DirectX::SimpleMath::Vector2);
     UINT offset = 0;
     context->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
@@ -81,20 +77,20 @@ void Snow::Render(
     context->VSSetConstantBuffers(0, 1, m_constBuffer.GetAddressOf());
     context->GSSetConstantBuffers(0, 1, m_constBuffer.GetAddressOf());
 
-    // 雪のシェーダをセット
+    //雪のシェーダをセット
     context->IASetInputLayout(m_layout.Get());
     context->VSSetShader(m_vs.Get(), nullptr, 0);
     context->GSSetShader(m_gs.Get(), nullptr, 0);
     context->PSSetShader(m_ps.Get(), nullptr, 0);
 
-    // テクスチャとサンプラーをセット 
-    context->PSSetShaderResources(0, 1, m_texture.GetAddressOf()); // t0 レジスタにセット
+    //テクスチャとサンプラーをセット 
+    context->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
 
-    // 画像を綺麗に表示するためのサンプラー
+    //画像を綺麗に表示するためのサンプラー
     auto sampler = m_states->LinearClamp();
     context->PSSetSamplers(0, 1, &sampler);
 
-    // ブレンド設定など
+    //ブレンド設定など
     context->OMSetBlendState(m_states->NonPremultiplied(), nullptr, 0xFFFFFFFF);
     context->OMSetDepthStencilState(m_states->DepthRead(), 0);
     context->RSSetState(m_states->CullNone());

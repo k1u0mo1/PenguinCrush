@@ -3,18 +3,15 @@
  * @file   LevelHard.h
  * @brief  ハードステージの管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/22
+ * @date   2026/07/01
  */
-
 
 #pragma once
 #include "LevelBase.h"
 #include "Game/EnemyList/EnemyBaseParameter.h"
-
 #include "Game/WeatherList/Rain.h"
 #include "Game/WeatherList/Snow.h"
 #include "Game/SoundList/AudioManager.h"
-
 
 /// <summary>
 /// ハードステージの管理を行うクラス
@@ -25,6 +22,10 @@ private:
 
     //BGMの大きさ
     static constexpr float DEFAULT_BGM_VOLUME = 0.2f;
+
+    //画面サイズ
+    static constexpr int SCREEN_SIZE_WIDTH = 1280;
+    static constexpr int SCREEN_SIZE_HEIGHT = 720;
 
 public:
 
@@ -54,27 +55,24 @@ public:
 
         stageManager->AddStage(L"HardStage",
             deviceResources->GetWindow(),
-            1280, 720,
+            SCREEN_SIZE_WIDTH, 720,
             "Resources\\Stages\\HardStage.bmp");
 
         stageManager->SetCurrentStage(L"HardStage");
 
-       
-
-
         //天候　2択
         if (rand() % 2 == 0)
         {
+            //雨
             m_weather = std::make_unique<Rain>();
         }
         else
         {
+            //雪
             m_weather = std::make_unique<Snow>();
         }
-
         //天候の初期化
         m_weather->Initialize(deviceResources->GetD3DDevice());
-
 
         //ステージのBGM
         AudioManager* audio = AudioManager::GetInstance();

@@ -3,7 +3,7 @@
  * @file   DebugFont.h
  * @brief  デバッグ用のフォントクラス
  * @author 國田知睦
- * @date   2026/06/10
+ * @date   2026/07/01
  */
 
 #pragma once
@@ -28,13 +28,10 @@ private:
 	{
 		//位置
 		DirectX::SimpleMath::Vector2 pos;
-
 		//文字列
 		std::wstring string;
-
 		//色
 		DirectX::SimpleMath::Color color;
-
 		//スケール
 		float scale = 1.0f;
 	};
@@ -45,10 +42,8 @@ private:
 protected:
 	//スプライトバッチ
 	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
-
 	// スプライトフォント
 	std::unique_ptr<DirectX::SpriteFont> m_spriteFont;
-
 	// フォントの縦サイズ
 	float m_fontHeight;
 
@@ -105,23 +100,18 @@ private:
 	{
 		// 位置
 		DirectX::SimpleMath::Vector3 pos;
-
 		// 文字列
 		std::wstring string;
-
 		// 色
 		DirectX::SimpleMath::Color color;
-
 		// スケール
 		float scale = 1.0f;
 	};
 
 	// 表示文字列の配列
 	std::vector<String> m_strings;
-
 	// エフェクト
 	std::unique_ptr<DirectX::BasicEffect> m_effect;
-
 	// 入力レイアウト
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
 

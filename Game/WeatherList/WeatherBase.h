@@ -3,7 +3,7 @@
  * @file   WeatherBase.h
  * @brief  天候の親クラス
  * @author 國田知睦
- * @date   2026/06/17
+ * @date   2026/07/01
  */
 
 #pragma once
@@ -28,7 +28,6 @@ private:
 
 	//パーティクルの最大数
 	static constexpr int MAX_PARTICLES = 5000;
-
 	//パーティクルの初期サイズ
 	static constexpr float DEFAULT_PARTICLE_SIZE = 1.0f;
 
@@ -69,7 +68,7 @@ protected:
 	//共通のリソース
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_constBuffer;
-
+	//共通のオブジェクト
 	std::unique_ptr<DirectX::CommonStates> m_states;
 
 	//時間

@@ -3,16 +3,14 @@
  * @file   StageManager.h
  * @brief  ステージを管理するマネージャークラス
  * @author 國田知睦
- * @date   2026/06/10
+ * @date   2026/07/01
  */
 
+#pragma once
 #include "Game/GimmickList/Stage.h"
 #include <unordered_map>
 #include <string>
-
 #include "Game/GimmickList/WaveManager.h"
-
-#pragma once
 
 /// <summary>
 /// ステージを管理するマネージャー
@@ -87,12 +85,11 @@ public:
 	[[nodiscard]] Stage* GetCurrentStage() const noexcept { return m_currentStage; }
 
 private:
-
+	//デバイスリソースへのポインタ
 	DX::DeviceResources* m_deviceResources;
-
+	//ステージリスト
 	std::unordered_map<std::wstring, std::unique_ptr<Stage>> m_stages;
-
+	//現在のステージ
 	Stage* m_currentStage = nullptr;
-
 };
 

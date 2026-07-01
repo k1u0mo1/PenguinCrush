@@ -3,23 +3,16 @@
  * @file   Stage.h
  * @brief  ゲームの足場（ステージ）を管理・描画するクラス
  * @author 國田知睦
- * @date   2026/06/24
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "pch.h"
-
 #include "Game/Common/DeviceResources.h"
 #include "Game/Common/StepTimer.h"
-
 #include "Effects.h"
-
-//#include <Game/GimmickList/Wave.h>
-
 #include "Game/Collision/ModelCollision.h"
 #include "Game/Collision/DisplayCollision.h"
-
 #include "Game/GimmickList/WaveManager.h"
 
 /// <summary>
@@ -33,24 +26,23 @@ private:
     //------------------------------------------------------
     //ステージのサイズ関連
     //------------------------------------------------------
-
     //ステージの半分のサイズ （ここを変更すると描画と当たり判定が自動で変更される）
     static constexpr float STAGE_HALF_SIZE = 2.0f;
-    
+
     //3Dモデル本来の半分のサイズ
     static constexpr float MODEL_BASE_HALF_SIZE = 5.0f;
-
     //ステージのX軸スケール　（STAGE_HALF_SIZEに連動して自動で計算）
     static constexpr float STAGE_SCALE_X = STAGE_HALF_SIZE / MODEL_BASE_HALF_SIZE;
-
     //ステージのZ軸スケール　（STAGE_HALF_SIZEに連動して自動で計算）
     static constexpr float STAGE_SCALE_Z = STAGE_HALF_SIZE / MODEL_BASE_HALF_SIZE;
-
     //ステージのY軸スケール 厚さと高さ
     static constexpr float STAGE_SCALE_Y = 3.0f;
     //ステージの高さのずれを調整するオフセット
     static constexpr float STAGE_OFFSET_Y = 5.0f;
     
+    //------------------------------------------------------
+    //ステージの揺れと足場1つ1つの情報関連
+    //------------------------------------------------------
     //ステージの揺れの大きさ
     static constexpr float STAGE_ANGLE = 100.0f;
     //流氷の数　縦＊横
@@ -68,16 +60,19 @@ private:
 	//ステージの端のY座標　これを下回るとステージから落ちたとみなす
     static constexpr float STAGE_BOUNDARY_Y = -4.9f;
 	
+    //------------------------------------------------------
+    //カメラの位置関連
+    //------------------------------------------------------
     //真下に延ばすレイ
     static constexpr float RAY_START_HEIGHT = 1000.0f;
     static constexpr float RAY_MIN_HEIGHT = -100.0f;
 
-    //
+    //リスポーン地点を探す範囲
     static constexpr float RESPAWN_SEARCH_MIN = -10.0f;
     static constexpr float RESPAWN_SEARCH_MAX = 10.0f; 
     static constexpr float RESPAWN_SEARCH_STEP = 2.0f;
 
-    //描画周り
+    //カメラの位置
     static constexpr float CAMERA_FOV = 45.0f;
     static constexpr float CAMERA_NEAR = 0.1f;
     static constexpr float CAMERA_FAR = 1000.0f;
@@ -85,7 +80,6 @@ private:
     //流氷の落ちる速度
     static constexpr float GRAVITY = 1.8f;
     static constexpr float WAVE_BLEND_FACTOR = 0.2f;
-
     //小さい揺れ
     static constexpr float SMALL_SHAKING = 0.01f;
     //耐久性が低いときの揺れ
@@ -94,9 +88,7 @@ private:
     //微数値
     static constexpr float SLIDE_EPSILON = 0.0001f; 
 
-
-
-    //
+    //流氷の情報
     struct IceFloe
     {
         //ローカルワールド行列
@@ -117,7 +109,6 @@ private:
         float fallSpeed = 0.0f;
         //耐久値
         float hp = ICE_HP;
-
     };
 
 public:
@@ -226,8 +217,6 @@ public:
     /// <returns>滑る方向を示す正規化されたベクトル</returns>
     DirectX::SimpleMath::Vector3 GetSlideDirection(float x, float z) const;
 
-    //面の向きを渡す用　影で使う
-
     /// <summary>
     /// 現在のステージの面の向きを取得
     /// </summary>
@@ -268,43 +257,38 @@ private:
     /// <param name="height">ウィンドウの高さ</param>
     void CreateWindowSizeResources(int width, int height);
 
-    //std::unique_ptr<DX::DeviceResources> m_deviceResources;
+    //デバイスリソース
     DX::DeviceResources* m_deviceResources;
 
-    //  射影行列
+    //射影行列
     DirectX::SimpleMath::Matrix m_proj;
-
+    //ビュー行列
     std::unique_ptr<DirectX::CommonStates> m_states;
     std::unique_ptr<DirectX::Model> m_stageModel;
     
-
     DirectX::SimpleMath::Vector3 m_position;
 
-    // X軸に対する回転角（ラジアン）
+    //X軸に対する回転角（ラジアン）
     float m_rotateX;
 
-    // Z軸に対する回転角（ラジアン）
+    //Z軸に対する回転角（ラジアン）
     float m_rotateZ;
-
 
     //複数の流氷を管理する配列
     std::vector<IceFloe> m_iceFloes;
-
+    
     std::unique_ptr<DirectX::EffectFactory> m_effectFactory;
 
     DirectX::SimpleMath::Vector3 stagePointA{ -5.0f,0.0f,0.0f };
-
     DirectX::SimpleMath::Vector3 stagePointB{ 5.0f,1.0f,0.0f };
 
-
+    //当たり判定用のオブジェクト
     std::unique_ptr<ModelCollision> m_stageCollision;
     std::unique_ptr<DisplayCollision> m_displayCollision;
-
-    //当たり判定
-    bool m_isColliding = false;
-
     //OBBで使う
     DirectX::BoundingOrientedBox m_localOBB;
+    //当たり判定
+    bool m_isColliding = false;
 
     //ステージの大きさを渡す用
     float m_minX, m_maxX;

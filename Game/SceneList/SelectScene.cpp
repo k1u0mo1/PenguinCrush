@@ -2,10 +2,9 @@
  * @file   SelectScene.cpp
  * @brief  選択画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/06/25
+ * @date   2026/07/01
  */
 
-//
 #include "pch.h"
 #include <Effects.h>
 #include "SelectScene.h"
@@ -14,16 +13,14 @@
 #include "GamePlayScene.h"
 #include "TitleScene.h"
 
-using namespace DirectX;
-
 //-----------------------------------------------------------------
 // コンストラクタ
 //-----------------------------------------------------------------
 
 SelectScene::SelectScene()
-    : m_deviceResources()
+    : 
+    m_deviceResources()
 {
-
 }
 
 //-----------------------------------------------------------------
@@ -32,7 +29,7 @@ SelectScene::SelectScene()
 
 void SelectScene::Initialize()
 {
-
+    //デバイスリソース
     m_deviceResources = GetUserResources()->GetDeviceResources();
 
 	CreateDeviceDependentResources();
@@ -40,10 +37,8 @@ void SelectScene::Initialize()
 
     //カーソルリセット
     m_currentCursor = 0;
-
     // フェードイン
     GetUserResources()->GetTransitionMask()->Open();
-
 }
 
 //-----------------------------------------------------------------
@@ -53,16 +48,15 @@ void SelectScene::Initialize()
 void SelectScene::Update(float elapsedTime)
 {
 	elapsedTime;
-
+    //キーボード用
 	auto input = GetUserResources()->GetInputManager();
-
 
     //波を変更
     if (input->kbTracker.pressed.Tab)
     {
+        //波の切り替え
         m_waveManager->ToggleMode();
     }
-
 	//ステージの数
     int stageCount = static_cast<int>(m_stageList.size());
 
@@ -79,7 +73,6 @@ void SelectScene::Update(float elapsedTime)
 			m_currentCursor = stageCount - 1; 
         }
     }
-
 	//カーソル移動（下キー）
     if (input->kbTracker.pressed.Down || input->kbTracker.pressed.S)
     {
@@ -87,17 +80,15 @@ void SelectScene::Update(float elapsedTime)
         AudioManager::GetInstance()->Play("SE_Move");
 		//カーソルを下に移動
         m_currentCursor++;
-
 		//カーソルがステージの数以上になったら、最初のステージにループ
         if (m_currentCursor >= stageCount)
         {
             m_currentCursor = 0; 
         }
     }
-    
 
+    //フェードアウト用
     auto transitionMask = GetUserResources()->GetTransitionMask();
-
     //フェード
     if (m_isChangingScene)
     {
@@ -114,7 +105,6 @@ void SelectScene::Update(float elapsedTime)
     {
         ChangeScene<TitleScene>();
     }
-
     //[o]でタイトルへ強制戻る
     if (input->kbTracker.pressed.O)
     {
@@ -153,28 +143,21 @@ void SelectScene::Update(float elapsedTime)
     // ----------------------------------------------------
     // 回転アニメーションの計算
     // ----------------------------------------------------
-
     //アニメーション
     m_animationTimer += elapsedTime;
-
+    //ステージ全体の回転
     float stepAngle = DirectX::XM_2PI / stageCount;
-
     //ステージの回転の計算
     m_targetAngle = GOAL_DIRECTION * m_currentCursor * stepAngle;
-
     //角度の差分(diff)を計算
     float diff = m_targetAngle - m_currentAngle;
-
     //最短ルートの計算
     while (diff > DirectX::XM_PI) diff -= DirectX::XM_2PI;
     while (diff < -DirectX::XM_PI) diff += DirectX::XM_2PI;
-
     //現在の角度を更新
     float speed = ROTATE_SPEED * elapsedTime;
-
     //合わせる
     m_currentAngle += diff * speed;
-
 }
 
 //-----------------------------------------------------------------
@@ -205,7 +188,6 @@ void SelectScene::Render()
     // ----------------------------------------------------
     // モデル描画のループ処理
     // ----------------------------------------------------
-
     for (int i = 0; i < m_stageList.size(); i++)
     {
         //モデルがロードされていなかったらスキップする
@@ -223,13 +205,10 @@ void SelectScene::Render()
         // ----------------------------------------------------
         // スケールと回転の計算
         // ----------------------------------------------------
-
         //自分が選択されているか？
         bool isSelected = (i == m_currentCursor);
-
         //選択されていたら大きくなる　それ以外は小さく　表示
         float scale = isSelected ? selectScale : baseScale;
-
         //モデル自身の回転（演出用）
         float selfRot = m_animationTimer;
 
@@ -237,11 +216,11 @@ void SelectScene::Render()
         // 行列の作成
         // ----------------------------------------------------
 
-        //合わせる
-        SimpleMath::Matrix world =
-            SimpleMath::Matrix::CreateScale(scale) *
-            SimpleMath::Matrix::CreateRotationY(selfRot) *
-            SimpleMath::Matrix::CreateTranslation(x, 0.0f, z);
+        //合成
+        DirectX::SimpleMath::Matrix world =
+            DirectX::SimpleMath::Matrix::CreateScale(scale) *
+            DirectX::SimpleMath::Matrix::CreateRotationY(selfRot) *
+            DirectX::SimpleMath::Matrix::CreateTranslation(x, 0.0f, z);
 
         // ----------------------------------------------------
         // 解放していないステージの色を変える
@@ -253,30 +232,28 @@ void SelectScene::Render()
             {
                 //エフェクトを取得
                 auto basicEffect = dynamic_cast<DirectX::BasicEffect*>(part->effect.get());
-
                 if (basicEffect)
                 {
                     //解放していない
                     if (!IsStageUnlocked(i))
                     {
                         //モデルの色を暗くする
-                        basicEffect->SetDiffuseColor(Colors::Black);
+                        basicEffect->SetDiffuseColor(DirectX::Colors::Black);
                     }
                     else
                     {
                         //解放していたら元の色に戻すために白の明るさを付ける
-                        basicEffect->SetDiffuseColor(Colors::White);
+                        basicEffect->SetDiffuseColor(DirectX::Colors::White);
                     }
                 }
             }
         }
-
         //描画
         m_stageList[i].model->Draw(
             context, *m_states, world, m_view, m_proj);
     }
 
-    m_spriteBatch->Begin(SpriteSortMode_Deferred, m_states->NonPremultiplied());
+    m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_states->NonPremultiplied());
 
     // ----------------------------------------------------
     // 背景テクスチャの描画
@@ -285,40 +262,32 @@ void SelectScene::Render()
     if (m_backgroundTexture)
     {
         //画面全体に描画 UI
-        m_spriteBatch->Draw(m_backgroundTexture.Get(), SimpleMath::Vector2(0, 0));
-        
+        m_spriteBatch->Draw(m_backgroundTexture.Get(), DirectX::SimpleMath::Vector2(0, 0));
     }
-
     if (m_textureButtonUI)
     {
         //ボタンUI
-        m_spriteBatch->Draw(m_textureButtonUI.Get(), SimpleMath::Vector2(0, 0));
+        m_spriteBatch->Draw(m_textureButtonUI.Get(), DirectX::SimpleMath::Vector2(0, 0));
     }
-
     if (m_textureWaveUI)
     {
         //波UI
-		m_spriteBatch->Draw(m_textureWaveUI.Get(), SimpleMath::Vector2(0, 0));
+		m_spriteBatch->Draw(m_textureWaveUI.Get(), DirectX::SimpleMath::Vector2(0, 0));
     }
     
     // ----------------------------------------------------
     // テクスチャの描画
     // ----------------------------------------------------
-
     //テクスチャの座標
     float startX = UI_START_X;
     float startY = UI_START_Y;
-    
     //カーソルのオフセット
     float cursorOffset = CURSOR_OFFSET;
 
     for (size_t i = 0; i < m_stageList.size(); i++)
     {
-
-
         //描画位置
-        Vector2 position(startX, startY + (i * UI_STEP_Y));
-
+        DirectX::SimpleMath::Vector2 position(startX, startY + (i * UI_STEP_Y));
         //何番か
         bool isSelected = (i == m_currentCursor);
 
@@ -331,24 +300,24 @@ void SelectScene::Render()
 
             ((ID3D11Texture2D*)res.Get())->GetDesc(&desc);
 
-            Vector2 origin(desc.Width / 2.0f, desc.Height / 2.0f);
+            DirectX::SimpleMath::
+                Vector2 origin(desc.Width / 2.0f, desc.Height / 2.0f);
 
             //選択中は大きくさせる
             float scale = isSelected ? TEXTURE_SCALE_SELECTED : TEXTURE_SCALE_NORMAL;
-
             //選択中の色の変化
-            XMVECTOR color;
+            DirectX::XMVECTOR color;
 
             //ロック状態に合わせて色を変える
             if (!IsStageUnlocked(i))
             {
                 //まだステージが解放されていない
-                color = Colors::Black;
+                color = DirectX::Colors::Black;
             }
             else
             {
                 //ステージが解放されている場合は選択の色を変える
-                color = isSelected ? Colors::White : Colors::Gray;
+                color = isSelected ? DirectX::Colors::White : DirectX::Colors::Gray;
             }
 
             m_spriteBatch->Draw(
@@ -371,37 +340,36 @@ void SelectScene::Render()
 
             CD3D11_TEXTURE2D_DESC curDesc;
             ((ID3D11Texture2D*)curRes.Get())->GetDesc(&curDesc);
-            SimpleMath::Vector2 curOrigin(curDesc.Width / 2.0f, curDesc.Height / 2.0f);
+            DirectX::SimpleMath::Vector2 curOrigin(curDesc.Width / 2.0f, curDesc.Height / 2.0f);
 
             //左カーソル
-            SimpleMath::Vector2 leftPos = position;
+            DirectX::SimpleMath::Vector2 leftPos = position;
             leftPos.x -= cursorOffset;
 
             m_spriteBatch->Draw(
                 m_textureCursor.Get(),
                 leftPos,
                 nullptr,
-                Colors::White,
+                DirectX::Colors::White,
                 0.0f,
                 curOrigin,
                 CURSOR_SCALE
             );
 
             //右カーソル
-            SimpleMath::Vector2 rightPos = position;
+            DirectX::SimpleMath::Vector2 rightPos = position;
             rightPos.x += cursorOffset;
 
             m_spriteBatch->Draw(
                 m_textureCursor.Get(),
                 rightPos,
                 nullptr,
-                Colors::White,
+                DirectX::Colors::White,
                 0.0f,
                 curOrigin,
                 CURSOR_SCALE,
-                SpriteEffects_FlipHorizontally
+                DirectX::SpriteEffects_FlipHorizontally
             );
-
         }
 
         //クリアマークの描画
@@ -412,25 +380,23 @@ void SelectScene::Render()
             m_textureClearMark->GetResource(&markRes);
             CD3D11_TEXTURE2D_DESC markDesc;
             ((ID3D11Texture2D*)markRes.Get())->GetDesc(&markDesc);
-            Vector2 markOrigin(markDesc.Width / 2.0f, markDesc.Height / 2.0f);
 
-            Vector2 markPosition = position + Vector2(0.0f, 0.0f);
+            DirectX::SimpleMath::Vector2 markPosition =
+                position + DirectX::SimpleMath::Vector2(0.0f, 0.0f);
+            DirectX::SimpleMath::Vector2 markOrigin(markDesc.Width / 2.0f, markDesc.Height / 2.0f);
 
             m_spriteBatch->Draw(
                 m_textureClearMark.Get(),
                 markPosition,
                 nullptr,
-                Colors::White,
+                DirectX::Colors::White,
                 0.0f,
                 markOrigin,
                 CLEAR_MARK_SCALE
             );
         }
-
     }
-
     m_spriteBatch->End();
-
 }
 
 //-----------------------------------------------------------------
@@ -439,7 +405,6 @@ void SelectScene::Render()
 
 void SelectScene::Finalize()
 {
-
 }
 
 //-----------------------------------------------------------------
@@ -456,9 +421,9 @@ void SelectScene::CreateDeviceDependentResources()
     //-------------------------------------------------
    
     //スプライトバッチ
-    m_spriteBatch = std::make_unique<SpriteBatch>(context);
+    m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(context);
     //ステート
-    m_states = std::make_unique<CommonStates>(device);
+    m_states = std::make_unique<DirectX::CommonStates>(device);
 
     //-------------------------------------------------
     //ステージのデータの構築
@@ -495,42 +460,22 @@ void SelectScene::CreateDeviceDependentResources()
         StageData data;
         data.name = desc.name;
         DirectX::CreateWICTextureFromFile(device, desc.texturePath.c_str(), nullptr, data.texture.GetAddressOf());
-        data.model = Model::CreateFromSDKMESH(device, desc.modelPath.c_str(), fx);
+        data.model = DirectX::Model::CreateFromSDKMESH(device, desc.modelPath.c_str(), fx);
         data.type = desc.type;
         m_stageList.push_back(std::move(data));
     };
 
 	//背景テクスチャ
     //ステージUI
-    DirectX::CreateWICTextureFromFile(
-        device,
-        L"Resources\\Textures\\SelectUI.png",
-        nullptr,
-        m_backgroundTexture.GetAddressOf());
+    DirectX::CreateWICTextureFromFile(device,L"Resources\\Textures\\SelectUI.png",  nullptr,m_backgroundTexture.GetAddressOf());
     //ボタンUI
-    DirectX::CreateWICTextureFromFile(
-        device,
-        L"Resources\\Textures\\ButtonUI.png",
-        nullptr,
-        m_textureButtonUI.GetAddressOf());
+    DirectX::CreateWICTextureFromFile(device,L"Resources\\Textures\\ButtonUI.png",  nullptr,m_textureButtonUI.GetAddressOf());
     //カーソルUI
-    DirectX::CreateWICTextureFromFile(
-        device,
-        L"Resources\\Textures\\Cursor.png",
-        nullptr,
-        m_textureCursor.GetAddressOf());
+    DirectX::CreateWICTextureFromFile(device,L"Resources\\Textures\\Cursor.png",    nullptr,m_textureCursor.GetAddressOf());
     //波変更UI
-    DirectX::CreateWICTextureFromFile(
-        device,
-        L"Resources\\Textures\\WaveChange.png",
-        nullptr,
-        m_textureWaveUI.GetAddressOf());
+    DirectX::CreateWICTextureFromFile(device,L"Resources\\Textures\\WaveChange.png",nullptr,m_textureWaveUI.GetAddressOf());
     //クリアマークUI
-    DirectX::CreateWICTextureFromFile(
-        device,
-        L"Resources\\Textures\\ClearMark.png",
-        nullptr,
-        m_textureClearMark.GetAddressOf());
+    DirectX::CreateWICTextureFromFile(device,L"Resources\\Textures\\ClearMark.png", nullptr,m_textureClearMark.GetAddressOf());
     
     AudioManager* audio = AudioManager::GetInstance();
     audio->Initialize();
@@ -553,7 +498,6 @@ void SelectScene::CreateDeviceDependentResources()
 
 void SelectScene::CreateWindowSizeDependentResources()
 {
-
     HWND hwnd = m_deviceResources->GetWindow();
     RECT size = m_deviceResources->GetOutputSize();
     int width = size.right - size.left;
@@ -561,15 +505,15 @@ void SelectScene::CreateWindowSizeDependentResources()
     float aspectRatio = float(width) / float(height);
 
     //行列作成
-    m_view = SimpleMath::Matrix::CreateLookAt(
-        Vector3(0.0f, CAMERA_EYE_Y, CAMERA_EYE_Z),
-        Vector3(0, CAMERA_TARGET_Y, 0),
-        Vector3::Up
+    m_view = DirectX::SimpleMath::Matrix::CreateLookAt(
+        DirectX::SimpleMath::Vector3(0.0f, CAMERA_EYE_Y, CAMERA_EYE_Z),
+        DirectX::SimpleMath::Vector3(0, CAMERA_TARGET_Y, 0),
+        DirectX::SimpleMath::Vector3::Up
     );
 
     //射影行列を作成
-    m_proj = SimpleMath::Matrix::CreatePerspectiveFieldOfView(
-        XMConvertToRadians(CAMERA_FOV),
+    m_proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(
+        DirectX::XMConvertToRadians(CAMERA_FOV),
         aspectRatio,
         CAMERA_NEAR, CAMERA_FAR
     );
@@ -577,7 +521,6 @@ void SelectScene::CreateWindowSizeDependentResources()
     //Waveの初期化
     m_waveManager = std::make_unique<WaveManager>(m_deviceResources);
     m_waveManager->Initialize(hwnd, width, height);
-
 }
 
 //-----------------------------------------------------------------
@@ -627,8 +570,7 @@ bool SelectScene::IsStageUnlocked(int stageIndex) const
     }
 
     //１つ前のステージタイプを取得
-    auto prevStageType = m_stageList[stageIndex - 1].type;
-
+    auto prevStageType = m_stageList[static_cast<std::vector<SelectScene::StageData, std::allocator<SelectScene::StageData>>::size_type>(stageIndex) - 1].type;
     //1つ前のステージがクリアされていたら、このステージを解放
     return s_isClearedList[(int)prevStageType];
 }

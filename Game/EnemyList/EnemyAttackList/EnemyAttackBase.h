@@ -1,5 +1,4 @@
 
-
 /**
  * @file   EnemyAttackBase.h
  * @brief  敵の各攻撃パターンの基底クラス

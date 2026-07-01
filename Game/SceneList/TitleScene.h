@@ -2,18 +2,14 @@
  * @file   TitleScene.h
  * @brief  タイトル画面の初期化・更新・描画を管理するシーンクラス
  * @author 國田知睦
- * @date   2026/06/11
+ * @date   2026/07/01
  */
 
-
 #pragma once
-
-//使用クラス----------------
 
 #include "pch.h"
 #include "UserResources.h"
 #include "Library/SceneManager.h"
-//--------------------------
 
 //雪
 #include "Game/WeatherList/Snow.h"
@@ -41,7 +37,6 @@ private:
 
 	//ボタンの配置
 	static constexpr float BUTTON_START_Y_RATIO = 0.6f;
-
 	static constexpr float BUTTON_STEP_Y = 80.0f;
 
 	//カーソルの中心から左右の離れ具合
@@ -53,6 +48,27 @@ private:
 	static constexpr float BUTTON_SCALE_SELECTED = 1.2f;
 	//非選択時の大きさ
 	static constexpr float BUTTON_SCALE_NORMAL = 1.0f;
+
+	//音量設定
+	static constexpr float DEFAULT_BGM_VOLUME = 0.2f;
+	static constexpr float DEFAULT_SE_CLICK_VOLUME = 1.0f;
+	static constexpr float DEFAULT_SE_VOLUME = 0.2f;
+
+	//タイトルのサイズ
+	static constexpr float TITLE_SIZE = 1.0f;
+	static constexpr float TITLE_POSITION = 0.3f;
+
+	//カメラ設定
+	//カメラの画角
+	static constexpr float CAMERA_FOV = 45.0f;
+	//カメラの配置の高さ
+	static constexpr float CAMERA_EYE_Y = 15.0f;
+	//カメラの手前への引き
+	static constexpr float CAMERA_EYE_Z = -30.0f;
+	//前方のクリップ面
+	static constexpr float CAMERA_NEAR = 0.1f;
+	//後方のクリップ面
+	static constexpr float CAMERA_FAR = 1000.0f;
 
 
 //継承シーン関数
@@ -120,7 +136,6 @@ private:
 
 	//ビュー行列
 	DirectX::SimpleMath::Matrix m_view;
-
 	//射影行列
 	DirectX::SimpleMath::Matrix m_proj;
 
@@ -129,13 +144,11 @@ private:
 
 	//リソース
 	DX::DeviceResources* m_deviceResources;
-
 	//２D描画用
 	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
-
+	//ステート
 	std::unique_ptr<DirectX::CommonStates> m_states;
 
-	
 	// テクスチャ
 	//タイトル
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureTitle; 
@@ -143,16 +156,13 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureStart; 
 	//やめる
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureQuit;
-
 	// ボタンUIテクスチャ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureButtonUI;
-
 	// カーソルUIテクスチャ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureCursor;
 
-	
 	//背景用
-	//雪
+	//雪（エフェクト用）
 	std::unique_ptr<Snow> m_snow;
 	//背景ステージ
 	std::unique_ptr<Stage> m_backgroundStage;
@@ -162,5 +172,4 @@ private:
 private:
 	//シーン移動中のフラグ
 	bool m_isChangingScene = false;
-
 };

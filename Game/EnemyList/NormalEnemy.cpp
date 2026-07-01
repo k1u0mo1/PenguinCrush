@@ -3,7 +3,7 @@
  * @file   NormalEnemy.cpp
  * @brief  通常敵の管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/24
+ * @date   2026/07/01
  */
 
 #include "pch.h"
@@ -11,19 +11,21 @@
 #include "Game/EnemyList/EnemyManager.h"
 #include "Game/SoundList/AudioManager.h"
 
-using namespace DirectX;
-
+//----------------------------------------------------------
+// 通常敵のインスタンスを生成
+//----------------------------------------------------------
 
 NormalEnemy::NormalEnemy(
 	DX::DeviceResources* deviceResources,
 	const DirectX::SimpleMath::Vector3& position,
 	const EnemyBaseParameter& param,
 	std::shared_ptr<DisplayCollision> displayCollision)
-	: EnemyBase(deviceResources, position, param)
-	, m_deviceResources(deviceResources)
-	, m_displayCollision(displayCollision)
-	, m_state(EnemyState::Idle)
-	, m_stateTimer(0.0f)
+	: 
+	EnemyBase(deviceResources, position, param),
+	m_deviceResources(deviceResources),
+	m_displayCollision(displayCollision),
+	m_state(EnemyState::Idle),
+	m_stateTimer(0.0f)
 {
 	//攻撃パターンの追加
 	m_attackPattern.push_back(std::make_shared<MeleeAttackPattern>());
@@ -36,8 +38,11 @@ NormalEnemy::NormalEnemy(
 	//プレイヤーとの距離をばらつかせる
 	float randomOffset = ((static_cast<float>(rand()) / RAND_MAX)-0.5f) * STOP_DISTANCE_RAND_RANGE;
 	m_stopDistance = STOP_DISTANCE + randomOffset;
-
 }
+
+//----------------------------------------------------------
+// 通常敵の初期化
+//----------------------------------------------------------
 
 void NormalEnemy::Initialize()
 {
@@ -61,6 +66,10 @@ void NormalEnemy::Initialize()
 	AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/P_E_落水.wav");
 }
 
+//----------------------------------------------------------
+// 通常敵の更新
+//----------------------------------------------------------
+
 void NormalEnemy::Update(
 	float deltaTime,
 	const DirectX::SimpleMath::Vector3& playerPosition,
@@ -83,7 +92,6 @@ void NormalEnemy::Update(
 
 	//AI更新
 	UpdateAI(deltaTime, playerPosition, stage, particle, enemyManager);
-
 	//物理更新
 	UpdatePhysics(stage, deltaTime);
 
@@ -91,16 +99,17 @@ void NormalEnemy::Update(
 	if (m_modelCollision)
 	{
 		//モデルのスケールと位置を反映させたワールド行列を作成
-		SimpleMath::Matrix world = 
-			SimpleMath::Matrix::CreateScale(m_param.scale) *
-			SimpleMath::Matrix::CreateTranslation(m_position);
-
+		DirectX::SimpleMath::Matrix world =
+			DirectX::SimpleMath::Matrix::CreateScale(m_param.scale) *
+			DirectX::SimpleMath::Matrix::CreateTranslation(m_position);
 		//モデルの当たり判定を更新
 		m_modelCollision->UpdateBoundingInfo(world);
 	}
-
-
 }
+
+//----------------------------------------------------------
+// 通常敵のAI更新
+//----------------------------------------------------------
 
 void NormalEnemy::UpdateAI(
 	float dt,
@@ -109,6 +118,7 @@ void NormalEnemy::UpdateAI(
 	Particle* /*particle*/, 
 	EnemyManager* enemyManager)
 {
+	//攻撃のクールダウンタイマーを減らす
 	if (m_meleeAttackCooldownTimer > 0.0f)
 	{
 		m_meleeAttackCooldownTimer -= dt;
@@ -119,16 +129,13 @@ void NormalEnemy::UpdateAI(
 	{
 		return;
 	}
-
 	
-	m_targetVelocity = DirectX::SimpleMath::Vector3::Zero;
-
 	//プレイヤーとの距離を計算
 	float dist = DirectX::SimpleMath::Vector3::Distance(m_position, playerPos);
 	DirectX::SimpleMath::Vector3 forward = playerPos - m_position;
 	forward.y = 0.0f;
-
 	
+	//プレイヤーの方向を正規化
 	if (forward.LengthSquared() > VECTOR_EPSILON)
 	{
 		forward.Normalize();
@@ -136,7 +143,6 @@ void NormalEnemy::UpdateAI(
 
 	//目標速度を初期化
 	m_targetVelocity = DirectX::SimpleMath::Vector3::Zero;
-	
 
 	switch (m_state)
 	{
@@ -155,7 +161,6 @@ void NormalEnemy::UpdateAI(
 					m_targetVelocity,
 					m_rotationY
 				);
-
 			}
 		}
 		else
@@ -166,12 +171,13 @@ void NormalEnemy::UpdateAI(
 				m_rotationY = std::atan2(forward.x, forward.z);
 			}
 		}
-
+		//攻撃の判定
 		if (enemyManager && !m_attackPattern.empty())
 		{
-			//
+			//プレイヤーとの距離が攻撃距離以内で、クールダウンが終わっている場合は攻撃
 			if (dist < ATTACK_DISTANCE && m_meleeAttackCooldownTimer <= 0.0f)
 			{
+				//攻撃パターン
 				m_attackPattern[0]->Execute(this, forward, enemyManager);
 
 				m_state = EnemyState::Attack;
@@ -179,36 +185,39 @@ void NormalEnemy::UpdateAI(
 				m_meleeAttackCooldownTimer = ATTACK_COOLDOWN;
 			}
 		}
-
 		break;
 	case EnemyState::Attack:
 	default:
 		break;
-	
 	}
-
 }
+
+//----------------------------------------------------------
+// 通常敵の物理更新
+//----------------------------------------------------------
 
 void NormalEnemy::UpdatePhysics(Stage* stage, float dt,Particle* particle)
 {
 	//滑る床の挙動を更新
 	CharacterBase::UpdatePhysice(dt, stage);
-
+	//落下の判定と処理
 	CheckAndHandleFalling(stage, particle);
 
 	//滑る床の挙動を管理するクラスを更新
 	if (stage)
 	{
 		//滑る床の方向を取得
-		SimpleMath::Vector3 slideDir = stage->GetSlideDirection(m_position.x, m_position.z);
+		DirectX::SimpleMath::Vector3 slideDir = stage->GetSlideDirection(m_position.x, m_position.z);
 		//滑る床の挙動を更新
 		m_slideBehavior.Update(m_position, m_targetVelocity, slideDir, dt);
-
 		//落下の判定と処理
 		CheckAndHandleFalling(stage, nullptr);
 	}
-
 }
+
+//----------------------------------------------------------
+// 通常敵の描画
+//----------------------------------------------------------
 
 void NormalEnemy::Render(
 	ID3D11DeviceContext* context,
@@ -216,14 +225,12 @@ void NormalEnemy::Render(
 	const DirectX::SimpleMath::Matrix& proj)
 {
 	if (IsDead())return;
-
-	SimpleMath::Matrix rotX = SimpleMath::Matrix::Identity;
-	
-	SimpleMath::Matrix rotation =
-		SimpleMath::Matrix::CreateRotationY(m_rotationY + DirectX::XM_PI);
-	
-	SimpleMath::Matrix combinedTransform =
-		SimpleMath::Matrix::CreateScale(m_param.scale) *
+	//モデルの回転行列を作成
+	DirectX::SimpleMath::Matrix rotX = DirectX::SimpleMath::Matrix::Identity;
+	DirectX::SimpleMath::Matrix rotation =
+		DirectX::SimpleMath::Matrix::CreateRotationY(m_rotationY + DirectX::XM_PI);
+	DirectX::SimpleMath::Matrix combinedTransform =
+		DirectX::SimpleMath::Matrix::CreateScale(m_param.scale) *
 		rotX * rotation;
 
 	if (m_renderer)
@@ -234,34 +241,41 @@ void NormalEnemy::Render(
 			combinedTransform, view, proj, nullptr, nullptr
 		);
 	}
-
+	//当たり判定の描画
 	if (m_displayCollision && m_states)
 	{
 		m_displayCollision->DrawCollision(
 			context, m_states.get(), view, proj,
-			Colors::White, Colors::Blue, COLLISION_DRAW_ALPHA_NORMAL
+			DirectX::Colors::White, DirectX::Colors::Blue, COLLISION_DRAW_ALPHA_NORMAL
 		);
 	}
-
+	//モデルの当たり判定の描画
 	if (m_modelCollision && m_displayCollision && m_states)
 	{
 		m_modelCollision->AddDisplayCollision(m_displayCollision.get());
 		m_displayCollision->DrawCollision(
 			context, m_states.get(), view, proj,
-			Colors::White, Colors::Cyan, COLLISION_DRAW_ALPHA_ACTIVE
+			DirectX::Colors::White, DirectX::Colors::Cyan, COLLISION_DRAW_ALPHA_ACTIVE
 		);
 	}
 }
+
+//----------------------------------------------------------
+// 通常敵のダメージ処理
+//----------------------------------------------------------
 
 void NormalEnemy::TakeDamage(
 	float amount, PlayerAttackType /*type*/)
 {
 	if (IsDead())return;
-
+	//体力を減らす
 	m_hp -= amount;
 	if (m_hp < 0)m_hp = 0;
-	
 }
+
+//----------------------------------------------------------
+// 通常敵のノックバック処理
+//----------------------------------------------------------
 
 void NormalEnemy::ApplyKnockback(
 	const DirectX::SimpleMath::Vector3& direction,
@@ -274,5 +288,4 @@ void NormalEnemy::ApplyKnockback(
 	m_knockbackVelocity.y = m_param.receivedKnockbackUpwardForce;
 	//ノックバック後の硬直
 	m_knockbackTimer = m_param.receivedKnockbackDuration;
-
 }

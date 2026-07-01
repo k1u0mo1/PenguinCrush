@@ -2,7 +2,7 @@
  * @file   SkyDome.cpp
  * @brief  スカイドームの描画・管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/01
  */
 
 #include "pch.h"
@@ -14,7 +14,8 @@
 //-----------------------------------------------------------------
 
 SkyDome::SkyDome(DX::DeviceResources* deviceResources)
-	: m_deviceResources(deviceResources)
+	: 
+	m_deviceResources(deviceResources)
 {
 }
 
@@ -86,13 +87,6 @@ void SkyDome::Render(
 			}
 		});
 
-
-	//for (const auto& mesh : m_model->meshes)
-	//{
-	//	//モデルの描画
-	//	mesh->Draw(context,  world, view, proj);
-	//}
-
 	for (const auto& mesh : m_model->meshes)
 	{
 		// モデルの描画（カスタムステートでサンプラーをリニアに強制する）
@@ -107,5 +101,4 @@ void SkyDome::Render(
 	//ステートに戻す
 	context->OMSetDepthStencilState(m_states->DepthDefault(), 0);
 	context->RSSetState(m_states->CullCounterClockwise());
-
 }

@@ -2,34 +2,29 @@
  * @file   Stage.cpp
  * @brief  ゲームの足場（ステージ）を管理・描画するクラス
  * @author 國田知睦
- * @date   2026/06/24
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "Stage.h"
-
 #include <algorithm>
 #include <cmath>
 #include <fstream>
-
-using namespace DirectX;
-using namespace DirectX::SimpleMath;
-
-using Microsoft::WRL::ComPtr;
 
 //----------------------------------------------------------
 // コンストラクタ
 //----------------------------------------------------------
 
 Stage::Stage(DX::DeviceResources* deviceResources)
-    : m_deviceResources(deviceResources)
-    , m_position(0, 0, 0)
-    , m_rotateX(0.0f)
-    , m_rotateZ(0.0f)
-    , m_minX()
-    , m_maxX()
-    , m_minZ()
-    , m_maxZ()
+    :
+    m_deviceResources(deviceResources),
+    m_position(0, 0, 0),
+    m_rotateX(0.0f),
+    m_rotateZ(0.0f),
+    m_minX(),
+    m_maxX(),
+    m_minZ(),
+    m_maxZ()
 {
 
     m_deviceResources->RegisterDeviceNotify(this);
@@ -57,7 +52,6 @@ void Stage::Initialize(
     const std::string& mapFilename)
 {
     CreateDeviceResources();
-
     CreateWindowSizeResources(width, height);
 
     //当たり判定見る用
@@ -66,7 +60,6 @@ void Stage::Initialize(
         //ModelCollisionOrientedBox を使って、モデルに合わせた箱を作る
         m_stageCollision = std::make_unique<ModelCollisionOrientedBox>(m_stageModel.get());
     }
-
     //-----------------------------------------------------------
 
     //ステージ全体の有効範囲を自動計算するための初期値
@@ -116,7 +109,6 @@ void Stage::Initialize(
             //画像サイズがrowPaddedを超えていないか確認
             if ((x * 3 + 2) < rowPadded)
             {
-
                 //B→G→Rの順番に色が格納
                 //青
                 unsigned char B = rowData[x * 3];
@@ -129,8 +121,8 @@ void Stage::Initialize(
                 //白色＝流氷
                 if (R >= 200 && G >= 200 && B >= 200)
                 {
+                    //流氷のデータを作る
                     IceFloe floe;
-
                     //配置座標の計算  mapWidthとmapHeightを基準に中心を原点へ
                     float posX = (x - (mapWidth - 1) / 2.0f) * DRIFT_ICE_SPACING;
                     float posZ = (actualZ - (mapHeight - 1) / 2.0f) * DRIFT_ICE_SPACING;
@@ -161,14 +153,11 @@ void Stage::Initialize(
             }
         }
     }
-
     //使い終わったメモリとファイルを解放
     delete[] rowData;
     file.close();
-
-
     //------------------------------------------------------------
-
+    //ステージの有効範囲を保持
     m_minX = minX;
     m_maxX = maxX;
     m_minZ = minZ;
@@ -181,10 +170,9 @@ void Stage::Initialize(
 
 float Stage::GetGroundHeight(float x, float z) const
 {
-    
     // 真上から真下へのレイ
-    Vector3 rayOrigin(x, RAY_START_HEIGHT, z);
-    Vector3 rayDir(0, -1, 0);
+    DirectX::SimpleMath::Vector3 rayOrigin(x, RAY_START_HEIGHT, z);
+    DirectX::SimpleMath::Vector3 rayDir(0, -1, 0);
     
     //プレイヤーの落下ライン初期値
     float highestPoint = RAY_MIN_HEIGHT; 
@@ -194,20 +182,21 @@ float Stage::GetGroundHeight(float x, float z) const
     {
         //完全に落下したら流氷の足場判定を外す
         if (floe.position.y<FALL_LIMIT_Y)continue;
-
+        //流氷のOBBをワールド行列で変換
         DirectX::BoundingOrientedBox obb = floe.obb;
-
-        SimpleMath::Matrix collisionMatrix = 
+        //流氷の回転と位置を反映
+        DirectX::SimpleMath::Matrix collisionMatrix =
             floe.rotationMatrix * 
-            SimpleMath::Matrix::CreateTranslation(floe.position);
+            DirectX::SimpleMath::Matrix::CreateTranslation(floe.position);
 
         obb.Transform(obb, collisionMatrix);
-
+        //レイとOBBの交差判定
         float dist = 0.0f;
 
         //その流氷のOBBと交差するか？
         if (obb.Intersects(rayOrigin, rayDir, dist))
         {
+            //交差した場合、レイの原点からの距離を計算して、足場の高さを求める
             float hitY = rayOrigin.y - dist;
             //一番高い位置を足場とする (複数の流氷が重なっていた場合の対策)
             if (hitY > highestPoint)
@@ -216,7 +205,6 @@ float Stage::GetGroundHeight(float x, float z) const
             }
         }
     }
-
     return highestPoint;
 }
 
@@ -226,6 +214,7 @@ float Stage::GetGroundHeight(float x, float z) const
 
 bool Stage::IsInside(float x, float z) const
 {
+    //ステージの有効範囲内かどうか
     return (x >= m_minX && x <= m_maxX &&
         z >= m_minZ && z <= m_maxZ);
 }
@@ -239,26 +228,25 @@ DirectX::SimpleMath::Vector3 Stage::GetSlideDirection(float /*x*/, float /*z*/) 
     //個別の流氷
     for (const auto& floe : m_iceFloes)
     {
-        //
-        Vector3 normal = Vector3::TransformNormal(Vector3::Up, floe.rotationMatrix);
+        //流氷の回転行列から法線を計算
+        DirectX::SimpleMath::Vector3 normal = 
+            DirectX::SimpleMath::Vector3::TransformNormal(DirectX::SimpleMath::Vector3::Up, floe.rotationMatrix);
         normal.Normalize();
 
-        //
-        Vector3 gravity = Vector3::Down;
-        Vector3 slideDir = gravity - (gravity.Dot(normal) * normal);
+        //重力ベクトルと法線から滑る方向を計算
+        DirectX::SimpleMath::Vector3 gravity = DirectX::SimpleMath::Vector3::Down;
+        DirectX::SimpleMath::Vector3 slideDir = gravity - (gravity.Dot(normal) * normal);
 
         if (slideDir.LengthSquared() > SLIDE_EPSILON)
         {
             slideDir.Normalize();
-
+            //傾きの角度を計算して滑る強さを決定
             float slopeAngle = acos(std::max(-1.0f, std::min(1.0f, normal.y)));
             float slideStrength = sinf(slopeAngle) * STAGE_ANGLE;
             return slideDir * slideStrength;
         }
-        
     }
-
-    return Vector3::Zero;
+    return DirectX::SimpleMath::Vector3::Zero;
 }
 
 //----------------------------------------------------------
@@ -268,15 +256,14 @@ DirectX::SimpleMath::Vector3 Stage::GetSlideDirection(float /*x*/, float /*z*/) 
 DirectX::SimpleMath::Vector3 Stage::GetNormal() const
 {
     //回転計算用 Renderでやっていることと同じ
-    SimpleMath::Matrix rotX = SimpleMath::Matrix::CreateRotationX(m_rotateX);
-    SimpleMath::Matrix rotZ = SimpleMath::Matrix::CreateRotationZ(m_rotateZ);
-
+    DirectX::SimpleMath::Matrix rotX = DirectX::SimpleMath::Matrix::CreateRotationX(m_rotateX);
+    DirectX::SimpleMath::Matrix rotZ = DirectX::SimpleMath::Matrix::CreateRotationZ(m_rotateZ);
     //合わせる
-    SimpleMath::Matrix rotation = rotZ * rotX;
+    DirectX::SimpleMath::Matrix rotation = rotZ * rotX;
 
     //ステージの回転に合わせて回す
-    SimpleMath::Vector3 normal = SimpleMath::Vector3::TransformNormal(SimpleMath::Vector3::Up, rotation);
-
+    DirectX::SimpleMath::Vector3 normal = 
+        DirectX::SimpleMath::Vector3::TransformNormal(DirectX::SimpleMath::Vector3::Up, rotation);
     normal.Normalize();
 
     return normal;
@@ -289,9 +276,10 @@ DirectX::SimpleMath::Vector3 Stage::GetNormal() const
 void Stage::ApplyDamegeToFloe(float elapsedTime, float x, float z)
 {
     //キャラクターの頭上から真下にレイを飛ばす
-    SimpleMath::Vector3 rayOrigin(x, RAY_START_HEIGHT, z);
-    SimpleMath::Vector3 rayDir(0, -1, 0);
-
+    DirectX::SimpleMath::Vector3 rayOrigin(x, RAY_START_HEIGHT, z);
+    DirectX::SimpleMath::Vector3 rayDir(0, -1, 0);
+    
+    //一番高い流氷を探す
     IceFloe* targetFloe = nullptr;
     float highestPoint = RAY_MIN_HEIGHT;
 
@@ -300,20 +288,21 @@ void Stage::ApplyDamegeToFloe(float elapsedTime, float x, float z)
     {
         //すでに沈んでいるものは省く
         if (floe.isFallen)continue;
-
+        //流氷のOBBをワールド行列で変換
         DirectX::BoundingOrientedBox obb = floe.obb;
-        SimpleMath::Matrix collisionMatrix =
+        DirectX::SimpleMath::Matrix collisionMatrix =
             floe.rotationMatrix * 
-            SimpleMath::Matrix::CreateTranslation(floe.position);
-
+            DirectX::SimpleMath::Matrix::CreateTranslation(floe.position);
+        //OBBをワールド行列で変換
         obb.Transform(obb, collisionMatrix);
 
         float dist = 0.0f;
-
+        //レイとOBBの交差判定
         if (obb.Intersects(rayOrigin, rayDir, dist))
         {
+            //交差した時、レイの原点からの距離を計算して足場の高さを求める
             float hitY = rayOrigin.y - dist;
-
+            //一番高い位置を足場とする
             if (hitY > highestPoint)
             {
                 highestPoint = hitY;
@@ -321,14 +310,16 @@ void Stage::ApplyDamegeToFloe(float elapsedTime, float x, float z)
             }
         }
     }
-
     //乗っている流氷のHPを減らす
     if (targetFloe)
     {
         targetFloe->hp -= DAMAGE_PER_SECOND * elapsedTime;
     }
-
 }
+
+//----------------------------------------------------------
+// ステージ上の安全なリスポーン位置を見つける
+//----------------------------------------------------------
 
 bool Stage::FindSafeRespawnPosition(float respawnHeight, float boundaryY, DirectX::SimpleMath::Vector3& outPos) const
 {
@@ -361,19 +352,18 @@ void Stage::CreateDeviceResources()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
-    m_states = std::make_unique<CommonStates>(device);
+    m_states = std::make_unique<DirectX::CommonStates>(device);
 
     //EffectFactory fx(device);
 
     m_effectFactory = std::make_unique<DirectX::EffectFactory>(device);
     m_effectFactory->SetDirectory(L"Resources\\Models");
-    //fx.SetDirectory(L"Resources\\Models");
-    m_stageModel = Model::CreateFromSDKMESH(
+    m_stageModel = DirectX::Model::CreateFromSDKMESH(
         device,
         L"Resources\\Models\\ICENew.sdkmesh",
         *m_effectFactory.get()
     );
-}//ICENew
+}
 
 //----------------------------------------------------------
 // 画面リソース
@@ -386,8 +376,8 @@ void Stage::CreateWindowSizeResources(int /*width*/, int /*height*/)
     RECT rect = m_deviceResources->GetOutputSize();
 
     // 射影行列の作成
-    m_proj = SimpleMath::Matrix::CreatePerspectiveFieldOfView(
-        XMConvertToRadians(CAMERA_FOV)
+    m_proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(
+        DirectX::XMConvertToRadians(CAMERA_FOV)
         , static_cast<float>(rect.right) / static_cast<float>(rect.bottom)
         , CAMERA_NEAR, CAMERA_FAR);
 }
@@ -412,7 +402,9 @@ void Stage::Update(float elapsedTime, WaveManager* waveManager)
     m_position.y = centerWaveHeight;
 
     //ステージ全体を共通で傾けるための回転行列を１つ作る
-    Matrix stageRotation = Matrix::CreateRotationX(m_rotateX) * Matrix::CreateRotationZ(m_rotateZ);
+    DirectX::SimpleMath::Matrix stageRotation = 
+        DirectX::SimpleMath::Matrix::CreateRotationX(m_rotateX) *
+        DirectX::SimpleMath::Matrix::CreateRotationZ(m_rotateZ);
 
     //全ての流氷の座標と回転を計算
     for (auto& floe : m_iceFloes)
@@ -433,18 +425,17 @@ void Stage::Update(float elapsedTime, WaveManager* waveManager)
             continue;
         }
         //全体が連動する
-        Vector3 idealPos = m_position + Vector3::Transform(floe.basePosition, stageRotation);
+        DirectX::SimpleMath::Vector3 idealPos = 
+            m_position + DirectX::SimpleMath::Vector3::Transform(floe.basePosition, stageRotation);
         
         //実際の波の高さと実際の波の傾斜を取得
         float localWaveY = waveManager->GetCurrentHeight(idealPos.x, idealPos.z);
-        Vector2 localSlope = waveManager->GetCurrentWaveAngle(idealPos.x, idealPos.z);
+        DirectX::SimpleMath::Vector2 localSlope = waveManager->GetCurrentWaveAngle(idealPos.x, idealPos.z);
 
         //揺れる強さ
         float blendFactor = WAVE_BLEND_FACTOR;
-
         //高さのブレンド
         idealPos.y = (idealPos.y * (1.0f - blendFactor)) + (localWaveY * blendFactor);
-
         //傾きのブレンド
         float finalRotateX = (m_rotateX * (1.0f - blendFactor)) + (localSlope.x * blendFactor);
         float finalRotateZ = (m_rotateZ * (1.0f - blendFactor)) + (localSlope.y * blendFactor);
@@ -468,15 +459,14 @@ void Stage::Update(float elapsedTime, WaveManager* waveManager)
             }
         }
 
-
         //ブレンド結果を流氷に適用
         floe.rotateX = m_rotateX;
         floe.rotateZ = m_rotateZ;
-        floe.rotationMatrix = Matrix::CreateRotationX(finalRotateX) * Matrix::CreateRotationZ(finalRotateZ);
-        floe.position = Vector3(idealPos.x, idealPos.y, idealPos.z);
+        floe.rotationMatrix = 
+            DirectX::SimpleMath::Matrix::CreateRotationX(finalRotateX) *
+            DirectX::SimpleMath::Matrix::CreateRotationZ(finalRotateZ);
+        floe.position = DirectX::SimpleMath::Vector3(idealPos.x, idealPos.y, idealPos.z);
     }
-
-
 }
 
 //----------------------------------------------------------
@@ -485,24 +475,20 @@ void Stage::Update(float elapsedTime, WaveManager* waveManager)
 
 void Stage::Render(
     ID3D11DeviceContext* context,
-    const SimpleMath::Matrix& view,
-    const SimpleMath::Matrix& /*proj*/,
+    const DirectX::SimpleMath::Matrix& view,
+    const DirectX::SimpleMath::Matrix& /*proj*/,
     DisplayCollision* displayCollision
 )
 {
     //光の描画
-    m_stageModel->UpdateEffects([&](IEffect* effect) 
+    m_stageModel->UpdateEffects([&](DirectX::IEffect* effect)
     {
-
-        auto basicEffect = dynamic_cast<BasicEffect*>(effect);
-
+        auto basicEffect = dynamic_cast<DirectX::BasicEffect*>(effect);
         if (basicEffect)
         {
             basicEffect->EnableDefaultLighting();
-        }
-        
+        }   
     });
-
 
     //流氷の描画ループ
     for (const auto& floe : m_iceFloes)
@@ -511,11 +497,13 @@ void Stage::Render(
         if (floe.position.y < FALL_LIMIT_Y)continue;
 
         //描画用ワールド行列
-        Matrix world = Matrix::CreateScale(
+        DirectX::SimpleMath::Matrix world =
+            DirectX::SimpleMath::Matrix::CreateScale(
             STAGE_SCALE_X, STAGE_SCALE_Y, STAGE_SCALE_Z)
             * floe.rotationMatrix
-            * Matrix::CreateTranslation(
-                floe.position + Vector3(0.0f, STAGE_OFFSET_Y, 0.0f));
+            * DirectX::SimpleMath::Matrix::CreateTranslation(
+                floe.position + DirectX::SimpleMath::Vector3(0.0f, STAGE_OFFSET_Y, 0.0f)
+            );
 
         //流氷を１つずつ描画
         m_stageModel->Draw(context, *m_states.get(), world, view, m_proj);
@@ -524,14 +512,14 @@ void Stage::Render(
         if (m_stageCollision && displayCollision)
         {
             DirectX::BoundingOrientedBox currentObb;
-
-            SimpleMath::Matrix collisionMatrix = floe.rotationMatrix * Matrix::CreateTranslation(floe.position);
+            //流氷のOBBをワールド行列で変換
+            DirectX::SimpleMath::Matrix collisionMatrix = 
+                floe.rotationMatrix * DirectX::SimpleMath::Matrix::CreateTranslation(floe.position);
 
             floe.obb.Transform(currentObb, collisionMatrix);
 
             displayCollision->AddBoundingOrientedBox(currentObb, DirectX::Colors::Red);
         }
-
     }
 }
 

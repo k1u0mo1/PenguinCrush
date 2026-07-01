@@ -3,12 +3,11 @@
  * @file   Player.cpp
  * @brief  プレイヤーキャラクターの制御・パラメータ管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "Player.h"
-
 #include "PlayerRenderer.h"
 #include "Game/GimmickList/Stage.h"
 #include "Game/Effects/Particle.h"
@@ -17,11 +16,7 @@
 #include "Game/ShadowRenderer/ShadowRenderer.h"
 #include "Game/GimmickList/WaveManager.h"
 #include "AttackList/AttackManager.h"
-
 #include "Game/Collision/ModelCollision.h"
-
-using namespace DirectX;
-using namespace DirectX::SimpleMath;
 
 //-----------------------------------------------------------------
 // プレイヤーインスタンスを生成
@@ -31,9 +26,10 @@ Player::Player(
     DX::DeviceResources* deviceResources,
     std::shared_ptr<DisplayCollision> collision,
     PlayerCamera* camera)
-    : m_deviceResources(deviceResources)
-    , m_displayCollision(collision)
-    , m_camera(camera)
+    : 
+    m_deviceResources(deviceResources),
+    m_displayCollision(collision),
+    m_camera(camera)
 {
 }
 
@@ -74,16 +70,14 @@ void Player::Initialize(
         PLAYER_START_POSITION_X,
         PLAYER_START_POSITION_Y, 
         PLAYER_START_POSITION_Z };
-
 	//初期の向きはZ軸正方向
     m_forward = { 0.0f, 0.0f, 0.0f };
 
     //パラメータのリセット
     //重力
-    m_velocity = Vector3::Zero;
-
+    m_velocity = DirectX::SimpleMath::Vector3::Zero;
     //ノックバック
-    m_knockbackVelocity = Vector3::Zero;
+    m_knockbackVelocity = DirectX::SimpleMath::Vector3::Zero;
     m_knockbackTimer = 0.0f;
     //ダッシュしているか
     m_isDashing = false;
@@ -103,8 +97,8 @@ void Player::Initialize(
 
 void Player::Update(
     float elapsedTime,
-    const Mouse::State& mouse,
-    const Mouse::ButtonStateTracker& mouseTracker,
+    const DirectX::Mouse::State& mouse,
+    const DirectX::Mouse::ButtonStateTracker& mouseTracker,
     Stage* stage,
     WaveManager* /*waveManager*/,
     Particle* particle)
@@ -112,14 +106,13 @@ void Player::Update(
     if (!stage) return;
 
     CheckAndHandleFalling(stage, particle);
-
+    //キーボードの状態を取得
     auto kb = DirectX::Keyboard::Get().GetState();
 
     // 状態タイマーの更新
     if (m_stateTimer > 0.0f)
     {
         m_stateTimer -= elapsedTime;
-
         if (m_stateTimer <= 0.0f)
         {
             m_state = PlayerState::Idle;
@@ -138,19 +131,14 @@ void Player::Update(
         m_attackCoolTime -= elapsedTime;
     }
 
-
     //移動
     HandleMovement(elapsedTime, stage, particle);
-
     //ノックバック処理
     CharacterBase::UpdatePhysice(elapsedTime, m_stage);
-
     //攻撃
     HandleAttack(elapsedTime, mouse, mouseTracker, kb);
-
     //スタミナ回復
     UpdateStamina(elapsedTime);
-
     
 	//落下してステージの下に到達した場合の処理
     if(m_position.y< STAGE_BOUNDARY_Y)
@@ -160,7 +148,7 @@ void Player::Update(
         if (particle)
         {
             // 水面の高さに合わせて発生位置
-            SimpleMath::Vector3 splashPos = m_position;
+            DirectX::SimpleMath::Vector3 splashPos = m_position;
             splashPos.y = 0.0f;
             //水しぶき
             particle->Spawn(Particle::Type::Splash, splashPos, SPLASH_OF_WATER);
@@ -186,15 +174,14 @@ void Player::Update(
 
 		//HPを減らすなどのペナルティ処理
         m_stats.TakeDamage(FALL_DAMAGE);
-
 	}
-
 
     // コリジョン情報の更新を追加
     if (m_collision)
     {
 		//ワールド行列を計算してコリジョンに渡す
-        SimpleMath::Matrix world = SimpleMath::Matrix::CreateWorld(m_position, m_forward, SimpleMath::Vector3::Up);
+        DirectX::SimpleMath::Matrix world = 
+            DirectX::SimpleMath::Matrix::CreateWorld(m_position, m_forward, DirectX::SimpleMath::Vector3::Up);
 
         m_collision->UpdateBoundingInfo(world);
     }
@@ -224,7 +211,6 @@ void Player::Render(ID3D11DeviceContext* context,
         m_stage,
         shadowRenderer
     );
-
     
     //当たり判定
     if (m_displayCollision && m_collision)
@@ -232,18 +218,12 @@ void Player::Render(ID3D11DeviceContext* context,
         //DisplayCollision に現在のコリジョン情報を登録 
         m_collision->AddDisplayCollision(m_displayCollision.get());
 
-
-        //当たり判定の描画-----------------------------------------
-
         //登録されたコリジョンを描画
         m_displayCollision->DrawCollision(
             context, m_states.get(), view, proj,
-            Colors::Green, Colors::Lime, COLLISION_LINE_THICKNESS // プレイヤーは緑色で表示
+            DirectX::Colors::Green, DirectX::Colors::Lime, COLLISION_LINE_THICKNESS // プレイヤーは緑色で表示
         );
-
-        //---------------------------------------------------------
     }
-
 }
 
 //-----------------------------------------------------------------
@@ -267,7 +247,6 @@ void Player::ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float
         //ふらつき状態を呼び出す
         ApplyDizzy();
     }
-
 }
 
 //-----------------------------------------------------------------
@@ -276,13 +255,11 @@ void Player::ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float
 
 float Player::GetMoveSpeed() const
 {
-
     //ダッシュ中の速度
     if (m_isDashing)
     {
         return MOVE_SPEED + DASH_SPEED; 
     }
-
     // 通常速度
     return MOVE_SPEED;
 }
@@ -297,7 +274,6 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
 
     // ダッシュ判定（スペースキー）
     auto kb = DirectX::Keyboard::Get().GetState();
-
     //ノックバック中は移動入力を無視
     if (m_knockbackTimer > 0.0f)
     {
@@ -312,12 +288,12 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
         m_isDashing = false;
 
         //ステージの傾斜のみを渡して更新
-        Vector3 slideDir = stage->GetSlideDirection(m_position.x,m_position.z);
+        DirectX::SimpleMath::Vector3 slideDir = stage->GetSlideDirection(m_position.x,m_position.z);
+        //ふらつき中は移動入力を無視してステージの傾斜のみを更新
+        m_slideBehavior.Update(m_position, DirectX::SimpleMath::Vector3::Zero, slideDir, elapsedTime);
 
-        m_slideBehavior.Update(m_position, Vector3::Zero, slideDir, elapsedTime);
-
+        //ステージの高さに合わせてY座標を補正
         float stageY = stage->GetGroundHeight(m_position.x, m_position.z);
-
         if (m_position.y < stageY && stageY > STAGE_BOUNDARY_Y) {
             m_position.y = stageY - GROUND_OFFSET_Y;
             m_velocity.y = 0.0f;
@@ -333,7 +309,6 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
     //プレイヤーの forward をカメラ方向に更新
     m_forward = m_forward + (camForward - m_forward) * TURN_SPEED * elapsedTime;
     m_forward.Normalize();
-
     DirectX::SimpleMath::Vector3 forwardVector = m_forward;
 
     //ダッシュしてるか
@@ -351,7 +326,7 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
     //----------------------------------------------------
 
     // 入力に基づく「出したい速度」を計算
-    Vector3 targetVelocity = Vector3::Zero;
+    DirectX::SimpleMath::Vector3 targetVelocity = DirectX::SimpleMath::Vector3::Zero;
 
     if (kb.W /*||kb.A || kb.D*/)
     {
@@ -364,13 +339,12 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
         {
             //消費するスタミナ量
             m_stats.UseStamina(STAMINA_COST_DASH * elapsedTime);
-
             // ダッシュ中のエフェクト発生
             if (particle)
             {
                 // 描画される高さ
-                SimpleMath::Vector3 dashPos =
-                    m_position + SimpleMath::Vector3(0.0f, DASH_HEIGHT,0.0f);
+                DirectX::SimpleMath::Vector3 dashPos =
+                    m_position + DirectX::SimpleMath::Vector3(0.0f, DASH_HEIGHT,0.0f);
                 
                 //ダッシュの煙の描画
                 particle->Spawn(
@@ -387,30 +361,26 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
         targetVelocity = -forwardVector * MOVE_SPEED ;
     }
 
-
     //----------------------------------------------------
     //滑る慣性を選ぶ
     //----------------------------------------------------
 
     //ステージからのスライド方向を取得
-    Vector3 slideDir = stage->GetSlideDirection(m_position.x,m_position.z);
+    DirectX::SimpleMath::Vector3 slideDir = stage->GetSlideDirection(m_position.x,m_position.z);
 
     //突進（ダッシュ）中かどうかで処理を分ける
     if (m_state == PlayerState::Rush || m_isDashing)
     {
         //突進中は慣性（ステージの滑り）を無視
         m_position += targetVelocity * elapsedTime;
-
         //ダッシュ中は足場の傾きの慣性を外す
-        m_slideBehavior.Update(m_position, Vector3::Zero, slideDir, elapsedTime);
+        m_slideBehavior.Update(m_position, DirectX::SimpleMath::Vector3::Zero, slideDir, elapsedTime);
     }
     else
     {
         //通常は足場の傾きを付ける
         m_slideBehavior.Update(m_position, targetVelocity, slideDir, elapsedTime);
     }
-
-    
 }
 
 //-----------------------------------------------------------------
@@ -431,7 +401,7 @@ void Player::HandleAttack(
     //------------------------------------------------------
 
     // 近距離攻撃（左クリック）
-    if (mouseTracker.leftButton == Mouse::ButtonStateTracker::PRESSED &&
+    if (mouseTracker.leftButton == DirectX::Mouse::ButtonStateTracker::PRESSED &&
         m_stats.stamina >= STAMINA_REQ_ATTACK &&
         m_state != PlayerState::Rush)
     {
@@ -440,7 +410,6 @@ void Player::HandleAttack(
         
 		//攻撃のクールタイマー
         m_stateTimer = STATE_TIMER_ATTACK;
-
 		//攻撃処理
         if (m_attackManager)
             m_attackManager->Attack(this);
@@ -456,7 +425,6 @@ void Player::HandleAttack(
         if (!kb.Space || m_stats.stamina <= 0.0f)
         {
             m_state = PlayerState::Idle;
-            
             m_attackCoolTime = ATTACK_COOLDOWN;
             return;
         }
@@ -470,7 +438,6 @@ void Player::HandleAttack(
         && m_attackCoolTime <= 0.0f)
     {
         m_state = PlayerState::Rush;
-        
         m_stateTimer = 0.0f;
 
 		//攻撃処理
@@ -478,7 +445,6 @@ void Player::HandleAttack(
             m_attackManager->Rush(this);
         {
             m_stats.UseStamina(STAMINA_COST_RUSH);
-            
         }
     }
 }
@@ -489,7 +455,7 @@ void Player::HandleAttack(
 
 void Player::UpdateStamina(float elapsedTime)
 {
-    // スタミナ自然回復
+    //スタミナ自然回復
     m_stats.RecoverStamina(elapsedTime);
 }
 
@@ -503,8 +469,7 @@ void Player::ApplyDizzy()
     if (m_state == PlayerState::Dizzy) return;
 
     m_state = PlayerState::Dizzy;
-
-    
+    //ふらつき状態のタイマーをリセット
     m_stateTimer = STATE_TIMER_DIZZY;
 
     //ダッシュなどの状態を強制解除
@@ -512,7 +477,6 @@ void Player::ApplyDizzy()
 
     //慣性を少し残し、入力の速度をゼロにする
     m_attackCoolTime = 0.0f;
-
 }
 
 //-----------------------------------------------------------------
@@ -542,11 +506,7 @@ void Player::CreateDeviceResources()
     //------------------------------------------------------
     //ステートの作成
     //------------------------------------------------------
-
-    m_states = std::make_unique<CommonStates>(device);
-
-    
-    
+    m_states = std::make_unique<DirectX::CommonStates>(device);
     //------------------------------------------------------
     //コリジョンの生成
     //------------------------------------------------------
@@ -555,18 +515,14 @@ void Player::CreateDeviceResources()
         //当たり判定
         m_collision = std::make_unique<ModelCollisionOrientedBox>(m_model.get());
     }
-
     //------------------------------------------------------
     //影用のテクスチャの読み込み
     //------------------------------------------------------
-
-    CreateDDSTextureFromFile(device, L"Resources\\Textures\\Shadow.dds", nullptr, m_shadowTexture.GetAddressOf());
+    DirectX::CreateDDSTextureFromFile(device, L"Resources\\Textures\\Shadow.dds", nullptr, m_shadowTexture.GetAddressOf());
 
     //------------------------------------------------------
     //効果音のロード
     //------------------------------------------------------
-    //AudioManager* audio = AudioManager::GetInstance();
-
     //攻撃関連
     AudioManager::GetInstance()->LoadSound("Attack", L"Resources/Sounds/P_近距離攻撃.wav");
     AudioManager::GetInstance()->LoadSound("Dash", L"Resources/Sounds/P_突進攻撃.wav");
@@ -575,7 +531,6 @@ void Player::CreateDeviceResources()
     //その他
     AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/P_E_落水.wav");
     AudioManager::GetInstance()->LoadSound("Heal", L"Resources/Sounds/SE_回復.wav");
-
 }
 
 //----------------------------------------------------------

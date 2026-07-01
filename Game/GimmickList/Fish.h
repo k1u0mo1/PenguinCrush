@@ -3,25 +3,19 @@
  * @file   Fish.h
  * @brief  魚オブジェクト
  * @author 國田知睦
- * @date   2026/06/11
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "pch.h"
-
 #include "Game/Common/DeviceResources.h"
 #include "Game/Common/StepTimer.h"
-
 #include "Game/Camera/PlayerCamera.h"
 #include "Game/Collision/DisplayCollision.h"
 #include "Game/Collision/ModelCollision.h"
-
 #include "Game/GimmickList/Stage.h"
-
 //影
 #include "Game/ShadowRenderer/ShadowRenderer.h"
-
 //傾き
 #include "Game/GimmickList/SlideBehavior.h"
 
@@ -36,14 +30,11 @@ private:
     //------------------------------------------------------
     //生存時間関連
     //------------------------------------------------------
-
     //魚が消滅するまでの時間
     static constexpr float MAX_LIFETIME = 13.0f;
-
     //------------------------------------------------------
     //描画＆スケール関連
     //------------------------------------------------------
-
     //魚モデルのX軸スケール
     static constexpr float FISH_SCALE_X = 0.6f;
     //魚モデルのY軸スケール
@@ -53,23 +44,55 @@ private:
     //モデルの初期向き補正
     static constexpr float MODEL_ROTATION_OFFSET = 90.0f;
 
+    //影の大きさ
+	static constexpr float SHADOW_SCALE = 1.5f;
+
+    //------------------------------------------------------
+    //動き関連
+    //------------------------------------------------------
+    //揺れ
+    static constexpr float FISH_RADIAN = 15.0f;
+
+    //魚の跳ねる強さ
+	static constexpr float FISH_JUMP_STRENGTH = 0.5f;
+    //跳ねる判定の高さ
+	static constexpr float FISH_JUMP_HEIGHT = 1.0f;
+    //跳ねる乱数の最大値
+    static constexpr int JUMP_PROBABILITY_MAX = 100;
+    //跳ねる乱数の最小値
+    static constexpr int JUMP_PROBABILITY_MIN = 3;
+    //跳ねる力の最小値
+    static constexpr float JUMP_FORCE_MIN = 3.0f;
+    //跳ねる力の振れ幅
+    static constexpr float JUMP_POWER_VARIANCE = 2.0f;
+	//跳ねた後にずれるX軸調整値
+    static constexpr float JUMP_OFFSET_X_SLIDE = 5.0f;
+    //跳ねた後にずれるX軸の倍率
+    static constexpr float JUMP_OFFSET_X_MUL = 0.05f;
+
     //------------------------------------------------------
     //当たり判定関連
     //------------------------------------------------------
-
     //箱型当たり判定のサイズ
     static constexpr float BOUNDING_BOX_SIZE = 1.5f;
     //円型当たり判定の半径
     static constexpr float BOUNDING_SPHERE_RADIUS = 2.5f;
 
+	//当たり判定の箱の大きさ
+    static constexpr float COLLISION_EXTENT_X = 1.0f;
+    static constexpr float COLLISION_EXTENT_Y = 1.0f;
+    static constexpr float COLLISION_EXTENT_Z = 2.0f;
+
     //------------------------------------------------------
     //アニメーション関連
     //------------------------------------------------------
-
     //跳ねるアニメーションの速度
     static constexpr float FLOP_SPEED = 20.0f;
     //跳ねる高さの最大値
     static constexpr float FLOP_HEIGHT = 5.0f;
+
+    //重力
+    static constexpr float GRAVITY = -9.8f;
 
 public:
 
@@ -125,12 +148,6 @@ public:
     /// </summary>
     void BulletKill();
 
-    /// <summary>
-    /// 魚に触れた時に得られる弾薬の増加量を取得
-    /// </summary>
-    /// <returns>弾薬の回復量</returns>
-    int GetAmmoValue() const { return m_ammoValue; }
-
     // コピー禁止
     Fish(const Fish&) = delete;
     Fish& operator=(const Fish&) = delete;
@@ -164,39 +181,31 @@ public:
     DirectX::BoundingSphere GetBoundingSphere() const { return m_sphere; }
 
 private:
-
+    //魚の座標
     DirectX::SimpleMath::Vector3 m_position;
+    //魚の向き
     DirectX::SimpleMath::Vector3 m_direction;
-    
+    //生存時間
     float m_lifetime;
-
-    
+    //デバイスリソース
     DX::DeviceResources* m_deviceResources;
 
-    //  射影行列
+    //射影行列
     DirectX::SimpleMath::Matrix m_proj;
 
     std::unique_ptr<DirectX::CommonStates> m_states;
-    //std::unique_ptr<DirectX::Model> m_bulletModel;
     std::shared_ptr<DirectX::Model> m_model;
 
+    //当たり判定用コリジョン
     std::unique_ptr<ModelCollisionOrientedBox> m_collision;
-
-    //※参照を持たせる
-    //DisplayCollision* m_displayCollision = nullptr;
     std::shared_ptr<DisplayCollision> m_displayCollision;
 
     //足元から原点の高さ
     float m_fishHeightOffset;
-
     //重力
     DirectX::SimpleMath::Vector3 m_velocity = DirectX::SimpleMath::Vector3::Zero;
-    //重力加速度
-    float m_gravity = -9.8f;
-
-    //魚を回収したときの増える弾数
-    int m_ammoValue = 1;
-
+    
+    
     //当たり判定Sphere
     DirectX::BoundingSphere m_sphere;
 

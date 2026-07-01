@@ -3,17 +3,12 @@
  * @file   Attack.cpp
  * @brief  敵の近距離攻撃クラス
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "AttackE.h"
-
 #include <Effects.h>
-
-using namespace DirectX;
-
-using Microsoft::WRL::ComPtr;
 
 //----------------------------------------------------------
 // 短時間だけ発生する攻撃判定を生成
@@ -24,19 +19,19 @@ AttackE::AttackE(
 	const DirectX::SimpleMath::Vector3& playerPos, 
 	const DirectX::SimpleMath::Vector3& forward,
 	std::shared_ptr<DisplayCollision> displayCollision)
-
-	: m_deviceResources(deviceResources)
-	, m_forward(forward)
-	, m_lifetime(0.0f)
-	, m_displayCollision(displayCollision)
+	:
+	m_deviceResources(deviceResources),
+	m_forward(forward),
+	m_lifetime(0.0f),
+	m_displayCollision(displayCollision)
 {
 	auto device = m_deviceResources->GetD3DDevice();
 
 	// モデル読み込み（Cube を流用）
-	EffectFactory fx(device);
+	DirectX::EffectFactory fx(device);
 	fx.SetDirectory(L"Resources\\Models");
 	m_attackModel = 
-		Model::CreateFromSDKMESH(device,
+		DirectX::Model::CreateFromSDKMESH(device,
 			L"Resources\\Models\\Cube.sdkmesh",
 			fx
 	);
@@ -46,9 +41,8 @@ AttackE::AttackE(
 
 	//高さを上げる
 	startPos.y += SPAWN_HEIGHT_OFFSET;
-
+	//前方に出す
 	m_position = startPos + forward * SPAWN_DISTANCE;
-
 
 	//OBB （幅 高さ 奥行き）
 	if (m_attackModel)
@@ -59,9 +53,7 @@ AttackE::AttackE(
 		m_collision->SetExtents(COLLISION_SIZE);
 	}
 
-	m_states = std::make_unique<CommonStates>(m_deviceResources->GetD3DDevice());
-
-	
+	m_states = std::make_unique<DirectX::CommonStates>(m_deviceResources->GetD3DDevice());
 }
 
 //----------------------------------------------------------
@@ -79,7 +71,6 @@ void AttackE::Update(float deltaTime)
 	{
 		m_collision->SetCenter(m_position);
 	}
-
 }
 
 //----------------------------------------------------------
@@ -91,16 +82,11 @@ void AttackE::Render(
 	const DirectX::SimpleMath::Matrix& /*view*/,
 	const DirectX::SimpleMath::Matrix& /*proj*/)
 {
-
-
 	if (!m_attackModel)return;
 
-	SimpleMath::Matrix world = 
-		SimpleMath::Matrix::CreateScale(SCALE_SIZE) *
-		SimpleMath::Matrix::CreateTranslation(m_position);
-
-	
-	//m_attackModel->Draw(context, *m_states, world, view, proj);
+	DirectX::SimpleMath::Matrix world =
+		DirectX::SimpleMath::Matrix::CreateScale(SCALE_SIZE) *
+		DirectX::SimpleMath::Matrix::CreateTranslation(m_position);
 
 	// デバッグ描画 OBB → BoundingBox
 	if (m_collision && m_displayCollision)
@@ -108,11 +94,9 @@ void AttackE::Render(
 		DirectX::BoundingBox box;
 		box.Center = m_collision->GetCenter();
 		box.Extents = m_collision->GetExtents();
-
 		//コリジョン線
 		m_displayCollision->AddBoundingBox(box, DirectX::Colors::White);
 	}
-
 }
 
 //----------------------------------------------------------

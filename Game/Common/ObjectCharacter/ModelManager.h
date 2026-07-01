@@ -3,7 +3,7 @@
  * @file   ModelManager.h
  * @brief  キャラクターのモデルを一括で管理管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/01
  */
 
 #pragma once
@@ -18,7 +18,7 @@ public:
 	/// <summary>
 	///	モデルを一括で管理するシングルトンインスタンスを取得
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>インスタンス</returns>
 	static ModelManager* GetInstance()
 	{
 		static ModelManager instance;
@@ -28,7 +28,7 @@ public:
 	/// <summary>
 	/// モデルの初期化
 	/// </summary>
-	/// <param name="device"></param>
+	/// <param name="device">デバイス</param>
 	void Initialize(ID3D11Device* device);
 
 

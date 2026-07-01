@@ -3,15 +3,13 @@
  * @file   Smoke.cpp
  * @brief  煙 エフェクトのパーティクル管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "Smoke.h"
-
 #include "Library/BinaryFile.h"
 #include "Game/Common/DeviceResources.h"
-
 #include <SimpleMath.h>
 #include <Effects.h>
 #include <PrimitiveBatch.h>
@@ -20,9 +18,6 @@
 #include <CommonStates.h>
 #include <vector>
 
-using namespace DirectX;
-
-
 //----------------------------------------------------------
 // 頂点シェーダへ渡す頂点データの入力レイアウト定義
 //----------------------------------------------------------
@@ -30,8 +25,8 @@ using namespace DirectX;
 const std::vector<D3D11_INPUT_ELEMENT_DESC> Smoke::INPUT_LAYOUT =
 {
 	{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "COLOR",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(SimpleMath::Vector3), D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(SimpleMath::Vector3) + sizeof(SimpleMath::Vector4), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(DirectX::SimpleMath::Vector3), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(DirectX::SimpleMath::Vector3) + sizeof(DirectX::SimpleMath::Vector4), D3D11_INPUT_PER_VERTEX_DATA, 0 },
 };
 
 //----------------------------------------------------------
@@ -39,7 +34,8 @@ const std::vector<D3D11_INPUT_ELEMENT_DESC> Smoke::INPUT_LAYOUT =
 //----------------------------------------------------------
 
 Smoke::Smoke()
-	: m_pDR(nullptr)
+	: 
+	m_pDR(nullptr)
 {
 }
 
@@ -84,10 +80,9 @@ void Smoke::Initialize(DX::DeviceResources* pDR)
 	LoadTexture(TEXTURE_PATH);
 
 	//プリミティブバッチの作成
-	m_batch = std::make_unique<PrimitiveBatch<VertexPositionColorTexture>>(pDR->GetD3DDeviceContext());
+	m_batch = std::make_unique<DirectX::PrimitiveBatch<DirectX::VertexPositionColorTexture>>(pDR->GetD3DDeviceContext());
 
-	m_states = std::make_unique<CommonStates>(device);
-
+	m_states = std::make_unique<DirectX::CommonStates>(device);
 }
 
 //----------------------------------------------------------
@@ -102,34 +97,33 @@ void Smoke::Render(
 	float alpha
 )
 {
-
 	ID3D11DeviceContext1* context = m_pDR->GetD3DDeviceContext();
 
 	//頂点情報
-	VertexPositionColorTexture vertex[VERTEX_COUNT] =
+	DirectX::VertexPositionColorTexture vertex[VERTEX_COUNT] =
 	{
-		VertexPositionColorTexture(
-			SimpleMath::Vector3(0.0f,  0.0f, 0.0f),
-			SimpleMath::Vector4(BASE_COLOR.x, BASE_COLOR.y, BASE_COLOR.z, alpha),
-			SimpleMath::Vector2(0.0f, 0.0f)),
+		DirectX::VertexPositionColorTexture(
+			DirectX::SimpleMath::Vector3(0.0f,  0.0f, 0.0f),
+			DirectX::SimpleMath::Vector4(BASE_COLOR.x, BASE_COLOR.y, BASE_COLOR.z, alpha),
+			DirectX::SimpleMath::Vector2(0.0f, 0.0f)),
 	};
 
 	//行列の計算
 	//サイズ
-	SimpleMath::Matrix matScale = SimpleMath::Matrix::CreateScale(scale);
+	DirectX::SimpleMath::Matrix matScale = DirectX::SimpleMath::Matrix::CreateScale(scale);
 	//回転
-	SimpleMath::Matrix matRot = SimpleMath::Matrix::CreateRotationX(DirectX::XM_PIDIV2);
+	DirectX::SimpleMath::Matrix matRot = DirectX::SimpleMath::Matrix::CreateRotationX(DirectX::XM_PIDIV2);
 	//移動
-	SimpleMath::Matrix matTrans = SimpleMath::Matrix::CreateTranslation(position);
+	DirectX::SimpleMath::Matrix matTrans = DirectX::SimpleMath::Matrix::CreateTranslation(position);
 	//合成
-	SimpleMath::Matrix matWorld = matScale * matRot * matTrans;
+	DirectX::SimpleMath::Matrix matWorld = matScale * matRot * matTrans;
 
 	//定数バッファのセット
 	ConstBuffer cbuff;
 	cbuff.matWorld = matWorld.Transpose();
 	cbuff.matView  = view.Transpose();
 	cbuff.matProj  = proj.Transpose();
-	cbuff.time = SimpleMath::Vector4(float(m_timer.GetTotalSeconds()), 0, 0, 0);
+	cbuff.time = DirectX::SimpleMath::Vector4(float(m_timer.GetTotalSeconds()), 0, 0, 0);
 	
 	//受け渡し用バッファの内容更新(ConstBufferからID3D11Bufferへの変換）
 	context->UpdateSubresource(m_CBuffer.Get(), 0, NULL, &cbuff, 0, 0);
@@ -178,7 +172,6 @@ void Smoke::Render(
 	context->PSSetShader(nullptr, nullptr, 0);
 
 	context->OMSetDepthStencilState(m_states->DepthDefault(), 0);
-
 }
 
 //----------------------------------------------------------
@@ -207,7 +200,6 @@ void Smoke::CreateShader()
 		MessageBox(0, L"CreateVertexShader Failed.", NULL, MB_OK);
 		return;
 	}
-
 	//ジオメトリシェーダ作成
 	if (FAILED(device->CreateGeometryShader(GSData.GetData(), GSData.GetSize(), NULL, m_geometryShader.ReleaseAndGetAddressOf())))
 	{

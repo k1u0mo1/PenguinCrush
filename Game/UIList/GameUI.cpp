@@ -3,24 +3,21 @@
  * @file   GameUI.cpp
  * @brief  画面のプレイヤーと敵のUIを表示を管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/17
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "GameUI.h"
-
 //テクスチャ読み込み用
 #include <WICTextureLoader.h>
-
-using namespace DirectX;
-using namespace DirectX::SimpleMath;
 
 //----------------------------------------------------------
 // コンストラクタ
 //----------------------------------------------------------
 
 GameUI::GameUI(DX::DeviceResources* deviceResources)
-    : m_deviceResources(deviceResources)
+    : 
+    m_deviceResources(deviceResources)
 {
 }
 
@@ -32,12 +29,11 @@ void GameUI::Initialize()
 {
     auto device = m_deviceResources->GetD3DDevice();
     auto context = m_deviceResources->GetD3DDeviceContext();
+    //スプライトバッチと共通ステートの作成
+    m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(context);
+    m_states = std::make_unique<DirectX::CommonStates>(device);
 
-    m_spriteBatch = std::make_unique<SpriteBatch>(context);
-    m_states = std::make_unique<CommonStates>(device);
-
-    
-    CreateWICTextureFromFile(
+    DirectX::CreateWICTextureFromFile(
         device,
         TEX_PATH_WHITE,
         nullptr,
@@ -51,14 +47,13 @@ void GameUI::Initialize()
 
 void GameUI::Render(Player* player, BossEnemy* boss)
 {
-    
     // 画面サイズを取得
     RECT rectSize = m_deviceResources->GetOutputSize();
     /*float screenWidth = static_cast<float>(rectSize.right - rectSize.left);*/
     float screenHeight = static_cast<float>(rectSize.bottom - rectSize.top);
 
     //スプライト描画開始
-    m_spriteBatch->Begin(SpriteSortMode_Deferred, m_states->NonPremultiplied());
+    m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_states->NonPremultiplied());
 
     // ---------------------------------------------------
     // プレイヤーのバー (画面左下)
@@ -68,10 +63,9 @@ void GameUI::Render(Player* player, BossEnemy* boss)
     {
         // 座標の計算 
         // HP
-        Vector2 hpPos = { PLAYER_UI_X, screenHeight - PLAYER_HP_BOTTOM_OFFSET };
+        DirectX::SimpleMath::Vector2 hpPos = { PLAYER_UI_X, screenHeight - PLAYER_HP_BOTTOM_OFFSET };
         // スタミナ
-        Vector2 stPos = { PLAYER_UI_X, screenHeight - PLAYER_STAMINA_BOTTOM_OFFSET };
-
+        DirectX::SimpleMath::Vector2 stPos = { PLAYER_UI_X, screenHeight - PLAYER_STAMINA_BOTTOM_OFFSET };
         // ---------------------------------------------------
         // プレイヤーのHPバー (画面左下)
         // ---------------------------------------------------
@@ -80,7 +74,7 @@ void GameUI::Render(Player* player, BossEnemy* boss)
             hpPos,
             BAR_FULL,
             BAR_FULL,
-            Color(Colors::Black),
+            DirectX::SimpleMath::Color(DirectX::Colors::Black),
             PLAYER_HP_SIZE
         );
 
@@ -89,31 +83,28 @@ void GameUI::Render(Player* player, BossEnemy* boss)
             hpPos,
             player->GetHP(),
             PLAYER_MAX_HP,
-            Color(Colors::Lime),
+            DirectX::SimpleMath::Color(DirectX::Colors::Lime),
             PLAYER_HP_SIZE
         ); 
 
         // ---------------------------------------------------
         // プレイヤーのスタミナバー (画面左下)
         // ---------------------------------------------------
-
         // スタミナ（黄色） - HPの下に表示する
         DrawBar(
             stPos,
             BAR_FULL,
             BAR_FULL,
-            Color(Colors::Black),
+            DirectX::SimpleMath::Color(DirectX::Colors::Black),
             PLAYER_STAMINA_SIZE
         );
-
         DrawBar(
             stPos,
             player->GetStamina(),
             player->GetMaxStamina(),
-            Color(Colors::Yellow),
+            DirectX::SimpleMath::Color(DirectX::Colors::Yellow),
             PLAYER_STAMINA_SIZE
         );
-
     }
 
     //---------------------------------------------------
@@ -127,53 +118,23 @@ void GameUI::Render(Player* player, BossEnemy* boss)
         // 画面中央計算
         RECT size = m_deviceResources->GetOutputSize();
         float centerX = (size.right - size.left) / 2.0f;
-        Vector2 pos = { centerX - (BOSS_HP_SIZE.x/2.0f), BOSS_HP_Y}; // 中央から左にずらす
+        DirectX::SimpleMath::Vector2 pos = { centerX - (BOSS_HP_SIZE.x/2.0f), BOSS_HP_Y}; // 中央から左にずらす
 
         // 背景
         DrawBar(pos, 
             BAR_FULL,
             BAR_FULL,
-            Color(Colors::Black), 
+            DirectX::SimpleMath::Color(DirectX::Colors::Black),
             BOSS_HP_SIZE
         );
         // HP（赤）
         DrawBar(pos,
             boss->GetHP(),
             bossMaxHP,
-            Color(Colors::Red), 
+            DirectX::SimpleMath::Color(DirectX::Colors::Red),
             BOSS_HP_SIZE
         );
     }
-
-
-    //---------------------------------------------------
-    // 酔い止めカーソル (画面中央)
-    //---------------------------------------------------
-    //画面の中心座標
-    //float centerX = screenWidth / 2.0f - 5.0f;
-    //float centerY = screenHeight / 2.0f - 30.0f;
-
-    if (m_texture)
-    {
-        // 点のサイズ
-        //float dotSize = 0.5f;
-
-      
-        //// White.png 
-        //m_spriteBatch->Draw(
-        //    m_texture.Get(),                 // テクスチャ
-        //    Vector2(centerX, centerY),       // 位置（画面中央）
-        //    nullptr,                         // ソース矩形（全体）
-        //    Colors::White * 1.0f,            // 色（少し半透明にすると邪魔にならない：0.8f）
-        //    0.0f,                            // 回転
-        //    Vector2(0.5f, 0.5f),             // 原点（画像の中心）※1x1の画像ならこれでOK
-        //    dotSize,                         // スケール（サイズ）
-        //    SpriteEffects_None,
-        //    0.0f
-        //);
-    }
-
-
     // 描画終了
     m_spriteBatch->End();
 }

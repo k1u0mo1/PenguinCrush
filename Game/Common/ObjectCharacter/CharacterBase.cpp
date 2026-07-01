@@ -3,7 +3,7 @@
  * @file   CharacterBase.cpp
  * @brief  キャラクター共通の情報の管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/01
  */
 
 #include "pch.h"
@@ -11,6 +11,10 @@
 #include "Game/GimmickList/Stage.h"
 #include "Game/SoundList/AudioManager.h" 
 #include "Game/Effects/Particle.h"
+
+//----------------------------------------------------------
+// キャラクター共通
+//----------------------------------------------------------
 
 void CharacterBase::UpdatePhysice(float dt, Stage* stage)
 {
@@ -32,8 +36,6 @@ void CharacterBase::UpdatePhysice(float dt, Stage* stage)
 		{
 			m_knockbackVelocity = DirectX::SimpleMath::Vector3::Zero;
 		}
-
-		
 	}
 
 	//接地判定（めり込まないように）
@@ -51,9 +53,11 @@ void CharacterBase::UpdatePhysice(float dt, Stage* stage)
 			m_velocity.y = 0.0f;
 		}
 	}
-	
-
 }
+
+//----------------------------------------------------------
+// ノックバック共通
+//----------------------------------------------------------
 
 void CharacterBase::ApplyKnockback(
 	const DirectX::SimpleMath::Vector3& direction,
@@ -62,11 +66,14 @@ void CharacterBase::ApplyKnockback(
 	float duration)
 {
 	m_knockbackVelocity = direction * power;
-
 	m_knockbackVelocity.y = upPower;
 
 	m_knockbackTimer = duration;
 }
+
+//----------------------------------------------------------
+// 落下の判定と処理共通
+//----------------------------------------------------------
 
 void CharacterBase::CheckAndHandleFalling(
 	Stage* /*stage*/, 

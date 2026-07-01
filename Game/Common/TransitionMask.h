@@ -3,10 +3,10 @@
  * @file   TransitionMask.h
  * @brief  シーン切り替えの管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/01
  */
-#pragma once
 
+#pragma once
 #include "SpriteBatch.h"
 
 /// <summary>
@@ -22,8 +22,6 @@ public:
 	enum  class FadeType
 	{
 		WIPE //ワイプ演出
-
-		//追加可能
 	};
 
 	/// <summary>
@@ -39,7 +37,6 @@ private:
 
 	//ダミーのテクスチャの縦横サイズ
 	static constexpr UINT DUMMY_TEX_SIZE = 1;
-	//
 	static constexpr uint32_t COLOR_WHITE_DATA = 0xFFFFFFFF;
 
 public:
@@ -172,7 +169,7 @@ private:
 
 	struct ConstantBuffer
 	{
-		float rate; 
+		float rate;
 		float pad[3];
 	};
 

@@ -3,15 +3,13 @@
  * @file   DebugFont.h
  * @brief  デバッグ用のフォントクラス
  * @author 國田知睦
- * @date   2026/06/10
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "DebugFont.h"
 #include "DirectXHelpers.h"
 #include "VertexTypes.h"
-
-using namespace DirectX;
 
 //----------------------------------------------------------
 // コンストラクタ　２D
@@ -21,13 +19,14 @@ DebugFont::DebugFont(
 	ID3D11Device* device, 
 	ID3D11DeviceContext* context,
 	wchar_t const* fileName)
-	: m_fontHeight{}
+	: 
+	m_fontHeight{}
 {
-	m_spriteBatch = std::make_unique<SpriteBatch>(context);
+	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(context);
 	m_spriteFont = std::make_unique<DirectX::SpriteFont>(device, fileName);
 
 	// フォントの縦サイズを取得する
-	SimpleMath::Vector2 textSize = m_spriteFont->MeasureString("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+	DirectX::SimpleMath::Vector2 textSize = m_spriteFont->MeasureString("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 	m_fontHeight = textSize.y;
 }
 
@@ -67,7 +66,7 @@ void DebugFont::AddString(
 
 void DebugFont::Render(DirectX::CommonStates* states)
 {
-	m_spriteBatch->Begin(SpriteSortMode_Deferred, nullptr, nullptr, states->DepthNone(), states->CullCounterClockwise());
+	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, states->DepthNone(), states->CullCounterClockwise());
 
 	for (size_t i = 0; i < m_strings.size(); i++)
 	{
@@ -77,7 +76,7 @@ void DebugFont::Render(DirectX::CommonStates* states)
 			m_strings[i].pos,
 			m_strings[i].color,
 			0.0f,
-			SimpleMath::Vector2(0.0f, 0.0f),
+			DirectX::SimpleMath::Vector2(0.0f, 0.0f),
 			m_strings[i].scale);
 	}
 
@@ -98,7 +97,7 @@ DebugFont3D::DebugFont3D(
 	: DebugFont(device,context,fileName)
 {
 	// エフェクトを作成
-	m_effect = std::make_unique<BasicEffect>(device);
+	m_effect = std::make_unique<DirectX::BasicEffect>(device);
 	m_effect->SetTextureEnabled(true);
 	m_effect->SetVertexColorEnabled(true);
 	m_effect->SetLightingEnabled(false);
@@ -108,8 +107,8 @@ DebugFont3D::DebugFont3D(
 		CreateInputLayoutFromEffect(
 			device,
 			m_effect.get(),
-			VertexPositionColorTexture::InputElements,
-			VertexPositionColorTexture::InputElementCount,
+			DirectX::VertexPositionColorTexture::InputElements,
+			DirectX::VertexPositionColorTexture::InputElementCount,
 			m_inputLayout.ReleaseAndGetAddressOf())
 	);
 }
@@ -157,10 +156,10 @@ void DebugFont3D::Render(
 	const DirectX::SimpleMath::Matrix& proj)
 {
 	// スクリーン座標はY軸が＋－逆なので
-	SimpleMath::Matrix invertY = SimpleMath::Matrix::CreateScale(1.0f, -1.0f, 1.0f);
+	DirectX::SimpleMath::Matrix invertY = DirectX::SimpleMath::Matrix::CreateScale(1.0f, -1.0f, 1.0f);
 
 	// ビュー行列の回転を打ち消す行列を作成する
-	SimpleMath::Matrix invView = view.Invert();
+	DirectX::SimpleMath::Matrix invView = view.Invert();
 	invView._41 = 0.0f;
 	invView._42 = 0.0f;
 	invView._43 = 0.0f;
@@ -171,10 +170,11 @@ void DebugFont3D::Render(
 
 	for (size_t i = 0; i < m_strings.size(); i++)
 	{
-		m_spriteBatch->Begin(SpriteSortMode_Deferred, nullptr, nullptr, states->DepthNone(), states->CullCounterClockwise(), [=]
+		m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, states->DepthNone(), states->CullCounterClockwise(), [=]
 			{
 				// ワールド行列作成
-				SimpleMath::Matrix world = invertY * invView * SimpleMath::Matrix::CreateTranslation(m_strings[i].pos);
+				DirectX::SimpleMath::Matrix world = 
+					invertY * invView * DirectX::SimpleMath::Matrix::CreateTranslation(m_strings[i].pos);
 				// エフェクトを適応する
 				m_effect->SetWorld(world);
 				m_effect->Apply(context);
@@ -184,12 +184,13 @@ void DebugFont3D::Render(
 		);
 
 		// 文字列の中心が表示位置になるように設定
-		SimpleMath::Vector2 textOrigin = m_spriteFont->MeasureString(m_strings[i].string.c_str()) / 2.0f;
+		DirectX::SimpleMath::Vector2 textOrigin =
+			DirectX::SimpleMath::Vector2(m_spriteFont->MeasureString(m_strings[i].string.c_str())) / 2.0f;
 
 		m_spriteFont->DrawString(
 			m_spriteBatch.get(),
 			m_strings[i].string.c_str(),
-			SimpleMath::Vector2::Zero,
+			DirectX::SimpleMath::Vector2::Zero,
 			m_strings[i].color,
 			0.0f,
 			textOrigin,

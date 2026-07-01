@@ -3,7 +3,7 @@
  * @file   LevelBase.h
  * @brief  すべてのステージの親となる基底クラス
  * @author 國田知睦
- * @date   2026/06/15
+ * @date   2026/07/01
  */
 
 //ステージ共通の「親クラス」 
@@ -65,16 +65,14 @@ public:
 		{
 			m_weather->Update(dt);
 		}
-	
 	}
-
 	
 	/// <summary>
 	/// ステージ固有の描画処理
 	/// </summary>
-	/// <param name="context"></param>
-	/// <param name="view"></param>
-	/// <param name="proj"></param>
+	/// <param name="context">コンテキスト</param>
+	/// <param name="view">ビュー行列</param>
+	/// <param name="proj">射影行列</param>
 	/// <param name="camPos">カメラ座標</param>
 	virtual void Render(
 		ID3D11DeviceContext* context, 
@@ -90,6 +88,6 @@ public:
 	}
 
 protected:
-
+	//天候
 	std::unique_ptr<WeatherBase> m_weather;
 };

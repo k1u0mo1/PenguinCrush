@@ -3,11 +3,10 @@
  * @file   Player.h
  * @brief  プレイヤーキャラクターの制御・パラメータ管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "pch.h"
 #include <DirectXMath.h>
 #include <memory>
@@ -44,8 +43,6 @@ public:
     };
 
 private:
-
-    //定数系
 
     //プレイヤーの初期座標
 	static constexpr float PLAYER_START_POSITION_X = -10.0f;
@@ -113,7 +110,6 @@ private:
 
 	//当たり判定の線の太さ
     static constexpr float COLLISION_LINE_THICKNESS = 0.1f;
-    
 
 public:
 
@@ -275,7 +271,6 @@ public:
     /// <param name="amount">回復する量</param>
     void Heal(float amount) { m_stats.Heal(amount); }
 
-
     /// <summary>
     /// 魚の当たり判定
     /// </summary>
@@ -365,75 +360,58 @@ private:
     }
 
 private:
-
+    //デバイスリソース
     DX::DeviceResources* m_deviceResources;
-
+    //当たり判定の表示用クラス
     std::shared_ptr<DisplayCollision> m_displayCollision;
-
     //衝突判定オブジェクトの追加
     std::unique_ptr<ModelCollisionOrientedBox> m_collision;
 
+    //攻撃マネージャーのポインタ
     AttackManager* m_attackManager = nullptr;
-
+    //プレイヤーのパラメータ
     PlayerStats m_stats;
-
     //カメラ
     PlayerCamera* m_camera = nullptr;
-
+    
     std::unique_ptr<DirectX::CommonStates> m_states;
     std::shared_ptr<DirectX::Model> m_model;
 
-    
+    //プレイヤーの正面方向ベクトル
     DirectX::SimpleMath::Vector3 m_forward = { 0,0,1 };
 
+    //プレイヤーが突進中か
     bool m_isDashing = false;
 
-    
-
-    // Optional: スライド移動用
+    //Optional: スライド移動用
     DirectX::SimpleMath::Vector3 m_slideVelocity = { 0,0,0 };
-
     SlideBehavior m_slideBehavior;
 
     //プレイヤーの現在の回転行列を保持する
     DirectX::SimpleMath::Matrix m_rotationMatrix = DirectX::SimpleMath::Matrix::Identity;
-
     //攻撃の連射防止用タイマー
     float m_attackCoolTime = 0.0f;
 
 private:
 
-    
 	//プレイヤーの描画クラス
     std::unique_ptr<PlayerRenderer> m_renderer;
-
     //プレイヤーの原因の状態
     PlayerState m_state = PlayerState::Idle;
     //モデルの切り替えている時間
     float m_stateTimer = 0.0f;
-
     
     //ふらつきエフェクトの現在の回転角度
     float m_dizzyRotationY = 0.0f;
-
 private:
 
     //影用のプリミティブ　板
     std::unique_ptr<DirectX::GeometricPrimitive> m_shadowQuad;
-
     //影のエフェクト
     std::unique_ptr<DirectX::BasicEffect> m_shadowEffect;
-
     //影のテクスチャ
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_shadowTexture;
-
     //入力レイアウト
     Microsoft::WRL::ComPtr<ID3D11InputLayout>    m_shadowInputLayout;
-
-    //影
-    //std::unique_ptr<ShadowRenderer> m_shadowRenderer;
-
     Stage* m_stage = nullptr;
-
-    
 };

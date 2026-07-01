@@ -3,10 +3,11 @@
  * @file   BinaryFile.h
  * @brief  バイナリーデータの読み込みと保持を行うクラス
  * @author 國田知睦
- * @date   2026/06/10
+ * @date   2026/07/01
  */
 
 #pragma once
+#include <memory>
 
 /// <summary>
 /// バイナリーデータの読み込みと保持を行うクラス
@@ -39,7 +40,7 @@ public:
 	/// ムーブコンストラクタ
 	/// </summary>
 	/// <param name="in">ムーブ元のBinaryFileオブジェクト</param>
-	BinaryFile(BinaryFile&& in);
+	BinaryFile(BinaryFile&& in) noexcept;
 
 	/// <summary>
 	/// ロードされたデータの先頭ポインタを取得

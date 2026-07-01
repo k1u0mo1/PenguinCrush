@@ -3,7 +3,7 @@
  * @file   ResultScene.cpp
  * @brief  リザルト画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/06/29
+ * @date   2026/07/01
  */
 
 #include "pch.h"
@@ -134,9 +134,9 @@ void ResultScene::Render()
 	//-----------------------------------------
 	// モデルの動き
 	//-----------------------------------------
-	SimpleMath::Vector3 scale(MODEL_SCALE);   //サイズ
-	SimpleMath::Vector3 rotation(0.0f, 0.0f, 0.0f);//回転
-	SimpleMath::Vector3 position(0.0f, 0.0f, 0.0f);//座標
+	DirectX::SimpleMath::Vector3 scale(MODEL_SCALE);   //サイズ
+	DirectX::SimpleMath::Vector3 rotation(0.0f, 0.0f, 0.0f);//回転
+	DirectX::SimpleMath::Vector3 position(0.0f, 0.0f, 0.0f);//座標
 
 	//プレイヤーが勝った時
 	if (GetUserResources()->IsGameClear())
@@ -162,12 +162,12 @@ void ResultScene::Render()
 	//３Dモデル
 	if (m_resultModel)
 	{
-		SimpleMath::Matrix world =
-			SimpleMath::Matrix::CreateScale(scale) *
-			SimpleMath::Matrix::CreateRotationX(rotation.x) *
-			SimpleMath::Matrix::CreateRotationY(rotation.y) *
-			SimpleMath::Matrix::CreateRotationZ(rotation.z) *
-			SimpleMath::Matrix::CreateTranslation(position);
+		DirectX::SimpleMath::Matrix world =
+			DirectX::SimpleMath::Matrix::CreateScale(scale) *
+			DirectX::SimpleMath::Matrix::CreateRotationX(rotation.x) *
+			DirectX::SimpleMath::Matrix::CreateRotationY(rotation.y) *
+			DirectX::SimpleMath::Matrix::CreateRotationZ(rotation.z) *
+			DirectX::SimpleMath::Matrix::CreateTranslation(position);
 		//プレイヤーのモデルの描画
 		m_resultModel->Draw(context, *m_states, world, m_view, m_proj);
 	}
@@ -181,10 +181,10 @@ void ResultScene::Render()
 	float screenH = float(size.bottom - size.top);
 	float centerX = screenW / 2.0f;
 	//スプライトバッチ
-	m_spriteBatch->Begin(SpriteSortMode_Deferred, m_states->NonPremultiplied());
+	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_states->NonPremultiplied());
 
 	//カメラの位置
-	Vector3 eyePos(0.0f, WEATHER_CAMERA_POS_Y, WEATHER_CAMERA_POS_Z);
+	DirectX::SimpleMath::Vector3 eyePos(0.0f, WEATHER_CAMERA_POS_Y, WEATHER_CAMERA_POS_Z);
 	//勝敗　勝ち
 	if (GetUserResources()->IsGameClear())
 	{
@@ -218,7 +218,7 @@ void ResultScene::Render()
 	if (m_textureButtonUI)
 	{
 		//ボタンUI
-		m_spriteBatch->Draw(m_textureButtonUI.Get(), SimpleMath::Vector2(0, 0));
+		m_spriteBatch->Draw(m_textureButtonUI.Get(), DirectX::SimpleMath::Vector2(0, 0));
 	}
 	// ボタンを表示する基準の高さ
 	float startY = screenH * BUTTON_START_Y_RATIO;
@@ -239,11 +239,11 @@ void ResultScene::Render()
 		//選択されていたらサイズを大きく
 		float buttonScale = isSelected ? BUTTON_SCALE_SELECTED : BUTTON_SCALE_NORMAL;
 		//選択されていたら色を変更
-		XMVECTOR color = isSelected ? Colors::White : Colors::Gray;
+		DirectX::XMVECTOR color = isSelected ? DirectX::Colors::White : DirectX::Colors::Gray;
 
 		DrawTextureCenter(
 			buttonTextures[i],
-			Vector2(centerX, startY + (stepY * i)),
+			DirectX::SimpleMath::Vector2(centerX, startY + (stepY * i)),
 			buttonScale, color);
 	}
 
@@ -256,9 +256,16 @@ void ResultScene::Render()
 		//カーソルに応じたY座標を出す
 		float cursorY = startY + (stepY * cursorIndex);
 		//左側の矢印
-		DrawTextureCenter(m_textureCursor.Get(), SimpleMath::Vector2(centerX - CURSOR_OFFSET_X, cursorY), CURSOR_SCALE);
+		DrawTextureCenter(
+			m_textureCursor.Get(),
+			DirectX::SimpleMath::Vector2(centerX - CURSOR_OFFSET_X, cursorY),
+			CURSOR_SCALE);
 		//右側の矢印 反転
-		DrawTextureCenter(m_textureCursor.Get(), SimpleMath::Vector2(centerX + CURSOR_OFFSET_X, cursorY), CURSOR_SCALE, Colors::White, SpriteEffects_FlipHorizontally);
+		DrawTextureCenter(
+			m_textureCursor.Get(),
+			DirectX::SimpleMath::Vector2(centerX + CURSOR_OFFSET_X, cursorY),
+			CURSOR_SCALE, DirectX::Colors::White, 
+			DirectX::SpriteEffects_FlipHorizontally);
 	}
 
 	m_spriteBatch->End();
@@ -283,23 +290,23 @@ void ResultScene::CreateDeviceDependentResources()
 	//共通ステートとバッチ
 	//---------------------------------------------------
 	//描画ステートの作成
-	m_states = std::make_unique<CommonStates>(device);
+	m_states = std::make_unique<DirectX::CommonStates>(device);
 	//２D描画バッチの作成
-	m_spriteBatch = std::make_unique<SpriteBatch>(context);
+	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(context);
 
 	//---------------------------------------------------
 	//テクスチャ読み込み
 	//---------------------------------------------------
-	CreateWICTextureFromFile(device, L"Resources\\Textures\\Clear.png", nullptr, m_textureClear.GetAddressOf());
-	CreateWICTextureFromFile(device, L"Resources\\Textures\\Over.png",  nullptr, m_textureOver.GetAddressOf());
-	CreateWICTextureFromFile(device, L"Resources\\Textures\\Retry.png", nullptr, m_textureRetry.GetAddressOf());
-	CreateWICTextureFromFile(device, L"Resources\\Textures\\選択画面.png",       nullptr, m_textureSelect.GetAddressOf());
-	CreateWICTextureFromFile(device, L"Resources\\Textures\\タイトルに移動.png", nullptr, m_textureTitle.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Clear.png", nullptr, m_textureClear.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Over.png",  nullptr, m_textureOver.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Retry.png", nullptr, m_textureRetry.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\選択画面.png",       nullptr, m_textureSelect.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\タイトルに移動.png", nullptr, m_textureTitle.GetAddressOf());
 
 	//ボタンUIテクスチャ読み込み
-	CreateWICTextureFromFile(device,L"Resources\\Textures\\ButtonUI1.png",nullptr,m_textureButtonUI.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device,L"Resources\\Textures\\ButtonUI1.png",nullptr,m_textureButtonUI.GetAddressOf());
 	//選択中の矢印テクスチャ読み込み
-	CreateWICTextureFromFile(device,L"Resources\\Textures\\Cursor.png",nullptr,m_textureCursor.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device,L"Resources\\Textures\\Cursor.png",nullptr,m_textureCursor.GetAddressOf());
 
 	//---------------------------------------------------
 	//モデル読み込み
@@ -365,13 +372,13 @@ void ResultScene::CreateWindowSizeDependentResources()
 	float aspectRatio = float(size.right - size.left) / float(size.bottom - size.top);
 
 	//ビュー行列
-	m_view = SimpleMath::Matrix::CreateLookAt(
+	m_view = DirectX::SimpleMath::Matrix::CreateLookAt(
 		DirectX::SimpleMath::Vector3(0.0f, CAMERA_EYE_Y, CAMERA_EYE_Z),
 		DirectX::SimpleMath::Vector3(0.0f, CAMERA_TARGET_Y, 0.0f),
 		DirectX::SimpleMath::Vector3::Up
 	);
 	//射影行列
-	m_proj = SimpleMath::Matrix::CreatePerspectiveFieldOfView(
+	m_proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(
 		DirectX::XMConvertToRadians(CAMERA_FOV),
 		aspectRatio,
 		CAMERA_NEAR, CAMERA_FAR

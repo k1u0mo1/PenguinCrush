@@ -2,11 +2,10 @@
  * @file   PlayerStats.h
  * @brief  プレイヤーのパラメータを管理するクラス
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include <algorithm>
 #include <Game/SoundList/AudioManager.h>
 
@@ -21,13 +20,11 @@ struct PlayerStats
 	//スタミナ関連の初期値
 	static constexpr float DEFAULT_STAMINA = 100.0f;
 	static constexpr float DEFAULT_STAMINA_MAX = 100.0f;
-
 	//スタミナ回復関連のパラメータ
 	//スタミナの回復速度（1秒あたりの回復量）
 	static constexpr float STAMINA_RECOVER_RATE = 100.0f; 
 	//スタミナを消費したあと、回復が始まるまでのクールタイム（秒）
 	static constexpr float STAMINA_COOL_TIME = 1.0f;
-
 
 	//プレイヤーの体力
 	float hp = DEFAULT_HP;

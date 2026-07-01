@@ -3,35 +3,35 @@
  * @file   DebugCamera.cpp
  * @brief  確認用デバッグカメラの動きの管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "DebugCamera.h"
 #include "Mouse.h"
-
-using namespace DirectX;
-
+#include <Library/InputManager.h>
 
 //--------------------------------------------------------------------------------------
 // コンストラクタ
 //--------------------------------------------------------------------------------------
 
 DebugCamera::DebugCamera(int windowWidth, int windowHeight)
-	: m_yAngle(0.0f)
-	, m_yTmp(0.0f)
-	, m_xAngle(0.0f)
-	, m_xTmp(0.0f)
-	, m_x(0)
-	, m_y(0)
-	, m_scrollWheelValue(0)
-	, m_screenW(windowWidth)
-	, m_screenH(windowHeight)
+	:
+	m_yAngle(0.0f),
+	m_yTmp(0.0f),
+	m_xAngle(0.0f),
+	m_xTmp(0.0f),
+	m_x(0),
+	m_y(0),
+	m_scrollWheelValue(0),
+	m_screenW(windowWidth),
+	m_screenH(windowHeight),
+	m_distance(DEFAULT_CAMERA_DISTANCE)
 {
 	SetWindowSize(windowWidth, windowHeight);
 
 	// マウスのフォイール値をリセット
-	Mouse::Get().ResetScrollWheelValue();
+	DirectX::Mouse::Get().ResetScrollWheelValue();
 }
 
 //--------------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ DebugCamera::DebugCamera(int windowWidth, int windowHeight)
 
 void DebugCamera::Update()
 {
-	Mouse::State state = Mouse::Get().GetState();
+	DirectX::Mouse::State state = DirectX::Mouse::Get().GetState();
 
 	// 前フレームからのスクロール変化量を取得し、距離に加算 
 	int scrollDelta = state.scrollWheelValue - m_scrollWheelValue;
@@ -56,12 +56,12 @@ void DebugCamera::Update()
 
 	m_tracker.Update(state);
 
-	if (m_tracker.leftButton == Mouse::ButtonStateTracker::PRESSED)
+	if (m_tracker.leftButton == DirectX::Mouse::ButtonStateTracker::PRESSED)
 	{
 		m_x = state.x;
 		m_y = state.y;
 	}
-	else if (m_tracker.leftButton == Mouse::ButtonStateTracker::RELEASED)
+	else if (m_tracker.leftButton == DirectX::Mouse::ButtonStateTracker::RELEASED)
 	{
 		m_xAngle = m_xTmp;
 		m_yAngle = m_yTmp;
@@ -75,10 +75,10 @@ void DebugCamera::Update()
 	//-----------------------------------------------------
 	//デバッグに切り替えた際にキーボード操作による自由移動
 	//-----------------------------------------------------
-	Keyboard::State kb = Keyboard::Get().GetState();
+	DirectX::Keyboard::State kb = DirectX::Keyboard::Get().GetState();
 
 	//現在のカメラの向いている水平方向と左右の方向を計算
-	Vector3 forward = m_target - m_eye;
+	DirectX::SimpleMath::Vector3 forward = m_target - m_eye;
 	//水平に移動させるためにY成分を消す
 	forward.y = 0.0f;
 
@@ -88,16 +88,15 @@ void DebugCamera::Update()
 	}
 	else 
 	{
-		forward = Vector3::Transform(Vector3::Forward, Matrix::CreateRotationY(m_yTmp));
+		forward = DirectX::SimpleMath::Vector3::Transform(DirectX::SimpleMath::Vector3::Forward, DirectX::SimpleMath::Matrix::CreateRotationY(m_yTmp));
 	}
 
-	Vector3 right = Vector3::Up.Cross(forward);
+	DirectX::SimpleMath::Vector3 right = DirectX::SimpleMath::Vector3::Up.Cross(forward);
 	right.Normalize();
 
-	Vector3 worldUp = Vector3::Up;
-	Vector3 move = Vector3::Zero;
+	DirectX::SimpleMath::Vector3 worldUp = DirectX::SimpleMath::Vector3::Up;
+	DirectX::SimpleMath::Vector3 move = DirectX::SimpleMath::Vector3::Zero;
 
-	
 	// WASDキーで前後左右に移動
 	if (kb.W) move += forward;
 	if (kb.S) move -= forward;
@@ -109,29 +108,26 @@ void DebugCamera::Update()
 	if (kb.Q) move -= worldUp;
 
 	// 入力があった場合、注視点（m_target）をスライドさせる
-	if (move != Vector3::Zero)
+	if (move != DirectX::SimpleMath::Vector3::Zero)
 	{
 		move.Normalize();
 		m_target += move * MOVE_SPEED;
 	}
-
 	//-----------------------------------------------------
 
 	// 回転
-	Matrix rotY = Matrix::CreateRotationY(m_yTmp);
-	Matrix rotX = Matrix::CreateRotationX(m_xTmp);
-	Matrix rt = rotY * rotX;
+	DirectX::SimpleMath::Matrix rotY = DirectX::SimpleMath::Matrix::CreateRotationY(m_yTmp);
+	DirectX::SimpleMath::Matrix rotX = DirectX::SimpleMath::Matrix::CreateRotationX(m_xTmp);
+	DirectX::SimpleMath::Matrix rt = rotY * rotX;
 
 	// プレイヤーを注視
-	Vector3 up = Vector3::Transform(Vector3::UnitY, rt.Invert());
-
+	DirectX::SimpleMath::Vector3 up = DirectX::SimpleMath::Vector3::Transform(DirectX::SimpleMath::Vector3::UnitY, rt.Invert());
 	
-	Vector3 offset(0.0f, CAMERA_OFFSET_Y, m_distance);
-	offset = Vector3::Transform(offset, rt);
+	DirectX::SimpleMath::Vector3 offset(0.0f, CAMERA_OFFSET_Y, m_distance);
+	offset = DirectX::SimpleMath::Vector3::Transform(offset, rt);
 
 	m_eye = m_target + offset;
-
-	m_view = Matrix::CreateLookAt(m_eye, m_target, up);
+	m_view = DirectX::SimpleMath::Matrix::CreateLookAt(m_eye, m_target, up);
 }
 
 //--------------------------------------------------------------------------------------
@@ -147,9 +143,9 @@ void DebugCamera::Motion(int x, int y)
 	if (dx != 0.0f || dy != 0.0f)
 	{
 		// Ｙ軸の回転
-		float yAngle = dx * XM_PI;
+		float yAngle = dx * DirectX::XM_PI;
 		// Ｘ軸の回転
-		float xAngle = dy * XM_PI;
+		float xAngle = dy * DirectX::XM_PI;
 
 		m_xTmp = m_xAngle + xAngle;
 		m_yTmp = m_yAngle + yAngle;
@@ -208,7 +204,7 @@ void DebugCamera::GetWindowSize(int& windowWidth, int& windowHeight) const
 // 視点
 //--------------------------------------------------------------------------------------
 
-void DebugCamera::UpdateTarget(const Vector3& playerPos)
+void DebugCamera::UpdateTarget(const DirectX::SimpleMath::Vector3& playerPos)
 {
 	m_target = playerPos;
 }
@@ -223,7 +219,8 @@ void DebugCamera::SetFromOtherCamera(const DirectX::SimpleMath::Vector3& eye, co
 	m_target = target;
 
 	// 角度計算（カメラ方向から回転角へ）
-	Vector3 dir = target - eye;
+	DirectX::SimpleMath::Vector3 dir = target - eye;
+	m_distance = dir.Length();
 	dir.Normalize();
 
 	m_yTmp = atan2f(dir.x, dir.z);     // Y 回転

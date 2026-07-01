@@ -3,13 +3,11 @@
  * @file   ShadowRenderer.h
  * @brief  ゲーム全体のキャラクターやオブジェクトの丸影を描画するクラス
  * @author 國田知睦
- * @date   2026/06/11
+ * @date   2026/07/01
  */
-
 
 #pragma once
 #include "pch.h"
-
 #include <d3d11.h>
 #include <wrl.h>
 #include <DirectXMath.h>
@@ -69,16 +67,12 @@ private:
 	//板ポリゴン用
 	//頂点バッファ
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
-
 	//インデックスバッファ
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;
-
 	//影のテクスチャ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureSRV;
-
 	//描画用ステートとエフェクト
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_shadowState;
 	std::unique_ptr<DirectX::BasicEffect> m_shadowEffect;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_shadowInputLayout;
-
 };

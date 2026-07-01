@@ -3,9 +3,8 @@
  * @file   AudioManager.h
  * @brief  ゲーム全体の音声（BGM・SE）を管理・再生するシングルトンクラス
  * @author 國田知睦
- * @date   2026/06/11
+ * @date   2026/07/01
  */
-
 
 #pragma once
 #include <string>
@@ -26,13 +25,10 @@ private:
 	static constexpr float MAX_VOLUME = 1.0f;
 	//デフォルトの音量
 	static constexpr float DEFAULT_VOLUME = 1.0f;
-
 	//音の高さ　（原音0.0）
 	static constexpr float DEFAULT_PITCH = 0.0f;
 	//左右　（中央0.0）
 	static constexpr float DEFAULT_PAN = 0.0f;
-
-
 
 public:
 
@@ -99,20 +95,17 @@ public:
 	void SetBGMVolume(float volume);
 
 private:
-
+	
 	AudioManager() {}
-
+	//コピーコンストラクタを削除
 	std::unique_ptr<DirectX::AudioEngine> m_audioEngine;
-
 	//文字列
 	std::map<std::string, std::unique_ptr<DirectX::SoundEffect>> m_sounds;
-
 	//現在再生中のBGMを保持する
 	std::unique_ptr<DirectX::SoundEffectInstance> m_bgmInstance;
 
 	//現在のBGMの音量を記憶する
 	float m_bgmVolume = DEFAULT_VOLUME;
-
 	//現在のSEの音量を記憶する
 	float m_seVolume = DEFAULT_VOLUME;
 

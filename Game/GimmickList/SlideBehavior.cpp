@@ -6,7 +6,6 @@
  */
 
 #include "pch.h"
-
 #include "SlideBehavior.h"
 
 //----------------------------------------------------------
@@ -34,7 +33,7 @@ void SlideBehavior::Update(DirectX::SimpleMath::Vector3& position, const DirectX
 
 	//傾斜の慣性計算
 	float slideLerpFactor = (slideDir.LengthSquared() > STOP_EPSILON) ? ACCELERATION_FORCE : FRICTION_FORCE;
-
+	//傾斜の慣性は滑る方向に対して線形補間で更新する
 	m_currentSlideVelocity = DirectX::SimpleMath::Vector3::Lerp(
 		m_currentSlideVelocity,
 		slideDir,

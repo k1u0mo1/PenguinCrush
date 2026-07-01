@@ -3,7 +3,7 @@
  * @file   DisplayCollision.cpp
  * @brief  ゲームの衝突判定を行うクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/01
  */
 
 #include "pch.h"
@@ -12,8 +12,6 @@
 #ifdef _COLLISION_LINE_ON
 #include "DebugDraw"
 #endif
-
-using namespace DirectX;
 
 //-----------------------------------------------------------------
 // コンストラクタ
@@ -24,25 +22,26 @@ DisplayCollision::DisplayCollision(
 	ID3D11DeviceContext* context, 
 	bool modelActive, bool lineActive,
 	uint32_t collisionMax)
-	: m_modelActive(modelActive)
-	, m_lineActive(lineActive)
-	, m_collisionMax(collisionMax)
+	: 
+	m_modelActive(modelActive),
+	m_lineActive(lineActive),
+	m_collisionMax(collisionMax)
 {
 	//モデル/////////////////////////////
 	
 	//モデルの作成 (球)
-	m_modelSphere = GeometricPrimitive::CreateSphere(
+	m_modelSphere = DirectX::GeometricPrimitive::CreateSphere(
 		context, 
 		DEFAULT_SPHERE_SIZE, 
 		DEFAULT_SPHERE_TESSELLATION);
 
 	//モデルの作成 (ボックス)　
-	m_modelBox = GeometricPrimitive::CreateCube(context);
+	m_modelBox = DirectX::GeometricPrimitive::CreateCube(context);
 
 	//エフェクト//////////////////////////////
 
 	//エフェクトの作成（モデル用）
-	m_modelEffect = std::make_unique<NormalMapEffect>(device);
+	m_modelEffect = std::make_unique<DirectX::NormalMapEffect>(device);
 	m_modelEffect->SetVertexColorEnabled(false);
 	m_modelEffect->SetBiasedVertexNormals(false);
 	m_modelEffect->SetInstancingEnabled(true);
@@ -50,14 +49,14 @@ DisplayCollision::DisplayCollision(
 	m_modelEffect->SetTexture(nullptr);
 	m_modelEffect->DisableSpecular();
 	m_modelEffect->EnableDefaultLighting();
-	m_modelEffect->SetWorld(SimpleMath::Matrix::Identity);
+	m_modelEffect->SetWorld(DirectX::SimpleMath::Matrix::Identity);
 
 	// エフェクトの作成（ライン用）
-	m_lineEffect = std::make_unique<BasicEffect>(device);
+	m_lineEffect = std::make_unique<DirectX::BasicEffect>(device);
 	m_lineEffect->SetVertexColorEnabled(true);
 	m_lineEffect->SetTextureEnabled(false);
 	m_lineEffect->SetLightingEnabled(false);
-	m_lineEffect->SetWorld(SimpleMath::Matrix::Identity);
+	m_lineEffect->SetWorld(DirectX::SimpleMath::Matrix::Identity);
 
 	//入力レイアウト///////////////////////////////////
 
@@ -81,7 +80,7 @@ DisplayCollision::DisplayCollision(
 
 	// インスタンシング用のワールド行列格納用定数バッファを作成
 	auto desc = CD3D11_BUFFER_DESC(
-		static_cast<UINT>(DISPLAY_COLLISION_MAX * sizeof(XMFLOAT3X4)),
+		static_cast<UINT>(DISPLAY_COLLISION_MAX * sizeof(DirectX::XMFLOAT3X4)),
 		D3D11_BIND_VERTEX_BUFFER,
 		D3D11_USAGE_DYNAMIC,
 		D3D11_CPU_ACCESS_WRITE);
@@ -131,8 +130,8 @@ void DisplayCollision::DrawCollisionModel(
 		//ワールド行列を設定
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		context->Map(m_instancedVB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-		XMFLOAT3X4* p = static_cast<XMFLOAT3X4*>(mappedResource.pData);
-		ZeroMemory(p, sizeof(XMFLOAT3X4) * m_spheres.size());
+		DirectX::XMFLOAT3X4* p = static_cast<DirectX::XMFLOAT3X4*>(mappedResource.pData);
+		ZeroMemory(p, sizeof(DirectX::XMFLOAT3X4) * m_spheres.size());
 		for (int i = 0; i < m_spheres.size(); i++)
 		{
 			//拡大縮小
@@ -148,7 +147,7 @@ void DisplayCollision::DrawCollisionModel(
 	//球をインスタンスし描画している（高速化のため）
 	m_modelSphere->DrawInstanced(m_modelEffect.get(), m_modelInputLayout.Get(), static_cast<uint32_t>(m_spheres.size()), true, false, 0, [=]()
 		{
-			UINT stride = sizeof(XMFLOAT3X4);
+			UINT stride = sizeof(DirectX::XMFLOAT3X4);
 			UINT offset = 0;
 			context->OMSetDepthStencilState(states->DepthRead(), 0);
 			context->IASetVertexBuffers(1, 1, m_instancedVB.GetAddressOf(), &stride, &offset);
@@ -161,14 +160,14 @@ void DisplayCollision::DrawCollisionModel(
 		//ワールド行列を設定
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		context->Map(m_instancedVB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-		XMFLOAT3X4* p = static_cast<XMFLOAT3X4*>(mappedResource.pData);
-		ZeroMemory(p, sizeof(XMFLOAT3X4) * m_boxes.size());
+		DirectX::XMFLOAT3X4* p = static_cast<DirectX::XMFLOAT3X4*>(mappedResource.pData);
+		ZeroMemory(p, sizeof(DirectX::XMFLOAT3X4) * m_boxes.size());
 		for (int i = 0; i < m_boxes.size(); i++)
 		{
-			SimpleMath::Matrix s = SimpleMath::Matrix::CreateScale(m_boxes[i].extents * 2.0f);
-			SimpleMath::Matrix r = SimpleMath::Matrix::CreateFromQuaternion(m_boxes[i].rotate);
-			SimpleMath::Matrix c = SimpleMath::Matrix::CreateTranslation(m_boxes[i].center);
-			SimpleMath::Matrix m = s * r * c;
+			DirectX::SimpleMath::Matrix s = DirectX::SimpleMath::Matrix::CreateScale(m_boxes[i].extents * 2.0f);
+			DirectX::SimpleMath::Matrix r = DirectX::SimpleMath::Matrix::CreateFromQuaternion(m_boxes[i].rotate);
+			DirectX::SimpleMath::Matrix c = DirectX::SimpleMath::Matrix::CreateTranslation(m_boxes[i].center);
+			DirectX::SimpleMath::Matrix m = s * r * c;
 			p[i]._11 = m._11;  p[i]._12 = m._21; p[i]._13 = m._31; p[i]._14 = m._41;
 			p[i]._21 = m._12;  p[i]._22 = m._22; p[i]._23 = m._32; p[i]._24 = m._42;
 			p[i]._31 = m._13;  p[i]._32 = m._23; p[i]._33 = m._33; p[i]._34 = m._43;
@@ -179,7 +178,7 @@ void DisplayCollision::DrawCollisionModel(
 	//ボックスをインスタンスし描画している（高速化のため）
 	m_modelBox->DrawInstanced(m_modelEffect.get(), m_modelInputLayout.Get(), static_cast<uint32_t>(m_boxes.size()), true, false, 0, [=]()
 		{
-			UINT stride = sizeof(XMFLOAT3X4);
+			UINT stride = sizeof(DirectX::XMFLOAT3X4);
 			UINT offset = 0;
 			context->OMSetDepthStencilState(states->DepthRead(), 0);
 			context->IASetVertexBuffers(1, 1, m_instancedVB.GetAddressOf(), &stride, &offset);
@@ -255,7 +254,7 @@ void DisplayCollision::DrawCollision(
 	}
 
 	//色＋アルファ値
-	SimpleMath::Color color = baseColor;
+	DirectX::SimpleMath::Color color = baseColor;
 	color.w = alpha;
 
 	//コリジョンモデルの描画

@@ -7,16 +7,11 @@
  */
 
 #pragma once
-
 #include "pch.h"
-
 #include "Game/Common/DeviceResources.h"
 #include "AttackBase.h"
-
 #include "Game/Common/StepTimer.h"
-
 #include "Game/Camera/PlayerCamera.h"
-
 #include <Game/Collision/DisplayCollision.h>
 #include <Game/Collision/ModelCollision.h>
 
@@ -27,10 +22,6 @@ class AttackP:public AttackBase
 {
 private:
 
-    //------------------------------------------------------
-    //定数関連
-    //------------------------------------------------------
-    
     //攻撃したときのダメージ量
     static constexpr float ATTACK_DAMAGE = 15.0f;
     //敵を弾き飛ばすノックバック力
@@ -39,17 +30,14 @@ private:
     static constexpr float MAX_LIFETIME = 0.3f;
     //攻撃の判定がプレイヤーの前に出すか
     static constexpr float SPAWN_OFFSET_FRONT = 2.0f;
-
     //攻撃距離
     static constexpr float ATTACK_DISTANCE = 0.1f;
 
 	//当たり判定のサイズ
 	static constexpr DirectX::SimpleMath::Vector3 COLLISION_SIZE =
         DirectX::SimpleMath::Vector3(0.5f, 1.0f, 0.5f);
-
 	//デバックの当たり判定の線の太さ
 	static constexpr float DEBUG_COLLISION_LINE_THICKNESS = 0.5f;
-
     //デフォルトの箱のサイズ
     static constexpr DirectX::SimpleMath::Vector3 DEFAULT_BOX_SIZE =
         DirectX::SimpleMath::Vector3(0.3f, 0.3f, 0.3f);
@@ -141,24 +129,23 @@ public:
     float GetDamage() const override { return ATTACK_DAMAGE; }
 
 private:
-
+    //デバイスリソース
     DX::DeviceResources* m_deviceResources;
-
+    //攻撃モデル
     std::shared_ptr<DirectX::Model> m_attackModel;
-
+    //攻撃座標
     DirectX::SimpleMath::Vector3 m_position;
-
+    //攻撃の向き
     DirectX::SimpleMath::Vector3 m_forward;
 
     std::unique_ptr<DirectX::CommonStates> m_states;
 
     //長さ
     float m_lifetime;
-    
+    //攻撃を終了したか
     bool m_isDead = false;
 
+    //攻撃の当たり判定
     std::unique_ptr<ModelCollisionOrientedBox> m_collision;
-
     std::shared_ptr<DisplayCollision> m_displayCollision;
-
 };

@@ -3,12 +3,10 @@
  * @file   HitStop.h
  * @brief  プレイヤーと敵のヒットストップを管理するクラス
  * @author 國田知睦
- * @date   2026/06/17
+ * @date   2026/07/01
  */
 
-
 #pragma once
-
 #include "pch.h"
 #include "Game/Common/DeviceResources.h"
 

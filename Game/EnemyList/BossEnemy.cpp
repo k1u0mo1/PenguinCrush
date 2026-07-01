@@ -3,26 +3,19 @@
  * @file   BossEnemy.cpp
  * @brief  ボスの管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/24
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "BossEnemy.h"
 #include <Effects.h>
-
 #include <Game/SoundList/AudioManager.h>
-
 #include <Game/Effects/Particle.h>
 #include <Game/Effects/Smoke.h>
 #include "Game/EnemyList/EnemyRenderer.h"
-
 #include "Game/EnemyList/EnemyManager.h"
 #include "Game/EnemyList/EnemyAttackList/EnemyAttackPattern.h"
 #include "Game/EnemyList/EnemyBaseParameter.h"
-
-
-using namespace DirectX;
-
 
 //----------------------------------------------------------
 // ボスのインスタンスを生成
@@ -30,20 +23,20 @@ using namespace DirectX;
 
 BossEnemy::BossEnemy(
     DX::DeviceResources* deviceResources,
-    const SimpleMath::Vector3& position,
+    const DirectX::SimpleMath::Vector3& position,
     std::shared_ptr<DisplayCollision> displayCollision,
     EnemyType type
 )
-    : EnemyBase(deviceResources,position,EnemyData::BossEnemy)
-    , m_deviceResources(deviceResources)
-    , m_displayCollision(displayCollision)
-    , m_isSmokeActive(false)
-    , m_isLandingEffectDone(false)
-    , m_smokeTimer(0.0f)
-    , m_isGroundPrev(false)
-    , m_isGroundNow(false)
+    : 
+    EnemyBase(deviceResources,position,EnemyData::BossEnemy),
+    m_deviceResources(deviceResources),
+    m_displayCollision(displayCollision),
+    m_isSmokeActive(false),
+    m_isLandingEffectDone(false),
+    m_smokeTimer(0.0f),
+    m_isGroundPrev(false),
+    m_isGroundNow(false)
 {
-
     m_type = type;
 
 	//攻撃パターンの追加
@@ -70,6 +63,7 @@ void BossEnemy::Initialize()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
+    //敵の描画初期化
     m_renderer = std::make_unique<EnemyRenderer>();
 	m_renderer->Initialize(device);
 
@@ -79,13 +73,11 @@ void BossEnemy::Initialize()
         m_collision = std::make_unique<ModelCollisionOrientedBox>(m_renderer->GetMainModel());
     }
 
-    m_states = std::make_unique<CommonStates>(device);
-
+    m_states = std::make_unique<DirectX::CommonStates>(device);
 
     //音の読み込み
     AudioManager::GetInstance()->LoadSound("AttackE", L"Resources/Sounds/E_近距離攻撃.wav");
     AudioManager::GetInstance()->LoadSound("DashE", L"Resources/Sounds/E_突進攻撃.wav");
-    
     AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/P_E_落水.wav");
 
     //エフェクト系
@@ -98,7 +90,6 @@ void BossEnemy::Initialize()
 
     //着地している
     m_isGroundPrev = true;
-
 }
 
 //----------------------------------------------------------
@@ -106,7 +97,7 @@ void BossEnemy::Initialize()
 //----------------------------------------------------------
 
 void BossEnemy::Update(float deltaTime,
-    const SimpleMath::Vector3& playerPosition,
+    const DirectX::SimpleMath::Vector3& playerPosition,
     Stage* stage,
     Particle* particle,
 	EnemyManager* enemyManager
@@ -166,10 +157,8 @@ void BossEnemy::Update(float deltaTime,
         if (m_smokeTimer >= SMOKE_DURATION)
         {
             m_isSmokeActive = false;
-            
         }
     }
-
     
     //------------------------------------------------
     //当たり判定の座標更新
@@ -177,13 +166,12 @@ void BossEnemy::Update(float deltaTime,
     // OBB 更新
     if (m_collision)
     {
-        SimpleMath::Matrix world =
-            SimpleMath::Matrix::CreateScale(m_param.scale)
-            * SimpleMath::Matrix::CreateTranslation(m_position);
+        DirectX::SimpleMath::Matrix world =
+            DirectX::SimpleMath::Matrix::CreateScale(m_param.scale)
+            * DirectX::SimpleMath::Matrix::CreateTranslation(m_position);
 
         m_collision->UpdateBoundingInfo(world);
     }
-
 }
 
 //----------------------------------------------------------
@@ -192,21 +180,20 @@ void BossEnemy::Update(float deltaTime,
 
 void BossEnemy::Render(
     ID3D11DeviceContext* context,
-    const SimpleMath::Matrix& view,
-    const SimpleMath::Matrix& proj
+    const DirectX::SimpleMath::Matrix& view,
+    const DirectX::SimpleMath::Matrix& proj
     )
 {
     if (IsDead()) return;
    
 	//モデルの回転行列を作る前に、X軸の回転行列を初期化
-    SimpleMath::Matrix rotX = SimpleMath::Matrix::Identity;
-
+    DirectX::SimpleMath::Matrix rotX = DirectX::SimpleMath::Matrix::Identity;
     // Y軸の回転行列 (計算した角度)
-    SimpleMath::Matrix rotation = SimpleMath::Matrix::CreateRotationY(m_rotationY+DirectX::XM_PI);
-
+    DirectX::SimpleMath::Matrix rotation =
+        DirectX::SimpleMath::Matrix::CreateRotationY(m_rotationY+DirectX::XM_PI);
 	//モデルの回転と拡大を組み合わせた行列
-	SimpleMath::Matrix combinedTransform = 
-        SimpleMath::Matrix::CreateScale(m_param.scale) *
+    DirectX::SimpleMath::Matrix combinedTransform =
+        DirectX::SimpleMath::Matrix::CreateScale(m_param.scale) *
         rotX * 
 		rotation;
     
@@ -226,11 +213,10 @@ void BossEnemy::Render(
             nullptr  
         );
     }
-
-    
+    //コリジョン描画
     m_displayCollision->DrawCollision(
         context, m_states.get(), view, proj,
-        Colors::White, Colors::Blue, TRANSPARENCY
+        DirectX::Colors::White, DirectX::Colors::Blue, TRANSPARENCY
     );
 
     //煙の描画
@@ -238,19 +224,14 @@ void BossEnemy::Render(
     {
         //時間経過に合わせて大きくする 
         float scale = SMOKE_SCALE + m_smokeTimer * SMOKE_GROWTH_RATE;
-
         //時間経過に合わせて透明にする 
         float alpha = 1.0f - (m_smokeTimer / SMOKE_DURATION);
-
         //煙の描画実行
         DirectX::SimpleMath::Vector3 drawPos = m_position;
         drawPos.y += SMOKE_Y_OFFSET;
-
 		//煙の描画実行
         m_smokeEffect->Render(view, proj, drawPos, scale, alpha);
-
     }
-
 
     if (m_collision)
     {
@@ -259,7 +240,7 @@ void BossEnemy::Render(
 
         m_displayCollision->DrawCollision(
             context, m_states.get(), view, proj,
-            Colors::White, Colors::Blue, 0.5f // 敵は青色で表示
+            DirectX::Colors::White, DirectX::Colors::Blue, 0.5f // 敵は青色で表示
         );
     }
 }
@@ -286,10 +267,8 @@ void BossEnemy::TakeDamage(float amount, PlayerAttackType type)
     //回避発動 3回連続で同じ攻撃だったら
     if (m_consecutiveHitCount >= EVADE_HIT_THRESHOLD)
     {
-        
         //回避状態へ
         SetState(EnemyState::Avoid, EVADE_DURATION);
-
         return;
     }
 
@@ -301,18 +280,15 @@ void BossEnemy::TakeDamage(float amount, PlayerAttackType type)
         if (m_playerAttackCounter >= STUN_HIT_THRESHOLD)
         {
             m_playerAttackCounter = 0;
-
 			//気絶状態へ　何秒動けないか
             SetState(EnemyState::Dizzy, STUN_TIME);
         }
     }
 
-
     //HPを減らす
     m_hp -= amount;
 
     if (m_hp < 0) m_hp = 0;
-    
 }
 
 //----------------------------------------------------------
@@ -328,7 +304,6 @@ void BossEnemy::ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, fl
     m_knockbackVelocity.y = m_param.receivedKnockbackUpwardForce;
     //ノックバック後の硬直
     m_knockbackTimer = m_param.receivedKnockbackDuration;
-
 }
 
 //----------------------------------------------------------
@@ -393,7 +368,6 @@ void BossEnemy::UpdateAI(
                     m_targetVelocity,
                     m_rotationY
                 );
-
             }
         }
         else
@@ -405,7 +379,6 @@ void BossEnemy::UpdateAI(
             }
         }
 
-        
 		//攻撃のクールダウンが終わっていて、プレイヤーが近ければ攻撃する
         if (enemyManager && !m_attackPatterns.empty())
         {
@@ -413,7 +386,7 @@ void BossEnemy::UpdateAI(
             if (dist < ATTACK_SWITCH_DISTANCE && m_meleeTimer <= 0.0f)
             {
 				m_attackPatterns[0]->Execute(this, forward, enemyManager);
-
+                //敵の攻撃状態
                 SetState(EnemyState::Attack, ATTACK_DURATION);
                 m_meleeTimer = ATTACK_TIMER;
             }
@@ -421,13 +394,12 @@ void BossEnemy::UpdateAI(
             else if (dist < RUSH_SWITCH_DISTANCE && m_rushTimer <= 0.0f)
             {
                 m_attackPatterns[1]->Execute(this, forward, enemyManager);
-
+                //敵の攻撃状態
 				SetState(EnemyState::Rush, ATTACK_DURATION);
                 m_rushTimer = RUSH_TIMER;
             }
         }
         break;
-
     }
     //攻撃中はAIは何もしない
     case EnemyState::Rush:
@@ -441,16 +413,12 @@ void BossEnemy::UpdateAI(
         //プレイヤーから見て右方向を計算
         DirectX::SimpleMath::Vector3 rightDir =
             DirectX::SimpleMath::Vector3::Up.Cross(forward);
-
         //右方向に歩く
-        m_targetVelocity = rightDir/* * (m_speed * 1.5f)*/;
+        m_targetVelocity = rightDir;
 		break;
     }
     }
-
 }
-
-
 
 //----------------------------------------------------------
 // 敵の物理演算と移動
@@ -458,8 +426,6 @@ void BossEnemy::UpdateAI(
 
 void BossEnemy::UpdatePhysics(Stage* stage, float dt, Particle* particle)
 {
-    
-
     CharacterBase::UpdatePhysice(dt, stage);
 
     if(stage)
@@ -476,34 +442,26 @@ void BossEnemy::UpdatePhysics(Stage* stage, float dt, Particle* particle)
         //ステージから現在の傾きを取得
         DirectX::SimpleMath::Vector3 slideDir = 
             stage->GetSlideDirection(m_position.x,m_position.z);
-
         //自発的な移動と波の傾きを渡し、座標を更新
         m_slideBehavior.Update(m_position, m_targetVelocity, slideDir, dt);
-
         //地面との当たり判定
         //敵のいる座標の足場の高さを取得
         float groundY = stage->GetGroundHeight(m_position.x, m_position.z);
-
         //足場より下、かつ足場の底より上なら着地
         if (m_position.y<groundY && groundY>STAGE_BOUNDARY_Y)
         {
-            
-
             //ノックバックをリセット
             m_knockbackVelocity.y = 0.0f;
 
             //最初の演出中なら着地した瞬間にLoadingへ
             if (m_state == EnemyState::Opening)
             {
-                m_state = EnemyState::Loading;
-                
+                SetState(EnemyState::Loading, SMOKE_DURATION);
             }
         }
-
 		//落下の判定と処理
 		CheckAndHandleFalling(stage, nullptr);
     }
-    
 }
 
 //----------------------------------------------------------

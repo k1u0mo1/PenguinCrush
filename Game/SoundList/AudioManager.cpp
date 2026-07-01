@@ -3,14 +3,11 @@
  * @file   AudioManager.cpp
  * @brief  ゲーム全体の音声（BGM・SE）を管理・再生するシングルトンクラス
  * @author 國田知睦
- * @date   2026/06/11
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "AudioManager.h"
-
-
-using namespace DirectX;
 
 //----------------------------------------------------------
 // オーディオエンジンの初期化
@@ -24,13 +21,13 @@ void AudioManager::Initialize()
 		return;
 	}
 
-	AUDIO_ENGINE_FLAGS eflags = AudioEngine_Default;
+	DirectX::AUDIO_ENGINE_FLAGS eflags = DirectX::AudioEngine_Default;
 
 #ifdef  _DEBUG
 	eflags |= AudioEngine_Debug;
 #endif //  _DEBUG
 
-	m_audioEngine = std::make_unique<AudioEngine>(eflags);
+	m_audioEngine = std::make_unique<DirectX::AudioEngine>(eflags);
 }
 
 //----------------------------------------------------------
@@ -39,7 +36,6 @@ void AudioManager::Initialize()
 
 void AudioManager::Update()
 {
-	
 }
 
 //----------------------------------------------------------
@@ -71,7 +67,7 @@ void AudioManager::LoadSound(
 	//ファイル読み込みをトライ（失敗したらキャッチ）
 	try
 	{
-		auto se = std::make_unique<SoundEffect>(m_audioEngine.get(), filename);
+		auto se = std::make_unique<DirectX::SoundEffect>(m_audioEngine.get(), filename);
 		m_sounds[key] = std::move(se);
 	}
 	catch (...) // 全ての例外をキャッチ
@@ -83,13 +79,6 @@ void AudioManager::LoadSound(
 		OutputDebugStringW(filename); // ファイル名を表示
 		OutputDebugStringA("\nPlease check the file path!\n");
 	}
-
-	//新しく読み込んでリストに追加
-	//auto se = std::make_unique<SoundEffect>(m_audioEngine.get(), filename);
-
-	//m_sounds[key] = std::move(se);
-
-
 }
 
 //----------------------------------------------------------
@@ -106,7 +95,6 @@ void AudioManager::Play(const std::string& key)
 
 	//音のリストをもらい流す
 	m_sounds[key]->Play(m_seVolume, DEFAULT_PITCH, DEFAULT_PAN);
-
 }
 
 //----------------------------------------------------------
@@ -116,17 +104,9 @@ void AudioManager::Play(const std::string& key)
 void AudioManager::SetSEVolume(float volume)
 {
 	//音量の範囲を0.0～1.0
-	if (volume < MIN_VOLUME)
-	{
-		volume = MIN_VOLUME;
-	}
-	if (volume > MAX_VOLUME)
-	{
-		volume = MAX_VOLUME;
-	}
+	m_seVolume = std::clamp(volume, MIN_VOLUME, MAX_VOLUME);
 
 	m_seVolume = volume;
-
 }
 
 //----------------------------------------------------------
@@ -146,7 +126,6 @@ void AudioManager::PlayBGM(const std::string& key)
 	{
 		return;
 	}
-
 
 	//すでにBGMが鳴っていたら止める
 	StopBGM();
@@ -190,14 +169,7 @@ void AudioManager::StopBGM()
 void AudioManager::SetBGMVolume(float volume)
 {
 	//音量の範囲を0.0～1.0
-	if (volume < MIN_VOLUME)
-	{
-		volume = MIN_VOLUME;
-	}
-	if (volume > MAX_VOLUME)
-	{
-		volume = MAX_VOLUME;
-	}
+	m_bgmVolume = std::clamp(volume, MIN_VOLUME, MAX_VOLUME);
 
 	m_bgmVolume = volume;
 

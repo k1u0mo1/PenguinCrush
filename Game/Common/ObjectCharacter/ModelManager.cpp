@@ -3,17 +3,19 @@
  * @file   ModelManager.h
  * @brief  キャラクターのモデルを一括で管理管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "ModelManager.h"
-
 #include <Effects.h>
+
+//----------------------------------------------------------
+// キャラクターモデルの初期化
+//----------------------------------------------------------
 
 void ModelManager::Initialize(ID3D11Device* device)
 {
-
 	DirectX::EffectFactory fx(device);
 	fx.SetDirectory(L"Resources\\Models");
 

@@ -3,25 +3,20 @@
  * @file   EnemyManager.h
  * @brief  敵関連をまとめる管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/15
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "pch.h"
 #include <memory>
 #include <vector>
-
 //影
 #include "Game/ShadowRenderer/ShadowRenderer.h"
-
 #include <CommonStates.h>
-
 //攻撃関連--------------------
 #include <Game/EnemyList/EnemyAttackList/AttackE.h>
 #include <Game/EnemyList/EnemyAttackList/RushE.h>
 //----------------------------
-
 #include "Game/EnemyList/EnemyBaseParameter.h"
 
 class BossEnemy;
@@ -47,12 +42,10 @@ private:
     static constexpr float RUSH_COOLDOWN = 7.0f;
     //近距離攻撃のクールタイム
     static constexpr float ATTACK_COOLDOWN = 1.5f;
-    
     //突進ステートの持続の時間
     static constexpr float RUSH_STATE_DURATION = 1.0f;
     //近距離ステートの持続の時間
     static constexpr float ATTACK_STATE_DURATION = 1.0f;
-    
     //近距離攻撃と突進攻撃の切り替え　
     static constexpr float ATTACK_SWITCH_DISTANCE = 10.0f;
     //突進攻撃と遠距離攻撃の切り替え　
@@ -63,10 +56,8 @@ private:
 
     //エフェクトの生成数
     static constexpr int HIT_EFFECT_COUNT = 50;
-
     //エフェクトのサイズ
     static constexpr float HIT_EFFECT_SIZE = 0.1f;
-
     //突進エフェクト生成数
     static constexpr int DASH_EFFECT_COUNT = 1;
     //突進エフェクトサイズ
@@ -80,7 +71,6 @@ private:
     //------------------------------------------------------
     //その他のシステム関連
     //------------------------------------------------------
-    
     //影の大きさ
     static constexpr float SHADOW_SCALE = 3.0f;
 
@@ -170,7 +160,6 @@ public:
     /// 指定したHPでボスをステージに出現
     /// </summary>
     void SpawnBoss();
-
 	
 	/// <summary>
 	/// 指定した位置に通常の敵をステージに出現
@@ -215,23 +204,16 @@ private:
 
     //敵のリスト
 	std::vector<std::unique_ptr<EnemyBase>> m_enemies;
-
     // DisplayCollision（全攻撃で共有）
     std::shared_ptr<DisplayCollision> m_displayCol;
-
-    
 
     //攻撃のクールタイマー
     float m_attackCoolTimer = 0.0f;
 
     //攻撃関連
     std::vector<std::unique_ptr<AttackE>> m_attacks;
-    
     std::vector<std::unique_ptr<RushE>>  m_rush;
-
     //ステート
     std::unique_ptr<DirectX::CommonStates> m_states;
-
-	
 };
 

@@ -3,7 +3,7 @@
  * @file   StageManager.cpp
  * @brief  ステージを管理するマネージャークラス
  * @author 國田知睦
- * @date   2026/06/10
+ * @date   2026/07/01
  */
 
 #include "pch.h"
@@ -15,7 +15,8 @@
 
 StageManager::StageManager(
     DX::DeviceResources* deviceResources)
-    : m_deviceResources(deviceResources) 
+    : 
+    m_deviceResources(deviceResources) 
 {
 
 }
@@ -26,21 +27,9 @@ StageManager::StageManager(
 
 void StageManager::Initialize(HWND /*hwnd*/, int /*width*/, int /*height*/)
 {
-    ////ステージクラスをインスタンスの生成
-    //auto stage = std::make_unique<Stage>(m_deviceResources);
-
-    ////ステージの初期化
-    //stage->Initialize(hwnd, width, height);
-
-    ////作成したステージを登録 ＜－大切
-    //m_stages[L"DefaultStage"] = std::move(stage);
-
-    ////登録したステージを現在のステージに設定
-    //m_currentStage = m_stages[L"DefaultStage"].get();
-
     //初期化
     m_stages.clear();
-
+    //現在のステージを初期化
     m_currentStage = nullptr;
 }
 
@@ -81,8 +70,7 @@ void StageManager::AddStage(
 
     //ステージの初期化
     stage->Initialize(hwnd, width, height, mapImagePath);
-
-    //作成したステージを登録 ＜－大切
+    //作成したステージを登録
     m_stages[name] = std::move(stage);
 }
 
@@ -109,6 +97,7 @@ void StageManager::Render(ID3D11DeviceContext* context,
 {
     if (m_currentStage)
     {
+        //現在のステージを描画
         m_currentStage->Render(context, view, proj, displayCollision);
     }
 }

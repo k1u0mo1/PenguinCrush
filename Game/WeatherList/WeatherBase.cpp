@@ -3,13 +3,11 @@
  * @file   WeatherBase.cpp
  * @brief  天候の親クラス
  * @author 國田知睦
- * @date   2026/06/17
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "WeatherBase.h"
-
-using namespace DirectX;
 
 //----------------------------------------------------------
 // 初期化
@@ -17,12 +15,11 @@ using namespace DirectX;
 
 void WeatherBase::Initialize(ID3D11Device* device)
 {
-
 	//時間の初期化
 	m_time = 0.0f;
 
 	//共通ステートの作成
-	m_states = std::make_unique<CommonStates>(device);
+	m_states = std::make_unique<DirectX::CommonStates>(device);
 
 	//定数バッファの作成
 	CD3D11_BUFFER_DESC cbd(sizeof(CBWeather), D3D11_BIND_CONSTANT_BUFFER);
@@ -31,8 +28,8 @@ void WeatherBase::Initialize(ID3D11Device* device)
 	//頂点データの作成
 	struct  Vertex
 	{
-		SimpleMath::Vector3 Pos;
-		SimpleMath::Vector2 Size;
+		DirectX::SimpleMath::Vector3 Pos;
+		DirectX::SimpleMath::Vector2 Size;
 	};
 
 	std::vector<Vertex> vertices(MAX_PARTICLES);
@@ -44,7 +41,6 @@ void WeatherBase::Initialize(ID3D11Device* device)
 			(rand() % SPAWN_RANGE_Y) / 10.0f,
 			(rand() % SPAWN_RANGE_Z) - (SPAWN_RANGE_Z * 0.5f)
 		);
-
 		//サイズ
 		vertices[i].Size = 
 			DirectX::SimpleMath::Vector2(DEFAULT_PARTICLE_SIZE, DEFAULT_PARTICLE_SIZE);

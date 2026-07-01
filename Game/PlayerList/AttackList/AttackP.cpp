@@ -2,17 +2,12 @@
  * @file   AttackP.cpp
  * @brief  プレイヤーの近距離攻撃を管理するクラスの実装
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "AttackP.h"
-
 #include <Effects.h>
-
-using namespace DirectX;
-
-using Microsoft::WRL::ComPtr;
 
 //-----------------------------------------------------------------
 // 近距離攻撃のインスタンスを生成
@@ -23,28 +18,26 @@ AttackP::AttackP(
 	const DirectX::SimpleMath::Vector3& playerPos, 
 	const DirectX::SimpleMath::Vector3& forward,
 	std::shared_ptr<DisplayCollision> displayCollision)
-
-	: m_deviceResources(deviceResources)
-	, m_forward(forward)
-	, m_lifetime(0.0f)
-	, m_displayCollision(displayCollision)
+	: 
+	m_deviceResources(deviceResources),
+	m_forward(forward),
+	m_lifetime(0.0f),
+	m_displayCollision(displayCollision)
 {
 	auto device = m_deviceResources->GetD3DDevice();
 
 	// モデル読み込み
-	EffectFactory fx(device);
+	DirectX::EffectFactory fx(device);
 	fx.SetDirectory(L"Resources\\Models");
 	m_attackModel = 
-		Model::CreateFromSDKMESH(device,
+		DirectX::Model::CreateFromSDKMESH(device,
 			L"Resources\\Models\\Cube.sdkmesh",
 			fx
 	);
-
+	
 	SetForward(forward);
-
 	m_forward = forward;
 	m_forward.Normalize();
-
 
 	//プレイヤーの前方に出す位置 
 	m_position = playerPos + forward * SPAWN_OFFSET_FRONT;
@@ -58,7 +51,7 @@ AttackP::AttackP(
 		m_collision->SetExtents(COLLISION_SIZE);
 	}
 
-	m_states = std::make_unique<CommonStates>(m_deviceResources->GetD3DDevice());
+	m_states = std::make_unique<DirectX::CommonStates>(m_deviceResources->GetD3DDevice());
 }
 
 //-----------------------------------------------------------------
@@ -97,12 +90,9 @@ void AttackP::Render(
 	if (!m_attackModel)return;
 
 	//ワールド行列の計算
-	SimpleMath::Matrix world = 
-		SimpleMath::Matrix::CreateScale(1.0f) *
-		SimpleMath::Matrix::CreateTranslation(m_position);
-
-	
-	//m_attackModel->Draw(context, *m_states, world, view, proj);
+	DirectX::SimpleMath::Matrix world =
+		DirectX::SimpleMath::Matrix::CreateScale(1.0f) *
+		DirectX::SimpleMath::Matrix::CreateTranslation(m_position);
 
 	//デバッグ描画 OBB → BoundingBox
 	if (m_collision && m_displayCollision)
@@ -129,7 +119,6 @@ void AttackP::Render(
 			DEBUG_COLLISION_LINE_THICKNESS
 		);
 	}
-
 }
 
 //-----------------------------------------------------------------

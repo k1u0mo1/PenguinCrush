@@ -3,7 +3,7 @@
  * @file   EnemyBase.cpp
  * @brief  敵の管理を行う基底クラス
  * @author 國田知睦
- * @date   2026/06/17
+ * @date   2026/07/01
  */
 
 
@@ -14,16 +14,20 @@
 #include "Game/GimmickList/Stage.h"
 #include "Game/Effects/Particle.h"
 
+ //----------------------------------------------------------
+ // 敵のコンストラクタ
+ //----------------------------------------------------------
+
 EnemyBase::EnemyBase(DX::DeviceResources* deviceResources,
 	const DirectX::SimpleMath::Vector3& position,
 	const EnemyBaseParameter& param)
-	: CharacterBase()
-	, m_param(param)
-	, m_deviceResources(deviceResources) 
-	, m_rotationY(0.0f)
+	: 
+	CharacterBase(),
+	m_param(param),
+	m_deviceResources(deviceResources) ,
+	m_rotationY(0.0f)
 {
 	m_position = position;
-
 	m_hp = param.maxHp;
 	m_maxHp = param.maxHp;
 	m_speed = param.speed;
@@ -32,9 +36,17 @@ EnemyBase::EnemyBase(DX::DeviceResources* deviceResources,
 	m_enemyAI = std::make_unique<EnemyAI>();
 }
 
+//----------------------------------------------------------
+// 敵の初期化
+//----------------------------------------------------------
+
 void EnemyBase::Initialize()
 {
 }
+
+//----------------------------------------------------------
+// 敵の更新
+//----------------------------------------------------------
 
 void EnemyBase::Update(
 	float dt,
@@ -49,6 +61,10 @@ void EnemyBase::Update(
 	//物理演算と移動処理
 	UpdatePhysice(dt, stage);
 }
+
+//----------------------------------------------------------
+// 敵の落下の判定と処理
+//----------------------------------------------------------
 
 void EnemyBase::CheckAndHandleFalling(
 	Stage* stage,
@@ -87,9 +103,8 @@ void EnemyBase::CheckAndHandleFalling(
 					break;
 				}
 			}
-			if (foundSafeSpot)break;
 		}
-		
+		//安全な場所
 		if (foundSafeSpot)
 		{
 			//座標を合わせる
@@ -110,6 +125,5 @@ void EnemyBase::CheckAndHandleFalling(
 		}
 
 		AudioManager::GetInstance()->Play("Fall");
-
 	}
 }

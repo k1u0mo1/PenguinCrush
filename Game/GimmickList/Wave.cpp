@@ -3,24 +3,20 @@
  * @file   Wave.h
  * @brief  水面の波を動的に生成・描画し、物理的な高さや傾きを提供するギミッククラス
  * @author 國田知睦
- * @date   2026/06/17
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "Wave.h"
 #include <Game/Common/ReadData.h>
 
-using namespace DirectX;
-
-using Microsoft::WRL::ComPtr;
-
 //----------------------------------------------------------
 // 波のコンストラクタ
 //----------------------------------------------------------
 
 Wave::Wave(DX::DeviceResources* deviceResources)
-    : m_deviceResources(deviceResources)
-
+    : 
+    m_deviceResources(deviceResources)
 {
     m_deviceResources->RegisterDeviceNotify(this);
 }
@@ -39,22 +35,20 @@ void Wave::Initialize(HWND /*hwnd*/, int width, int height)
 // 波の更新
 //----------------------------------------------------------
 
-
 void Wave::Update(float deltaTime)
 {
     //1フレームの時間経過を反映
     m_time += deltaTime;
-
-    //波の更新
-    //UpdateWaveVertices();
-
 }
 
 //----------------------------------------------------------
 // 波の描画
 //----------------------------------------------------------
 
-void Wave::Render(ID3D11DeviceContext* context, const SimpleMath::Matrix& view, const SimpleMath::Matrix& proj)
+void Wave::Render(
+    ID3D11DeviceContext* context,
+    const DirectX::SimpleMath::Matrix& view,
+    const DirectX::SimpleMath::Matrix& proj)
 {
 	//波のスケール　ドットモードなら1.0f、通常モードなら定数で指定したスケール
     float scaleX = m_isDotMode ? 1.0f : WAVE_SCALE_X;
@@ -62,9 +56,9 @@ void Wave::Render(ID3D11DeviceContext* context, const SimpleMath::Matrix& view, 
     float scaleZ = m_isDotMode ? 1.0f : WAVE_SCALE_Z;
 
     //波のサイズと座標
-    SimpleMath::Matrix world =
-        SimpleMath::Matrix::CreateScale(scaleX, scaleY, scaleZ) *
-        SimpleMath::Matrix::CreateTranslation(0.0f, WAVE_OFFSET_Y, 0.0f);
+    DirectX::SimpleMath::Matrix world =
+        DirectX::SimpleMath::Matrix::CreateScale(scaleX, scaleY, scaleZ) *
+        DirectX::SimpleMath::Matrix::CreateTranslation(0.0f, WAVE_OFFSET_Y, 0.0f);
 
     //GPUに時間と行列を送る
     D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -80,7 +74,7 @@ void Wave::Render(ID3D11DeviceContext* context, const SimpleMath::Matrix& view, 
         cb->isCubeMode = m_isDotMode ? 1 : 0;
 		//構造体のサイズを16バイトの倍数にするためのパディング
         cb->padding = DirectX::SimpleMath::Vector2(0.0f, 0.0f);
-
+        //マッピングを解除してGPUに渡す
         context->Unmap(m_constantBuffer.Get(), 0);
     }
 
@@ -88,7 +82,7 @@ void Wave::Render(ID3D11DeviceContext* context, const SimpleMath::Matrix& view, 
     context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
     context->VSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
     context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
-
+    //定数バッファをセット
     context->IASetInputLayout(m_inputLayout.Get());
     //カリング設定（無効）
     context->RSSetState(m_states->CullNone());
@@ -97,7 +91,6 @@ void Wave::Render(ID3D11DeviceContext* context, const SimpleMath::Matrix& view, 
     UINT stride = sizeof(WaveVertex);
     UINT offset = 0;
     context->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
-
     
     //ドットの波モード
     if (m_isDotMode)
@@ -137,16 +130,15 @@ void Wave::CreateDeviceResources()
     auto device = m_deviceResources->GetD3DDevice();
 
     device;
-
-    m_states = std::make_unique<CommonStates>(device);
-
+    //共通ステートの作成
+    m_states = std::make_unique<DirectX::CommonStates>(device);
     
     //波の中心を（０，０，０） 計算
     const float offsetX = (GRID_WIDTH - 1) * GRID_SPACING *0.5f;
     const float offsetZ = (GRID_HEIGHT - 1) * GRID_SPACING * 0.5f;
-
     
     m_waveVertices.clear();
+    //波の頂点データを作成
     for (int z = 0; z < GRID_HEIGHT; z++)
     {
         for (int x = 0; x < GRID_WIDTH; x++)
@@ -178,7 +170,7 @@ void Wave::CreateDeviceResources()
         {"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0, 0, D3D11_INPUT_PER_VERTEX_DATA,0},
         {"COLOR",   0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,12, D3D11_INPUT_PER_VERTEX_DATA,0},
     };
-
+    //入力レイアウトの作成
     DX::ThrowIfFailed(device->CreateInputLayout(
         inputElementDesc, ARRAYSIZE(inputElementDesc),
         vertexShaderBlob.data(), vertexShaderBlob.size(),
@@ -206,6 +198,7 @@ void Wave::CreateDeviceResources()
     {
         for (int x = 0; x < GRID_WIDTH - 1; x++)
         {
+            //頂点のインデックスを計算
             uint16_t i0 = static_cast<uint16_t>(z * GRID_WIDTH + x);
             uint16_t i1 = static_cast<uint16_t>(z * GRID_WIDTH + (x + 1));
             uint16_t i2 = static_cast<uint16_t>((z + 1) * GRID_WIDTH + x);
@@ -229,7 +222,7 @@ void Wave::CreateDeviceResources()
     vbd.Usage = D3D11_USAGE_DEFAULT;
     vbd.ByteWidth = sizeof(WaveVertex) * static_cast<UINT>(m_waveVertices.size());
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
+    //頂点データをGPUに渡す
     D3D11_SUBRESOURCE_DATA vinitData = {};
     vinitData.pSysMem = m_waveVertices.data();
     DX::ThrowIfFailed(device->CreateBuffer(&vbd, &vinitData, m_vertexBuffer.GetAddressOf()));
@@ -239,14 +232,13 @@ void Wave::CreateDeviceResources()
     ibd.Usage = D3D11_USAGE_DEFAULT;
     ibd.ByteWidth = sizeof(uint16_t) * m_indexCount;
     ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
+    //インデックスデータをGPUに渡す
     D3D11_SUBRESOURCE_DATA iinitData = {};
     iinitData.pSysMem = indices.data();
     DX::ThrowIfFailed(device->CreateBuffer(&ibd, &iinitData, m_indexBuffer.GetAddressOf()));
 
-    //
+    //立方体の頂点バッファとインデックスバッファを作成
     CreateCubeBuffer();
-
 }
 
 //----------------------------------------------------------
@@ -259,8 +251,8 @@ void Wave::CreateWindowSizeResources(int /*width*/, int /*height*/)
     RECT rect = m_deviceResources->GetOutputSize();
 
     // 射影行列の作成
-    m_proj = SimpleMath::Matrix::CreatePerspectiveFieldOfView(
-        XMConvertToRadians(CAM_FOV)  
+    m_proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(
+        DirectX::XMConvertToRadians(CAM_FOV)
         , static_cast<float>(rect.right) / static_cast<float>(rect.bottom)
         , CAM_NEAR, CAM_FAR);
 }
@@ -270,6 +262,7 @@ void Wave::CreateCubeBuffer()
     auto device = m_deviceResources->GetD3DDevice();
 
     //頂点データ
+    //立方体の頂点座標と色を定義
     WaveVertex cv[CUBE_SIZE] = {
         { DirectX::SimpleMath::Vector3(-CUDE_SIZE,  CUDE_SIZE, -CUDE_SIZE), DirectX::SimpleMath::Vector4(0.0f, 1.0f, 0.8f, 1.0f) },
         { DirectX::SimpleMath::Vector3( CUDE_SIZE,  CUDE_SIZE, -CUDE_SIZE), DirectX::SimpleMath::Vector4(0.0f, 1.0f, 0.8f, 1.0f) },
@@ -318,10 +311,10 @@ void Wave::CreateCubeBuffer()
 
 void Wave::UpdateWaveVertices()
 {
- 
+    //波の中心を原点にするためのオフセット
     const float offsetX = (GRID_WIDTH - 1) * GRID_SPACING * 0.5f;
     const float offsetZ = (GRID_WIDTH - 1) * GRID_SPACING * 0.5f;
-
+    //波の頂点を更新
     for (int z = 0; z < GRID_HEIGHT; z++)
     {
         for (int x = 0; x < GRID_WIDTH; x++)
@@ -329,13 +322,13 @@ void Wave::UpdateWaveVertices()
             size_t index = static_cast<size_t>(z * GRID_WIDTH + x);
 
             auto& vertex = m_waveVertices[index];
-
+            //グリッド座標をワールド座標に変換
             float fx = static_cast<float>(x);
             float fz = static_cast<float>(z);
 
             //ヘルパー関数で計算したものを使用
             float y = CalculateHeight(fx, fz, m_time);
-
+            //ワールド座標に変換してオフセットを引く
             vertex.position = DirectX::SimpleMath::Vector3(
                 fx * GRID_SPACING - offsetX,
                 y,
@@ -346,7 +339,6 @@ void Wave::UpdateWaveVertices()
             vertex.color = CalculateColor(y);
         }
     }
-
 }
 
 void Wave::OnDeviceLost() {}
@@ -368,22 +360,20 @@ DirectX::SimpleMath::Vector3 Wave::GetPosition() const
 
 DirectX::SimpleMath::Vector2 Wave::GetWaveAngle(float x, float z) const
 {
-   
-    //○.○fだけ座標をずらして実際の高さを調べて傾きを計算
-    const float epsilon = 0.1f;
+    //座標をずらして実際の高さを調べて傾きを計算
+    const float epsilon = GRADIENT_CALC_OFFSET;
 
     //Ｘ方向の傾き(少し右の高さ - 少し左の高さ)
     float h_minus_x = GetHeight(x - epsilon, z);
     float h_plus_x = GetHeight(x + epsilon, z);
-    float dy_dx = (h_plus_x - h_minus_x) / (epsilon * 2.0f);
+    float dy_dx = (h_plus_x - h_minus_x) / (GRADIENT_CALC_DENOMINATOR);
 
     //Ｚ方向の傾き(少し奥の高さ - 少し手前の高さ)
     float h_minus_z = GetHeight(x, z - epsilon);
     float h_plus_z = GetHeight(x, z + epsilon);
-    float dy_dz = (h_plus_z - h_minus_z) / (epsilon * 2.0f);
+    float dy_dz = (h_plus_z - h_minus_z) / (GRADIENT_CALC_DENOMINATOR);
 
     return { dy_dz,dy_dx };
-   
 }
 
 //----------------------------------------------------------
@@ -394,8 +384,8 @@ DirectX::SimpleMath::Vector2 Wave::GetWaveAngle(float x, float z) const
 float Wave::GetHeight(float x, float z) const
 {
     //ワールド座標(x, z)を、波の計算に使うグリッド座標(fx, fz)に逆変換
-    float offsetX = (GRID_WIDTH - 1) * GRID_SPACING * 0.5f;
-    float offsetZ = (GRID_HEIGHT - 1) * GRID_SPACING * 0.5f;
+    float offsetX = (GRID_WIDTH - 1) * GRID_SPACING * HALF_COEFFICIENT;
+    float offsetZ = (GRID_HEIGHT - 1) * GRID_SPACING * HALF_COEFFICIENT;
 
     //WAVE_SCALE で割りオフセットを合わせて間隔(SPACING)で割る
     float fx = (x / WAVE_SCALE_X + offsetX) / GRID_SPACING;
@@ -406,9 +396,4 @@ float Wave::GetHeight(float x, float z) const
 
     //Renderで適用しているワールド行列と同じスケールとオフセットをY軸に適用
     return y * WAVE_SCALE_Y + WAVE_OFFSET_Y;
-
-    //return CalculateHeight(x, z, m_time, 1.0f);
 }
-
-
-

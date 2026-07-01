@@ -3,11 +3,10 @@
  * @file   PlayerRenderer.h
  * @brief  プレイヤーキャラクターの描画を行うクラス
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "pch.h"
 #include <DirectXMath.h>
 #include <memory>
@@ -15,7 +14,6 @@
 #include "Game/GimmickList/Stage.h"
 #include "Game/ShadowRenderer/ShadowRenderer.h"
 #include "Game/PlayerList/Player.h"
-
 
 class PlayerRenderer
 {
@@ -94,13 +92,6 @@ private:
 	//描画用ステート
     std::unique_ptr<DirectX::CommonStates> m_states;
 
-    //モデル関連
-    /*std::shared_ptr<DirectX::Model> m_modelIdle;
-    std::shared_ptr<DirectX::Model> m_modelAttack;
-    
-    std::shared_ptr<DirectX::Model> m_modelRush;
-    std::shared_ptr<DirectX::Model> m_materialDizzy;*/
-
 	DirectX::Model* m_modelIdle = nullptr;
     DirectX::Model* m_modelAttack = nullptr;
     DirectX::Model* m_modelRush = nullptr;
@@ -108,6 +99,5 @@ private:
     
 	//影描画用のテクスチャ
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_shadowTexture;
-
 };
 

@@ -3,7 +3,7 @@
  * @file   GimmickManager.h
  * @brief  ゲーム内のギミックを一括で保持、更新、描画、管理するクラス
  * @author 國田知睦
- * @date   2026/06/11
+ * @date   2026/07/01
  */
 
 #pragma once
@@ -69,7 +69,6 @@ public:
 		}
 	}
 
-
 	/// <summary>
 	/// 登録されているギミックの中から、指定したクラスのギミックを検索して取得
 	/// </summary>
@@ -79,16 +78,16 @@ public:
 	std::shared_ptr<T> Get()
 	{
 		static_assert(std::is_base_of_v<IGimmick, T>, "T must inherit from IGimmick.");
-
+		//登録されているギミックの中から、指定したクラスのギミックを検索して取得
 		for (auto& g : m_gimmicks)
 		{
 			if (auto ptr = std::dynamic_pointer_cast<T>(g))
 			{
+				//見つかった場合はそのギミックの共有ポインタを返す
 				return ptr;
 			}
 		}
 		return nullptr;
-
 	}
 
 private:

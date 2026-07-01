@@ -3,13 +3,12 @@
  * @file   Rain.cpp
  * @brief  天候(雨)のクラス
  * @author 國田知睦
- * @date   2026/06/10
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "Rain.h"
 #include <iterator>
-
 #include <Library/BinaryFile.h>
 
 //----------------------------------------------------------
@@ -28,11 +27,10 @@ void Rain::Initialize(ID3D11Device* device)
     BinaryFile GSData = BinaryFile::LoadFile(L"Resources/Shaders/RainGS.cso");
     BinaryFile PSData = BinaryFile::LoadFile(L"Resources/Shaders/RainPS.cso");
 
+    //バーテックスシェーダ作成
     device->CreateVertexShader(VSData.GetData(), VSData.GetSize(), nullptr, m_vs.ReleaseAndGetAddressOf());
-
     // ジオメトリシェーダ作成
     device->CreateGeometryShader(GSData.GetData(), GSData.GetSize(), nullptr, m_gs.ReleaseAndGetAddressOf());
-
     // ピクセルシェーダ作成
     device->CreatePixelShader(PSData.GetData(), PSData.GetSize(), nullptr, m_ps.ReleaseAndGetAddressOf());
 
@@ -59,12 +57,12 @@ void Rain::Render(ID3D11DeviceContext* context, const DirectX::SimpleMath::Matri
 
     //時間計測 
     cb.time = DirectX::SimpleMath::Vector4(m_time, 0, 0, 0); // 雨なのでTypeフラグは不要(0でOK)
-
+    //カメラの座標
     cb.cameraPos = DirectX::SimpleMath::Vector4(camPos.x, camPos.y, camPos.z, 1);
 
     //雨パラメータ 
     cb.params = DirectX::SimpleMath::Vector4(RAIN_SPEED, RAIN_WIDTH, 0, 0);
-
+    //定数バッファ
     context->UpdateSubresource(m_constBuffer.Get(), 0, nullptr, &cb, 0, 0);
 
     //シェーダとステートのセット

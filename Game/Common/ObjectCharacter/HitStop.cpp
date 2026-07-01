@@ -3,21 +3,28 @@
  * @file   HitStop.cpp
  * @brief  プレイヤーと敵のヒットストップを管理するクラス
  * @author 國田知睦
- * @date   2026/06/17
+ * @date   2026/07/01
  */
-
 
 #include "pch.h"
 #include "HitStop.h"
 
+//----------------------------------------------------------
+// コンストラクタ
+//----------------------------------------------------------
+
 HitStop::HitStop()
-	: m_timer(0.0f)
+	: 
+	m_timer(0.0f)
 {
 }
 
+//----------------------------------------------------------
+// ヒットストップの更新
+//----------------------------------------------------------
+
 void HitStop::HitStopUpdate(float deltaTime)
 {
-
 	if(m_timer > 0.0f)
 	{
 		m_timer -= deltaTime;
@@ -26,5 +33,4 @@ void HitStop::HitStopUpdate(float deltaTime)
 			m_timer = 0.0f;
 		}
 	}
-
 }

@@ -3,23 +3,17 @@
  * @file   AttackManager.cpp
  * @brief  攻撃の管理クラス
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "Game/PlayerList/AttackList/AttackManager.h"
 #include "Game/PlayerList/Player.h"
-
-
-
 #include "Game/PlayerList/AttackList/AttackP.h"
 #include "Game/PlayerList/AttackList/RushP.h"
-
 #include "Game/EnemyList/BossEnemy.h"
-
 //効果音
 #include "Game/SoundList/AudioManager.h"
-
 #include "Game/Common/ObjectCharacter/HitStop.h"
 
 //-----------------------------------------------------------------
@@ -38,9 +32,8 @@ void AttackManager::Attack(Player* player)
 		player->GetForward(),           // プレイヤー前方
 		player->GetDisplayCollision()   // 当たり判定表示用
 	);
-
+	//攻撃リストに追加
 	AddAttack(meleeAttack);
-
 }
 
 //-----------------------------------------------------------------
@@ -57,14 +50,13 @@ void AttackManager::Rush(Player* player)
 
 	//RushPのインスタンス化
 	auto rushAttack = std::make_shared<RushP>(
-		player->GetDeviceResources(), // DeviceResources
-		player,                     // playerPos
-		dir,                           // forward
-		m_displayCollision  // displayCollision
+		player->GetDeviceResources(), 
+		player,                    
+		dir,                          
+		m_displayCollision  
 	);
-
+	//攻撃リストに追加
 	AddAttack(rushAttack);
-
 }
 
 //-----------------------------------------------------------------
@@ -96,7 +88,6 @@ void AttackManager::Update(
 	{
 		//既にヒットして無効化されている攻撃や、時間切れの攻撃はスキップ
 		if (atk->IsDead()) continue;
-
 		//敵との衝突チェック
 		for (auto& enemy : enemies)
 		{
@@ -121,7 +112,7 @@ void AttackManager::Update(
 				//ターゲットを攻撃源から押し返すベクトル
 				DirectX::SimpleMath::Vector3 knockbackDirection = atk->GetForward();
 				knockbackDirection.Normalize();
-
+				//攻撃のノックバックの強さを取得
 				float basePower = atk->GetKnockbackPower();
 
 				//エフェクト
@@ -137,7 +128,6 @@ void AttackManager::Update(
 						hitPos,
 						HIT_EFFECT_COUNT, 
 						HIT_EFFECT_SIZE);
-
 				}
 
 				//ノックバック
@@ -151,7 +141,6 @@ void AttackManager::Update(
 				{
 					//種類
 					type = PlayerAttackType::Attack;
-
 					//音
 					AudioManager::GetInstance()->Play("Attack");
 				}
@@ -160,18 +149,17 @@ void AttackManager::Update(
 				{
 					//種類
 					type = PlayerAttackType::Rush;
-
 					//音
 					AudioManager::GetInstance()->Play("Dash");
 
 					//敵に攻撃が当たったらプレイヤーにも与える
 					Player* hitPlayer = rushAtk->GetPlayer();
 
+					//プレイヤーがnullptrじゃない時　ノックバックを与える
 					if (hitPlayer != nullptr)
 					{
 						//プレイヤーの向いている方向とは逆のベクトルを計算
 						DirectX::SimpleMath::Vector3 bounceDir = -hitPlayer->GetForward();
-
 						//プレイヤーにノックバックを与える
 						hitPlayer->ApplyKnockback(bounceDir, RUSH_KNOCKBACK_POWER);
 					}
@@ -185,7 +173,6 @@ void AttackManager::Update(
 
 				//判別した種類で攻撃
 				enemy->TakeDamage(ATTACK_DAMAGE, type);
-
 				//攻撃を消す
 				atk->SetDead();
 			}
@@ -220,7 +207,6 @@ void AttackManager::Render(
 		atk->Render(context, view, proj);
 	}
 }
-
 
 //-----------------------------------------------------------------
 // 描画ステートを設定

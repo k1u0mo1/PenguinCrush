@@ -3,22 +3,16 @@
  * @file   Attack.h
  * @brief  敵の近距離攻撃クラス
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/07/01
  */
 
 #pragma once
-
 #include "pch.h"
-
 #include "Game/Common/DeviceResources.h"
 #include "Game/Common/StepTimer.h"
-
 #include "Game/Camera/PlayerCamera.h"
-
 #include "Game/Collision/DisplayCollision.h"
-
 #include "Game/Collision/ModelCollision.h"
-
 #include "Game/EnemyList/EnemyAttackList/EnemyAttackBase.h"
 
 class AttackE : public EnemyAttackBase
@@ -47,13 +41,10 @@ private:
     //当たり判定のサイズ
     static constexpr float DEFAULT_BOUNDING_SIZE = 0.3f;
 
-
     //当たり判定を○秒だけ判定させる
     static constexpr float MAX_LIFETIME = 0.3f;
-
     //サイズ
     static constexpr float SCALE_SIZE = 1.0f;
-
     //コリジョンの当たり判定のサイズ
     static constexpr DirectX::SimpleMath::Vector3 COLLISION_SIZE =
         DirectX::SimpleMath::Vector3(1.0f, 1.0f, 1.0f);
@@ -142,12 +133,13 @@ private:
 
 private:
 
+    //デバイスリソース
     DX::DeviceResources* m_deviceResources;
-
+    //攻撃モデル
     std::shared_ptr<DirectX::Model> m_attackModel;
-
+    //座標
     DirectX::SimpleMath::Vector3 m_position;
-
+    //方向（前方）
     DirectX::SimpleMath::Vector3 m_forward;
 
     std::unique_ptr<DirectX::CommonStates> m_states;
@@ -155,14 +147,7 @@ private:
     //長さ
     float m_lifetime;
     
-    //当たり判定用　
-    //std::shared_ptr<CollisionAABB> m_collision;
-
-    //std::unique_ptr<ModelCollision> m_collision;
+    //コリジョン
     std::unique_ptr<ModelCollisionOrientedBox> m_collision;
-
-    //DisplayCollision* m_displayCollision = nullptr;
-
     std::shared_ptr<DisplayCollision> m_displayCollision;
-
 };

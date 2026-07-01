@@ -6,7 +6,6 @@
  * @date   2026/06/08
  */
 
-
 #pragma once
 #include "Game/Collision/DisplayCollision.h"
 #include <Model.h>
@@ -48,8 +47,6 @@ public:
 	/// </summary>
 	/// <returns>AABB‚ÌÅ‘åÀ•W</returns>
 	DirectX::SimpleMath::Vector3 GetAABBMax() const;
-
-	//ModelCollision(const DirectX::SimpleMath::Vector3& size); // size = extents * 2
 
 	/// <summary>
 	/// Õ“Ë”»’è‚Ì’†SÀ•W‚ğæ“¾

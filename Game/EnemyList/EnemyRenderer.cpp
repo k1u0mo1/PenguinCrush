@@ -3,16 +3,13 @@
  * @file   EnemyRenderer.cpp
  * @brief  敵の描画関連の管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/05
+ * @date   2026/07/01
  */
 
 #include "pch.h"
 #include "EnemyRenderer.h"
 #include "Game/Common/ObjectCharacter/ModelManager.h"
-
 #include "DDSTextureLoader.h"
-
-using namespace DirectX;
 
 //-----------------------------------------------------------------
 // コンストラクタ
@@ -29,7 +26,7 @@ EnemyRenderer::EnemyRenderer()
 void EnemyRenderer::Initialize(ID3D11Device* device)
 {
 	//共通ステートの初期化
-    m_states = std::make_unique<CommonStates>(device);
+    m_states = std::make_unique<DirectX::CommonStates>(device);
 
     DirectX::EffectFactory fx(device);
     fx.SetDirectory(L"Resources\\Models");
@@ -41,7 +38,7 @@ void EnemyRenderer::Initialize(ID3D11Device* device)
     m_materialDizzy = ModelManager::GetInstance()->GetDizzyMaterial();
 
     //影用テクスチャの読み込み
-    CreateDDSTextureFromFile(device, L"Resources\\Textures\\Shadow.dds", nullptr, m_shadowTexture.GetAddressOf());
+    DirectX::CreateDDSTextureFromFile(device, L"Resources\\Textures\\Shadow.dds", nullptr, m_shadowTexture.GetAddressOf());
 }
 
 //-----------------------------------------------------------------
@@ -91,8 +88,10 @@ void EnemyRenderer::Render(
     if (!currentModel) return;
 
 	//回転行列と平行移動行列を組み合わせてワールド行列を作成
-	SimpleMath::Matrix world = rotationMatrix * SimpleMath::Matrix::CreateTranslation(position);
+    DirectX::SimpleMath::Matrix world =
+        rotationMatrix * DirectX::SimpleMath::Matrix::CreateTranslation(position);
 
+    //影の描画
     if (stage && shadowRenderer)
     {
 		shadowRenderer->Render(
@@ -101,7 +100,7 @@ void EnemyRenderer::Render(
             view, proj, position,
             SHADOW_DEFAULT_SCALE, SHADOW_DEFAULT_ROT_X, SHADOW_DEFAULT_ROT_Z);
     }
-
+    
+    //モデルの描画
     currentModel->Draw(context, *m_states, world, view, proj);
-
 }
