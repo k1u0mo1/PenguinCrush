@@ -3,7 +3,7 @@
  * @file   Wave.h
  * @brief  水面の波を動的に生成・描画し、物理的な高さや傾きを提供するギミッククラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/06
  */
 
 #pragma once
@@ -31,12 +31,23 @@ struct WaveConstantBuffer
     DirectX::SimpleMath::Matrix matView;
     //射影行列
     DirectX::SimpleMath::Matrix matProj;
+
     //時間
     float time;
     //波の高さ
     int isCubeMode;
-    //補助データ
-    DirectX::SimpleMath::Vector2 padding;
+    //波の細かさ
+    float waveFrequency;
+    //波の高さ
+    float waveAmplitude;
+    //キューブの大きさ
+    float cubeScale;
+    //グリッドの幅
+    int gridWidth;
+    //全体の波の速さ
+    float waveSpeed;
+    //置物 16の倍数に揃える
+    float padding;
 };
 
 /// <summary>

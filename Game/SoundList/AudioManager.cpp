@@ -85,7 +85,7 @@ void AudioManager::LoadSound(
 // 登録済みの効果音（SE）を1回再生
 //----------------------------------------------------------
 
-void AudioManager::Play(const std::string& key)
+void AudioManager::Play(const std::string& key,float volume)
 {
 	//リストにその名前の音があるか確認して再生
 	if (m_sounds.find(key) == m_sounds.end())
@@ -93,8 +93,11 @@ void AudioManager::Play(const std::string& key)
 		return;
 	}
 
+	//全体のSE音量と個別の音量を合わせる
+	float finalVolume = m_seVolume * volume;
+
 	//音のリストをもらい流す
-	m_sounds[key]->Play(m_seVolume, DEFAULT_PITCH, DEFAULT_PAN);
+	m_sounds[key]->Play(finalVolume, DEFAULT_PITCH, DEFAULT_PAN);
 }
 
 //----------------------------------------------------------

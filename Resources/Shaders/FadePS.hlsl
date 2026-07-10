@@ -1,4 +1,11 @@
 
+/**
+ * @file   FaderPS.hlsl
+ * @brief  フェードアウト用のシェーダ
+ * @author 國田知睦
+ * @date   2026/07/06
+ */
+
 Texture2D<float4> Texture : register(t0);
 sampler TextureSampler : register(s0);
 

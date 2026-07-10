@@ -29,14 +29,10 @@ Game::Game() noexcept(false)
     
 {
     m_deviceResources = std::make_unique<DX::DeviceResources>();
-    // TODO: Provide parameters for swapchain format, depth/stencil format, and backbuffer count.
-    //   Add DX::DeviceResources::c_AllowTearing to opt-in to variable rate displays.
-    //   Add DX::DeviceResources::c_EnableHDR for HDR10 display.
+    
     m_deviceResources->RegisterDeviceNotify(this);
-
+    //フルスクリーンではない
     m_fullscreen = FALSE;
-
-
 
 }
 
@@ -70,16 +66,6 @@ void Game::Initialize(HWND window, int width, int height)
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
 
-    // TODO: Change the timer settings if you want something other than the default variable timestep mode.
-    // e.g. for 60 FPS fixed timestep update logic, call:
-    /*
-    m_timer.SetFixedTimeStep(true);
-    m_timer.SetTargetElapsedSeconds(1.0 / 60);
-    */
-
-    /*auto device = m_deviceResources->GetD3DDevice();
-    auto context = m_deviceResources->GetD3DDeviceContext();*/
-
     //////////////////////////////////////////////////////////
 
     //マウスカーソルを消す
@@ -88,18 +74,12 @@ void Game::Initialize(HWND window, int width, int height)
 
     //どのシーンにするか
     m_sceneManager->SetScene<TitleScene>();
-    //m_sceneManager->SetScene<GamePlayScene>();
-    
-    //
-    //context->ClearRenderTargetView(m_transtionTexture->GetRenderTargetView(), Colors::Black);
-
+   
     //入力関連のマネージャーの初期化
     m_inputManager = std::make_unique<InputManager>();
     
     m_userResources->SetInputManager(m_inputManager.get());
-    
-    
-    
+     
     ////////////////////////////////////////////////////////
 }
 
@@ -120,7 +100,6 @@ void Game::Update(DX::StepTimer const& timer)
 {
     float elapsedTime = float(timer.GetElapsedSeconds());
 
-    // TODO: Add your game logic here.
     elapsedTime;
 
     ///////////////////////////////////////////////////
@@ -171,7 +150,6 @@ void Game::Render()
     m_deviceResources->PIXBeginEvent(L"Render");
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-    // TODO: Add your rendering code here.
     context;
 
     ///////////////////////////////////////////////////////////////////
@@ -302,7 +280,6 @@ void Game::OnWindowSizeChanged(int width, int height)
 // Properties
 void Game::GetDefaultSize(int& width, int& height) const noexcept
 {
-    // TODO: Change to desired default window size (note minimum size is 320x200).
     width = 1280;
     height = 720;
 }
@@ -357,13 +334,11 @@ void Game::CreateDeviceDependentResources()
 // Allocate all memory resources that change on a window SizeChanged event.
 void Game::CreateWindowSizeDependentResources()
 {
-    // TODO: Initialize windows-size dependent objects here.
     m_sceneManager->CreateWindowSizeDependentResources();
 }
 
 void Game::OnDeviceLost()
 {
-    // TODO: Add Direct3D resource cleanup here.
     m_sceneManager->OnDeviceLost();
 }
 

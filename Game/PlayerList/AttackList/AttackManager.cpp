@@ -3,7 +3,7 @@
  * @file   AttackManager.cpp
  * @brief  攻撃の管理クラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/10
  */
 
 #include "pch.h"

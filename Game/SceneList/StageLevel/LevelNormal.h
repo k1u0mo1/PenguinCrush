@@ -90,7 +90,7 @@ public:
         std::mt19937 gen(rd());
         //X,Zの範囲を指定
         std::uniform_real_distribution<float> disX(SPAWN_RANGE_MIN, SPAWN_RANGE_MAX);
-        std::uniform_real_distribution<float> disZ(SPAWN_RANGE_MAX, SPAWN_RANGE_MIN);
+        std::uniform_real_distribution<float> disZ(SPAWN_RANGE_MIN, SPAWN_RANGE_MAX);
 
         //ループしてランダムな座標に入れていく
         for (int i = 0; i < ENEMY_COUNT; i++)

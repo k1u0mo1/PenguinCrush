@@ -34,14 +34,14 @@ private:
     static constexpr float RUSH_SPEED = 25.0f;
 
     //サイズ
-    static constexpr float SCALE_SIZE = 1.0f;
+    static constexpr float SCALE_SIZE = 0.8f;
     //突進方向
     static constexpr DirectX::SimpleMath::Vector3 FORWARD =
         DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.1f);
 
     //当たり判定のサイズ
     static constexpr DirectX::SimpleMath::Vector3 COLLISION_SIZE =
-        DirectX::SimpleMath::Vector3(1.0f, 1.5f, 1.0f);
+        DirectX::SimpleMath::Vector3(1.0f, 1.8f, 1.0f);
 
     //デバックの当たり判定の線の太さ
     static constexpr float DEBUG_COLLISION_LINE_THICKNESS = 0.5f;

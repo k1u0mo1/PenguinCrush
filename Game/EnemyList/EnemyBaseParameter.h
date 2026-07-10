@@ -3,9 +3,8 @@
  * @file   EnemyBaseParameter.h
  * @brief  敵の基本的なパラメーターをまとめるクラス
  * @author 國田知睦
- * @date   2026/06/30
+ * @date   2026/07/06
  */
-
 
 #pragma once
 
@@ -41,7 +40,6 @@ struct EnemyBaseParameter
 //敵の基本的なパラメーターをまとめる名前空間
 namespace EnemyData
 {
-
 	/// <summary>
 	/// ボスの基本的なパラメーター　
 	/// </summary>
@@ -52,7 +50,7 @@ namespace EnemyData
 		//移動速度
 		5.0f,
 		//攻撃のクールタイム
-		1.5f,
+		2.5f,
 		//突進攻撃のクールタイム
 		7.0f,
 		//近距離攻撃のダメージ
@@ -79,7 +77,7 @@ namespace EnemyData
 		//移動速度
 		10.0f,
 		//攻撃のクールタイム
-		2.0f,
+		5.0f,
 		//突進攻撃のクールタイム
 		10.0f,
 		//近距離攻撃のダメージ
@@ -93,7 +91,7 @@ namespace EnemyData
 		//敵が上方向への浮き上がり力
 		30.0f,
 		//敵がノックバックの硬直時間
-		1.0f
+		1.5f
 	};
 
 	/// <summary>
@@ -106,7 +104,7 @@ namespace EnemyData
 		//移動速度
 		8.0f,
 		//攻撃のクールタイム
-		2.0f,
+		7.0f,
 		//突進攻撃のクールタイム
 		10.0f,
 		//近距離攻撃のダメージ
@@ -122,6 +120,5 @@ namespace EnemyData
 		//敵がノックバックの硬直時間
 		0.8f
 	};
-
 }
 

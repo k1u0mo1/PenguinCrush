@@ -3,7 +3,7 @@
  * @file   SelectScene.h
  * @brief  選択画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/10
  */
 
 #pragma once
@@ -30,7 +30,8 @@
 class SelectScene : public Scene<UserResources>
 {
 private:
-
+	//ステージの配置するY座標
+	static constexpr float STAGE_POS_Y = 3.0f;
 	//ステージの配置の半径
 	static constexpr float TARGET_RADIUS = 4.0f;
 	//非選択時のモデルのスケール
@@ -67,14 +68,15 @@ private:
 	static constexpr float DEFAULT_BGM_VOLUME = 0.2f;
 	static constexpr float DEFAULT_SE_CLICK_VOLUME = 1.0f;
 	static constexpr float DEFAULT_SE_VOLUME = 0.2f;
+	static constexpr float DEFAULT_SE_VOLUME_BLOCK = 1.2f;
 
 	//カメラ設定
 	//カメラの配置の高さ
-	static constexpr float CAMERA_EYE_Y = 5.0f;
+	static constexpr float CAMERA_EYE_Y = 7.0f;
 	//カメラの手前への引き
-	static constexpr float CAMERA_EYE_Z = -11.0f;
+	static constexpr float CAMERA_EYE_Z = -13.0f;
 	//カメラの注視点の高さ
-	static constexpr float CAMERA_TARGET_Y = 0.0f;
+	static constexpr float CAMERA_TARGET_Y = 2.0f;
 	//前方のクリップ面
 	static constexpr float CAMERA_NEAR = 0.1f;
 	//後方のクリップ面

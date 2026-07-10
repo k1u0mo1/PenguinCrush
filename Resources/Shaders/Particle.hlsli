@@ -1,3 +1,11 @@
+
+/**
+ * @file   Particle.hlsli
+ * @brief  エフェクト用のシェーダ
+ * @author 國田知睦
+ * @date   2026/07/06
+ */
+
 cbuffer ConstBuffer	: register(b0)
 {
 	matrix matWorld;

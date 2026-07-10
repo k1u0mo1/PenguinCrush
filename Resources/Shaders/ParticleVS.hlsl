@@ -1,3 +1,11 @@
+
+/**
+ * @file   ParticleVS.hlsl
+ * @brief  エフェクト用のシェーダ
+ * @author 國田知睦
+ * @date   2026/07/06
+ */
+
 #include "Particle.hlsli"
 
 PS_INPUT main(VS_INPUT input)

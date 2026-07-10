@@ -2,7 +2,7 @@
  * @file   SelectScene.cpp
  * @brief  選択画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/10
  */
 
 #include "pch.h"
@@ -64,7 +64,7 @@ void SelectScene::Update(float elapsedTime)
     if (input->kbTracker.pressed.Up || input->kbTracker.pressed.W)
     {
 		//移動音
-		AudioManager::GetInstance()->Play("SE_Move");
+		AudioManager::GetInstance()->Play("SE_Move", DEFAULT_SE_VOLUME);
 		//カーソルを上に移動
         m_currentCursor--;
 		//カーソルが0未満になったら、最後のステージにループ
@@ -77,7 +77,7 @@ void SelectScene::Update(float elapsedTime)
     if (input->kbTracker.pressed.Down || input->kbTracker.pressed.S)
     {
 		//移動音
-        AudioManager::GetInstance()->Play("SE_Move");
+        AudioManager::GetInstance()->Play("SE_Move",DEFAULT_SE_VOLUME);
 		//カーソルを下に移動
         m_currentCursor++;
 		//カーソルがステージの数以上になったら、最初のステージにループ
@@ -120,7 +120,7 @@ void SelectScene::Update(float elapsedTime)
         if (IsStageUnlocked(m_currentCursor))
         {
             //決定音
-            AudioManager::GetInstance()->Play("SE_Click");
+            AudioManager::GetInstance()->Play("SE_Click", DEFAULT_SE_CLICK_VOLUME);
 
             m_isChangingScene = true;
             transitionMask->Close();
@@ -130,7 +130,8 @@ void SelectScene::Update(float elapsedTime)
         }
         else
         {
-            //ステージが解放されていない音を追加
+            //ステージが解放されていない音
+            AudioManager::GetInstance()->Play("SE_Block",DEFAULT_SE_VOLUME_BLOCK);
         }
     }
 
@@ -179,8 +180,10 @@ void SelectScene::Render()
     float radius = TARGET_RADIUS;
 
     //サイズ設定
-    float baseScale = MODEL_BASE_SCALE; //選んでいない
-    float selectScale = MODEL_SELECCT_SCALE;//選択中
+    //選んでいない
+    float baseScale = MODEL_BASE_SCALE; 
+    //選択中
+    float selectScale = MODEL_SELECCT_SCALE;
 
     //モデル（ステージ）の１つ当たりの角度の間隔
     float stepAngle = DirectX::XM_2PI / m_stageList.size();
@@ -220,7 +223,7 @@ void SelectScene::Render()
         DirectX::SimpleMath::Matrix world =
             DirectX::SimpleMath::Matrix::CreateScale(scale) *
             DirectX::SimpleMath::Matrix::CreateRotationY(selfRot) *
-            DirectX::SimpleMath::Matrix::CreateTranslation(x, 0.0f, z);
+            DirectX::SimpleMath::Matrix::CreateTranslation(x, STAGE_POS_Y, z);
 
         // ----------------------------------------------------
         // 解放していないステージの色を変える
@@ -484,12 +487,13 @@ void SelectScene::CreateDeviceDependentResources()
     audio->PlayBGM("Select");
 
     //SE 決定音
-    audio->SetSEVolume(DEFAULT_SE_CLICK_VOLUME);
     audio->LoadSound("SE_Click", L"Resources/Sounds/SE_Click.wav");
 
     //SE 移動音
-    audio->SetSEVolume(DEFAULT_SE_VOLUME);
     audio->LoadSound("SE_Move", L"Resources/Sounds/SE_MoveCursor.wav");
+
+    //SE 通行止め音
+    audio->LoadSound("SE_Block", L"Resources/Sounds/SE_Block.wav");
 }
 
 //-----------------------------------------------------------------

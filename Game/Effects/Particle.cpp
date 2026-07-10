@@ -74,14 +74,14 @@ void Particle::Initialize(DX::DeviceResources* pDR)
 	m_pDR = pDR;
 	ID3D11Device1* device = pDR->GetD3DDevice();
 
-	//	シェーダーの作成
+	//シェーダーの作成
 	CreateShader();
 
-	//	画像の読み込み まだない
+	//画像の読み込み まだない
 	LoadTexture(L"Resources/Textures/White.png");
 	//LoadTexture(L"Resources/Textures/floor.png");
 
-	//	プリミティブバッチの作成
+	//プリミティブバッチの作成
 	m_batch = std::make_unique<DirectX::PrimitiveBatch<DirectX::VertexPositionColorTexture>>(pDR->GetD3DDeviceContext());
 
 	m_states = std::make_unique<DirectX::CommonStates>(device);
@@ -102,20 +102,19 @@ static float GetRandom(float min, float max)
 
 void Particle::Update(float elapsedTime)
 {
-	
 	//------------------------------------
 	// 水しぶき更新
 	//------------------------------------
 
 	for (auto& p : m_splashList)
 	{
-		// 速度に重力を加算
+		//速度に重力を加算
 		p.Velocity.y += GRAVITY * elapsedTime;
 
-		// 位置を更新
+		//位置を更新
 		p.Position += p.Velocity * elapsedTime;
 
-		// 年齢を加算
+		//年齢を加算
 		p.Age += elapsedTime;
 	}
 

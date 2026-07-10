@@ -1,3 +1,11 @@
+
+/**
+ * @file   WavePS.hlsl
+ * @brief  波用のシェーダ
+ * @author 國田知睦
+ * @date   2026/07/06
+ */
+
 #include "Wave.hlsli"
 
 Texture2D tex : register(t0);

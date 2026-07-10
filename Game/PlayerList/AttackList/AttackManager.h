@@ -3,7 +3,7 @@
  * @file   AttackManager.h
  * @brief  攻撃の管理クラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/10
  */
 
 #pragma once
@@ -23,11 +23,11 @@ class AttackManager
 private:
 
 	//エフェクトの高さ
-	static constexpr float HIT_EFFECT_HEIGHT = 1.0f;
+	static constexpr float HIT_EFFECT_HEIGHT = 2.0f;
 	//エフェクトの生成数
-	static constexpr int HIT_EFFECT_COUNT = 50;
+	static constexpr int HIT_EFFECT_COUNT = 100;
 	//エフェクトのサイズ
-	static constexpr float HIT_EFFECT_SIZE = 0.1f;
+	static constexpr float HIT_EFFECT_SIZE = 0.5f;
 	
 	//ダメージ量
 	static constexpr float ATTACK_DAMAGE = 100.0f;

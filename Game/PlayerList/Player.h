@@ -3,7 +3,7 @@
  * @file   Player.h
  * @brief  プレイヤーキャラクターの制御・パラメータ管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/06
  */
 
 #pragma once
@@ -104,9 +104,9 @@ private:
     //ダッシュ時の高さ
 	static constexpr float DASH_HEIGHT = 0.5f;
 	//ダッシュ時のエフェクトの数
-	static constexpr int DASH_EFFECT_NUM = 5;
+	static constexpr int DASH_EFFECT_NUM = 20;
 	//ダッシュエフェクトのサイズ
-	static constexpr float DASH_EFFECT_SIZE = 0.5f;
+	static constexpr float DASH_EFFECT_SIZE = 0.6f;
 
 	//当たり判定の線の太さ
     static constexpr float COLLISION_LINE_THICKNESS = 0.1f;

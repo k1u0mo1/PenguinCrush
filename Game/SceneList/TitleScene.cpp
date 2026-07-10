@@ -3,7 +3,7 @@
  * @file   TitleScene.h
  * @brief  タイトル画面の初期化・更新・描画を管理するシーンクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/10
  */
 
 #include "pch.h"
@@ -68,14 +68,14 @@ void TitleScene::Update(float elapsedTime)
 	if (input->kbTracker.pressed.Up || input->kbTracker.pressed.W)
 	{
 		//移動音
-		AudioManager::GetInstance()->Play("SE_Move");
+		AudioManager::GetInstance()->Play("SE_Move", DEFAULT_SE_VOLUME);
 		//↑
 		cursorInt = (cursorInt - 1 + maxCount) % maxCount;
 	}
 	if (input->kbTracker.pressed.Down || input->kbTracker.pressed.S)
 	{
 		//移動音
-		AudioManager::GetInstance()->Play("SE_Move");
+		AudioManager::GetInstance()->Play("SE_Move",DEFAULT_SE_VOLUME);
 		//↓
 		cursorInt = (cursorInt + 1) % maxCount;
 	}
@@ -99,7 +99,7 @@ void TitleScene::Update(float elapsedTime)
 	if (input->kbTracker.pressed.Enter || input->kbTracker.pressed.Space)
 	{
 		//決定音
-		AudioManager::GetInstance()->Play("SE_Click");
+		AudioManager::GetInstance()->Play("SE_Click", DEFAULT_SE_CLICK_VOLUME);
         if (m_currentCursor == MenuType::Start)
 		{
 			//シーンの変更を可
@@ -296,11 +296,9 @@ void TitleScene::CreateDeviceDependentResources()
 	audio->PlayBGM("Title");
 
 	//SE 決定音
-	audio->SetSEVolume(DEFAULT_SE_CLICK_VOLUME);
 	audio->LoadSound("SE_Click", L"Resources/Sounds/SE_Click.wav");
 
 	//SE 移動音
-	audio->SetSEVolume(DEFAULT_SE_VOLUME);
 	audio->LoadSound("SE_Move", L"Resources/Sounds/SE_MoveCursor.wav");
 }
 

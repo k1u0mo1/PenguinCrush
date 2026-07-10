@@ -3,7 +3,7 @@
  * @file   ResultScene.h
  * @brief  リザルト画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/06/29
+ * @date   2026/07/10
  */
 
 #pragma once

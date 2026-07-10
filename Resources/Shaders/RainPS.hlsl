@@ -1,3 +1,11 @@
+
+/**
+ * @file   RainPS.hlsl
+ * @brief  雨用のシェーダ
+ * @author 國田知睦
+ * @date   2026/07/06
+ */
+
 #include "Rain.hlsli"
 
 Texture2D tex : register(t0);

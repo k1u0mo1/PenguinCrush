@@ -1,3 +1,11 @@
+
+/**
+ * @file   RainGS.hlsl
+ * @brief  雨用のシェーダ
+ * @author 國田知睦
+ * @date   2026/07/06
+ */
+
 #include "Rain.hlsli"
 
 [maxvertexcount(4)] // 4頂点出して四角形を作る

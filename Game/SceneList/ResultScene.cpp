@@ -3,7 +3,7 @@
  * @file   ResultScene.cpp
  * @brief  リザルト画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/10
  */
 
 #include "pch.h"
@@ -88,14 +88,14 @@ void ResultScene::Update(float elapsedTime)
 	if (input->kbTracker.pressed.Up || input->kbTracker.pressed.W)
 	{
 		//移動音
-		AudioManager::GetInstance()->Play("SE_Move");
+		AudioManager::GetInstance()->Play("SE_Move",DEFAULT_SE_VOLUME);
 		//↑
 		cursorInt = (cursorInt - 1 + maxCount) % maxCount;
 	}
 	if (input->kbTracker.pressed.Down || input->kbTracker.pressed.S)
 	{
 		//移動音
-		AudioManager::GetInstance()->Play("SE_Move");
+		AudioManager::GetInstance()->Play("SE_Move", DEFAULT_SE_VOLUME);
 		//↓
 		cursorInt = (cursorInt + 1) % maxCount;
 	}
@@ -110,7 +110,7 @@ void ResultScene::Update(float elapsedTime)
 	if (input->kbTracker.pressed.Enter || input->kbTracker.pressed.Space)
 	{
 		//決定音
-		AudioManager::GetInstance()->Play("SE_Click");
+		AudioManager::GetInstance()->Play("SE_Click", DEFAULT_SE_CLICK_VOLUME);
 		switch (m_currentCursor)
 		{
 			//リトライ
@@ -356,10 +356,8 @@ void ResultScene::CreateDeviceDependentResources()
 	}
 
 	//SE 決定音
-	audio->SetSEVolume(DEFAULT_SE_CLICK_VOLUME);
 	audio->LoadSound("SE_Click", L"Resources/Sounds/SE_Click.wav");
 	//SE 移動音
-	audio->SetSEVolume(DEFAULT_SE_VOLUME);
 	audio->LoadSound("SE_Move", L"Resources/Sounds/SE_MoveCursor.wav");
 }
 

@@ -1,3 +1,11 @@
+
+/**
+ * @file   SmokeGS.hlsl
+ * @brief  煙用のシェーダ
+ * @author 國田知睦
+ * @date   2026/07/06
+ */
+
 #include "Smoke.hlsli"
 
 static const int vnum = 4;

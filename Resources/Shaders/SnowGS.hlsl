@@ -1,3 +1,11 @@
+
+/**
+ * @file   SnowGS.hlsl
+ * @brief  雪用のシェーダ
+ * @author 國田知睦
+ * @date   2026/07/06
+ */
+
 #include "Snow.hlsli"
 
 [maxvertexcount(4)]

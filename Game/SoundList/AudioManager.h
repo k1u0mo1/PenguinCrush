@@ -69,7 +69,8 @@ public:
 	/// 登録済みの効果音（SE）を1回再生
 	/// </summary>
 	/// <param name="key">再生したい音声の登録名</param>
-	void Play(const std::string& key);
+	/// <param name="volum">再生したい音声の音量サイズ</param>
+	void Play(const std::string& key, float volum = DEFAULT_VOLUME);
 
 	/// <summary>
 	/// 効果音（SE）の全体音量を設定

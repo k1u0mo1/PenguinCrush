@@ -1,5 +1,10 @@
 
-//Wave.hlsli
+/**
+ * @file   Wave.hlsli
+ * @brief  波用のシェーダ
+ * @author 國田知睦
+ * @date   2026/07/06
+ */
 
 //C++から毎フレーム送られてくるデータ
 cbuffer ConstBuffer	: register(b0)
@@ -8,8 +13,13 @@ cbuffer ConstBuffer	: register(b0)
 	matrix matView;
 	matrix matProj;
     float time; //波を動かす用の時間
-    int isCubeMode;//1:キューブ　0:通常の波
-    float2 padding;
+    int isCubeMode;//1:キューブ　0:通常の波  
+    float waveFrequency;
+    float waveAmplitude;
+    float cubeScale;
+    int gridWidth;
+    float waveSpeed;
+    float padding;
 };
 
 struct VS_INPUT

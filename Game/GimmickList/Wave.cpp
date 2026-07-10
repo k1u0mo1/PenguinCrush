@@ -3,7 +3,7 @@
  * @file   Wave.h
  * @brief  水面の波を動的に生成・描画し、物理的な高さや傾きを提供するギミッククラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/06
  */
 
 #include "pch.h"
@@ -69,11 +69,22 @@ void Wave::Render(
         cb->matView = view.Transpose();
         cb->matProj = proj.Transpose();
         cb->time    = m_time;
-
 		//ドットモードなら1、通常モードなら0をシェーダに送る
         cb->isCubeMode = m_isDotMode ? 1 : 0;
-		//構造体のサイズを16バイトの倍数にするためのパディング
-        cb->padding = DirectX::SimpleMath::Vector2(0.0f, 0.0f);
+
+        //シェーダに波の細かさを送る
+        cb->waveFrequency = 0.15f; 
+        //シェーダに波の高さを送る
+        cb->waveAmplitude = 2.5f;
+        //シェーダに波の大きさを送る
+        cb->cubeScale = 3.0f;
+        //シェーダにグリッドの幅を送る
+        cb->gridWidth = 200;
+        //シェーダに波の速さを送る
+        cb->waveSpeed = 1.0f;
+        //置物
+        cb->padding = 0.0f;
+		
         //マッピングを解除してGPUに渡す
         context->Unmap(m_constantBuffer.Get(), 0);
     }
@@ -86,6 +97,8 @@ void Wave::Render(
     context->IASetInputLayout(m_inputLayout.Get());
     //カリング設定（無効）
     context->RSSetState(m_states->CullNone());
+    //カメラから近いモノから描画
+    context->OMSetDepthStencilState(m_states->DepthDefault(), 0);
 
     //頂点バッファをセット
     UINT stride = sizeof(WaveVertex);
@@ -169,7 +182,7 @@ void Wave::CreateDeviceResources()
     {
         {"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0, 0, D3D11_INPUT_PER_VERTEX_DATA,0},
         {"COLOR",   0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,12, D3D11_INPUT_PER_VERTEX_DATA,0},
-        { "SV_InstanceID", 0, DXGI_FORMAT_R32_UINT,  1,  0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+        //{ "SV_InstanceID", 0, DXGI_FORMAT_R32_UINT,  1,  0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
     };
     //入力レイアウトの作成
     DX::ThrowIfFailed(device->CreateInputLayout(
