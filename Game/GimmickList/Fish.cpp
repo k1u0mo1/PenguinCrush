@@ -2,7 +2,7 @@
  * @file   Fish.cpp
  * @brief  魚オブジェクト
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/16
  */
 
 #include "pch.h"
@@ -275,7 +275,7 @@ bool Fish::IsAlive() const
 // 弾が当たった際などに呼ばれ、魚を消滅
 //----------------------------------------------------------
 
-void Fish::BulletKill()
+void Fish::FishDelete()
 {
     m_lifetime = MAX_LIFETIME;
 }

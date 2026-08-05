@@ -3,7 +3,7 @@
  * @file   EnemyAI.cpp
  * @brief  敵AIの動きの管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/30
+ * @date   2026/07/16
  */
 
 #include "pch.h"
@@ -14,7 +14,7 @@
  //----------------------------------------------------------
 
 void EnemyAI::UpdateAI(
-	float /*dt*/, 
+	float dt, 
 	const DirectX::SimpleMath::Vector3& currentPos, 
 	const DirectX::SimpleMath::Vector3& playerPos, 
 	Stage* stage,
@@ -22,6 +22,7 @@ void EnemyAI::UpdateAI(
 	DirectX::SimpleMath::Vector3& outVelocity,
 	float& outRotationY)
 {
+	UNREFERENCED_PARAMETER(dt);
 	
 	DirectX::SimpleMath::Vector3 forward = playerPos - currentPos;
 	forward.y = 0.0f;

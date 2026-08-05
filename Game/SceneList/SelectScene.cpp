@@ -2,7 +2,7 @@
  * @file   SelectScene.cpp
  * @brief  選択画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/07/10
+ * @date   2026/07/29
  */
 
 #include "pch.h"
@@ -169,6 +169,16 @@ void SelectScene::Render()
 {
 	//描画準備
 	auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
+    
+    DirectX::SimpleMath::Matrix view;
+    //-------------------------------------------------
+    //スカイドームの描画
+    //-------------------------------------------------
+    if (m_skyDome)
+    {
+        //スカイドームモデルの描画
+        m_skyDome->Render(context, view, m_proj);
+    }
 
     //波
     if (m_waveManager)
@@ -191,7 +201,7 @@ void SelectScene::Render()
     // ----------------------------------------------------
     // モデル描画のループ処理
     // ----------------------------------------------------
-    for (int i = 0; i < m_stageList.size(); i++)
+    for (int i = 0; i < static_cast<int>(m_stageList.size()); i++)
     {
         //モデルがロードされていなかったらスキップする
         if (!m_stageList[i].model)continue;
@@ -241,7 +251,7 @@ void SelectScene::Render()
                     if (!IsStageUnlocked(i))
                     {
                         //モデルの色を暗くする
-                        basicEffect->SetDiffuseColor(DirectX::Colors::Black);
+                        basicEffect->SetDiffuseColor(DirectX::Colors::Gray);
                     }
                     else
                     {
@@ -312,7 +322,7 @@ void SelectScene::Render()
             DirectX::XMVECTOR color;
 
             //ロック状態に合わせて色を変える
-            if (!IsStageUnlocked(i))
+            if (!IsStageUnlocked(static_cast<int>(i)))
             {
                 //まだステージが解放されていない
                 color = DirectX::Colors::Black;
@@ -428,6 +438,10 @@ void SelectScene::CreateDeviceDependentResources()
     //ステート
     m_states = std::make_unique<DirectX::CommonStates>(device);
 
+    //スカイドーム
+    m_skyDome = std::make_unique<SkyDome>(m_deviceResources);
+    m_skyDome->Initialize();
+
     //-------------------------------------------------
     //ステージのデータの構築
     //-------------------------------------------------
@@ -454,7 +468,7 @@ void SelectScene::CreateDeviceDependentResources()
         { L"Tutorial", L"Resources\\Textures\\Tutorial.png",  L"Resources\\Models\\Tutorial.sdkmesh", GamePlayScene::StageType::Tutorial },
         { L"EASY",     L"Resources\\Textures\\EASY_UI.png",   L"Resources\\Models\\S_1.sdkmesh",      GamePlayScene::StageType::EASY },
 		{ L"NORMAL",   L"Resources\\Textures\\NORMAL_UI.png", L"Resources\\Models\\S_2.sdkmesh",      GamePlayScene::StageType::NORMAL },
-		{ L"HARD",     L"Resources\\Textures\\HARD_UI.png",   L"Resources\\Models\\Hard.sdkmesh",      GamePlayScene::StageType::HARD },
+		{ L"HARD",     L"Resources\\Textures\\HARD_UI.png",   L"Resources\\Models\\Hard.sdkmesh",     GamePlayScene::StageType::HARD },
     };
 
 	//ステージのデータの初期化用の配列をループして、ステージのデータを構築する
@@ -488,10 +502,8 @@ void SelectScene::CreateDeviceDependentResources()
 
     //SE 決定音
     audio->LoadSound("SE_Click", L"Resources/Sounds/SE_Click.wav");
-
     //SE 移動音
     audio->LoadSound("SE_Move", L"Resources/Sounds/SE_MoveCursor.wav");
-
     //SE 通行止め音
     audio->LoadSound("SE_Block", L"Resources/Sounds/SE_Block.wav");
 }

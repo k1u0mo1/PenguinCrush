@@ -3,7 +3,7 @@
  * @file   FishManager.h
  * @brief  魚の描画・管理を行うマネージャークラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/16
  */
 
 #pragma once
@@ -15,6 +15,7 @@
 
 class ShadowRenderer;
 class Player;
+class Particle;
 
 class FishManager
 {
@@ -29,6 +30,15 @@ private:
     //魚を取得した際のプレイヤーのHP回復量
     static constexpr float FISH_HEAL_AMOUNT = 20.0f;
 
+    //回復した時の音量
+    static constexpr float HEAL_SE_VOLUME = 2.0f;
+
+    //エフェクトの高さ
+    static constexpr float HIT_EFFECT_HEIGHT = 1.0f;
+    //エフェクトの生成数
+    static constexpr int HIT_EFFECT_COUNT = 20;
+    //エフェクトのサイズ
+    static constexpr float HIT_EFFECT_SIZE = 0.2f;
     //------------------------------------------------------
     //スポーン範囲関連
     //------------------------------------------------------
@@ -63,7 +73,8 @@ public:
     /// </summary>
     /// <param name="elapsedTime">前フレームからの経過時間</param>
     /// <param name="player">当たり判定を行うプレイヤーのポインタ</param>
-    void Update(float elapsedTime, Player* player);
+    /// <param name="particle">ヒット時のエフェクト発生用マネージャー</param>
+    void Update(float elapsedTime, Player* player, Particle* particle);
 
     /// <summary>
     /// 存在しているすべての魚の描画

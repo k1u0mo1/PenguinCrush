@@ -69,14 +69,14 @@ void TitleScene::Update(float elapsedTime)
 	{
 		//移動音
 		AudioManager::GetInstance()->Play("SE_Move", DEFAULT_SE_VOLUME);
-		//↑
+		//↑に移動
 		cursorInt = (cursorInt - 1 + maxCount) % maxCount;
 	}
 	if (input->kbTracker.pressed.Down || input->kbTracker.pressed.S)
 	{
 		//移動音
 		AudioManager::GetInstance()->Play("SE_Move",DEFAULT_SE_VOLUME);
-		//↓
+		//↓に移動
 		cursorInt = (cursorInt + 1) % maxCount;
 	}
 
@@ -90,6 +90,7 @@ void TitleScene::Update(float elapsedTime)
 	{
 		if (transitionMask->IsClose() && transitionMask->IsEnd())
 		{
+			//セレクトシーンに移動
 			ChangeScene<SelectScene>();
 		}
 		return; 

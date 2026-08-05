@@ -188,7 +188,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureSelect;
 	//タイトルへ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureTitle;
-
 	// ボタンUIテクスチャ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureButtonUI;
 	// カーソルUIテクスチャ

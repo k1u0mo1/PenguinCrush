@@ -2,13 +2,14 @@
  * @file   FishManager.cpp
  * @brief  魚の描画・管理を行うマネージャークラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/16
  */
 
 #include "pch.h"
 #include "Game/GimmickList/FishManager.h"
 #include "Game/PlayerList/Player.h"
 #include "Game/ShadowRenderer/ShadowRenderer.h"
+#include "Game/Effects/Particle.h"
 
 //----------------------------------------------------------
 // インスタンスを生成
@@ -29,7 +30,7 @@ FishManager::FishManager(
 // 魚のスポーンタイマーの更新とプレイヤーとの当たり判定
 //----------------------------------------------------------
 
-void FishManager::Update(float dt, Player* player)
+void FishManager::Update(float dt, Player* player, Particle* particle)
 {
     //魚のスポーンタイマーを更新
     m_spawnTimer += dt;
@@ -64,9 +65,24 @@ void FishManager::Update(float dt, Player* player)
                     //HPを回復
                     player->Heal(FISH_HEAL_AMOUNT);
                     //回復音を再生
-                    AudioManager::GetInstance()->Play("Heal");
-                    //弾を消す
-                    fish->BulletKill();
+                    AudioManager::GetInstance()->Play("Heal", HEAL_SE_VOLUME);
+                    
+                    //回復エフェクト
+                    if (particle)
+                    {
+                        //プレイヤーの座標を取得
+                        DirectX::SimpleMath::Vector3 hitPos = player->GetPosition();
+                        hitPos.y += HIT_EFFECT_HEIGHT;
+
+                        particle->Spawn(
+                            Particle::Type::Heal,
+                            hitPos, 
+                            HIT_EFFECT_COUNT,
+                            HIT_EFFECT_SIZE);
+                    }
+
+                    //魚を消す
+                    fish->FishDelete();
 
                     break;
                 }

@@ -3,7 +3,7 @@
  * @file   ResultScene.cpp
  * @brief  リザルト画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/07/10
+ * @date   2026/07/17
  */
 
 #include "pch.h"
@@ -56,15 +56,14 @@ void ResultScene::Update(float elapsedTime)
 	elapsedTime;
 	//キーボード用
 	auto input = GetUserResources()->GetInputManager();
+	//タイマー
+	m_animationTimer += elapsedTime;
 
 	//[o]でタイトルへ強制戻る
 	if (input->kbTracker.pressed.O)
 	{
 		ChangeScene<TitleScene>();
 	}
-
-	//タイマー
-	m_animationTimer += elapsedTime;
 
 	// 天候の更新
 	if (m_snow)
@@ -89,14 +88,14 @@ void ResultScene::Update(float elapsedTime)
 	{
 		//移動音
 		AudioManager::GetInstance()->Play("SE_Move",DEFAULT_SE_VOLUME);
-		//↑
+		//↑に移動
 		cursorInt = (cursorInt - 1 + maxCount) % maxCount;
 	}
 	if (input->kbTracker.pressed.Down || input->kbTracker.pressed.S)
 	{
 		//移動音
 		AudioManager::GetInstance()->Play("SE_Move", DEFAULT_SE_VOLUME);
-		//↓
+		//↓に移動
 		cursorInt = (cursorInt + 1) % maxCount;
 	}
 
@@ -134,9 +133,12 @@ void ResultScene::Render()
 	//-----------------------------------------
 	// モデルの動き
 	//-----------------------------------------
-	DirectX::SimpleMath::Vector3 scale(MODEL_SCALE);   //サイズ
-	DirectX::SimpleMath::Vector3 rotation(0.0f, 0.0f, 0.0f);//回転
-	DirectX::SimpleMath::Vector3 position(0.0f, 0.0f, 0.0f);//座標
+	//サイズ
+	DirectX::SimpleMath::Vector3 scale(MODEL_SCALE);
+	//回転
+	DirectX::SimpleMath::Vector3 rotation(0.0f, 0.0f, 0.0f);
+	//座標
+	DirectX::SimpleMath::Vector3 position(0.0f, 0.0f, 0.0f);
 
 	//プレイヤーが勝った時
 	if (GetUserResources()->IsGameClear())
@@ -300,8 +302,8 @@ void ResultScene::CreateDeviceDependentResources()
 	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Clear.png", nullptr, m_textureClear.GetAddressOf());
 	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Over.png",  nullptr, m_textureOver.GetAddressOf());
 	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Retry.png", nullptr, m_textureRetry.GetAddressOf());
-	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\選択画面.png",       nullptr, m_textureSelect.GetAddressOf());
-	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\タイトルに移動.png", nullptr, m_textureTitle.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Selection_Screen.png",       nullptr, m_textureSelect.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Title_Screen.png", nullptr, m_textureTitle.GetAddressOf());
 
 	//ボタンUIテクスチャ読み込み
 	DirectX::CreateWICTextureFromFile(device,L"Resources\\Textures\\ButtonUI1.png",nullptr,m_textureButtonUI.GetAddressOf());

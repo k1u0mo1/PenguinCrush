@@ -131,8 +131,8 @@ void EnemyManager::Update(
                     particle->Spawn(
                         Particle::Type::Explosion,
                         hitPos,
-                        ATTACK_HIT_EFFECT_COUNT,
-                        ATTACK_HIT_EFFECT_SIZE);
+                        HIT_EFFECT_COUNT,
+                        HIT_EFFECT_SIZE);
                 }
 
                 //Œø‰Ê‰¹

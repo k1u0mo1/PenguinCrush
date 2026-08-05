@@ -209,7 +209,12 @@
     <ClInclude Include="Game\Common\ReadData.h" />
     <ClInclude Include="Game\Common\StepTimer.h" />
     <ClInclude Include="Game\Common\TransitionMask.h" />
+    <ClInclude Include="Game\Effects\BaseParticleEmitter.h" />
     <ClInclude Include="Game\Effects\Particle.h" />
+    <ClInclude Include="Game\Effects\ParticleList\DashEmitter.h" />
+    <ClInclude Include="Game\Effects\ParticleList\ExplosionEmitter.h" />
+    <ClInclude Include="Game\Effects\ParticleList\HealEmitter.h" />
+    <ClInclude Include="Game\Effects\ParticleList\SplashEmitter.h" />
     <ClInclude Include="Game\Effects\Smoke.h" />
     <ClInclude Include="Game\EnemyList\BossEnemy.h" />
     <ClInclude Include="Game\EnemyList\EnemyAI.h" />
@@ -273,6 +278,10 @@
     <ClCompile Include="Game\Common\ObjectCharacter\ModelManager.cpp" />
     <ClCompile Include="Game\Common\TransitionMask.cpp" />
     <ClCompile Include="Game\Effects\Particle.cpp" />
+    <ClCompile Include="Game\Effects\ParticleList\DashEmitter.cpp" />
+    <ClCompile Include="Game\Effects\ParticleList\ExplosionEmitter.cpp" />
+    <ClCompile Include="Game\Effects\ParticleList\HealEmitter.cpp" />
+    <ClCompile Include="Game\Effects\ParticleList\SplashEmitter.cpp" />
     <ClCompile Include="Game\Effects\Smoke.cpp" />
     <ClCompile Include="Game\EnemyList\BossEnemy.cpp" />
     <ClCompile Include="Game\EnemyList\EnemyAI.cpp" />

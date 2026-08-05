@@ -76,7 +76,8 @@ void AudioManager::LoadSound(
 		std::string message = "FAILED to load sound file: ";
 		// wchar_t* を string に変換して表示するのは手間なので簡易表示
 		OutputDebugStringA(message.c_str());
-		OutputDebugStringW(filename); // ファイル名を表示
+		// ファイル名を表示
+		OutputDebugStringW(filename); 
 		OutputDebugStringA("\nPlease check the file path!\n");
 	}
 }

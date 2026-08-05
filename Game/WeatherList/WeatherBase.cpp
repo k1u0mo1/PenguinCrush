@@ -3,7 +3,7 @@
  * @file   WeatherBase.cpp
  * @brief  天候の親クラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/17
  */
 
 #include "pch.h"
@@ -48,9 +48,7 @@ void WeatherBase::Initialize(ID3D11Device* device)
 
 	//頂点バッファの作成
 	D3D11_BUFFER_DESC bd = { sizeof(Vertex) * MAX_PARTICLES, D3D11_USAGE_IMMUTABLE, D3D11_BIND_VERTEX_BUFFER, 0, 0, 0 };
-	
 	D3D11_SUBRESOURCE_DATA data = { vertices.data(), 0, 0 };
-	
 	device->CreateBuffer(&bd, &data, m_vertexBuffer.ReleaseAndGetAddressOf());
 }
 

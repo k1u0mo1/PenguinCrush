@@ -32,12 +32,43 @@ void GameUI::Initialize()
     //スプライトバッチと共通ステートの作成
     m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(context);
     m_states = std::make_unique<DirectX::CommonStates>(device);
-
+    
+    //バー
     DirectX::CreateWICTextureFromFile(
         device,
         TEX_PATH_WHITE,
         nullptr,
         m_texture.GetAddressOf()
+    );
+    //プレイヤーパラメータUI
+    DirectX::CreateWICTextureFromFile(
+        device,
+        TEX_PATH_PLAYER_FRAME,
+        nullptr,
+        m_texPlayerFrame.GetAddressOf()
+    );
+    //敵パラメータUI
+    DirectX::CreateWICTextureFromFile(
+        device,
+        TEX_PATH_ENEMY_FRAME,
+        nullptr,
+        m_texEnemyFrame.GetAddressOf()
+    );
+
+    //HPアイコン
+    DirectX::CreateWICTextureFromFile(
+        device,
+        TEX_PATH_HP_ICON,
+        nullptr,
+        m_texHPIcon.GetAddressOf()
+    );
+
+    //スタミナアイコン
+    DirectX::CreateWICTextureFromFile(
+        device,
+        TEX_PATH_STAMINA_ICON,
+        nullptr,
+        m_texStaminaIcon.GetAddressOf()
     );
 }
 
@@ -67,8 +98,12 @@ void GameUI::Render(Player* player, BossEnemy* boss)
         // スタミナ
         DirectX::SimpleMath::Vector2 stPos = { PLAYER_UI_X, screenHeight - PLAYER_STAMINA_BOTTOM_OFFSET };
         // ---------------------------------------------------
-        // プレイヤーのHPバー (画面左下)
+        // プレイヤーのHPバーとHPアイコン (画面左下)
         // ---------------------------------------------------
+        //HPアイコンの左の座標
+        DirectX::SimpleMath::Vector2 hpIconPos = { hpPos.x - ICON_HP_SIZE.x - ICON_MARGIN,hpPos.y };
+        DrawIcon(m_texHPIcon.Get(), hpIconPos, ICON_HP_SIZE);
+
         //背景（黒）
         DrawBar(
             hpPos,
@@ -86,10 +121,16 @@ void GameUI::Render(Player* player, BossEnemy* boss)
             DirectX::SimpleMath::Color(DirectX::Colors::Lime),
             PLAYER_HP_SIZE
         ); 
+        //枠を被せる
+        DrawFrame(m_texPlayerFrame.Get(), hpPos, PLAYER_HP_SIZE);
 
         // ---------------------------------------------------
         // プレイヤーのスタミナバー (画面左下)
         // ---------------------------------------------------
+        //スタミナアイコンの左の座標
+        DirectX::SimpleMath::Vector2 staminaIconPos = { stPos.x - ICON_STAMINA_SIZE.x - ICON_MARGIN,stPos.y };
+        DrawIcon(m_texStaminaIcon.Get(), staminaIconPos, ICON_STAMINA_SIZE);
+
         // スタミナ（黄色） - HPの下に表示する
         DrawBar(
             stPos,
@@ -105,11 +146,16 @@ void GameUI::Render(Player* player, BossEnemy* boss)
             DirectX::SimpleMath::Color(DirectX::Colors::Yellow),
             PLAYER_STAMINA_SIZE
         );
+
+        //枠を被せる
+        DrawFrame(m_texPlayerFrame.Get(), stPos, PLAYER_STAMINA_SIZE);
+
     }
 
     //---------------------------------------------------
     // ボスのHPバー (画面上部中央)
     //---------------------------------------------------
+    
     if (boss && !boss->IsDead())
     {
         //ボスの最大HPを渡す
@@ -119,6 +165,11 @@ void GameUI::Render(Player* player, BossEnemy* boss)
         RECT size = m_deviceResources->GetOutputSize();
         float centerX = (size.right - size.left) / 2.0f;
         DirectX::SimpleMath::Vector2 pos = { centerX - (BOSS_HP_SIZE.x/2.0f), BOSS_HP_Y}; // 中央から左にずらす
+
+        //スタミナアイコンの左の座標
+        DirectX::SimpleMath::Vector2 enemyHPPos = { pos.x - ICON_HP_SIZE.x - ICON_MARGIN,pos.y };
+        DrawIcon(m_texHPIcon.Get(), enemyHPPos, ICON_HP_SIZE);
+
 
         // 背景
         DrawBar(pos, 
@@ -134,6 +185,9 @@ void GameUI::Render(Player* player, BossEnemy* boss)
             DirectX::SimpleMath::Color(DirectX::Colors::Red),
             BOSS_HP_SIZE
         );
+
+        //枠を被せる
+        DrawFrame(m_texEnemyFrame.Get(), pos, BOSS_HP_SIZE);
     }
     // 描画終了
     m_spriteBatch->End();
@@ -178,5 +232,57 @@ void GameUI::DrawBar(
         destRect,
         nullptr, // ソース矩形（全体を使う）
         color
+    );
+}
+
+//----------------------------------------------------------
+// 指定された位置とサイズで枠を描画する内部関数
+//----------------------------------------------------------
+
+void GameUI::DrawFrame(
+    ID3D11ShaderResourceView* texture,
+    const DirectX::SimpleMath::Vector2& position,
+    const DirectX::SimpleMath::Vector2& scale)
+{
+    if (!texture)return;
+
+    RECT destRect = {
+        (LONG)position.x,
+        (LONG)position.y,
+        (LONG)(position.x + scale.x),
+        (LONG)(position.y + scale.y)
+    };
+
+    m_spriteBatch->Draw(
+        texture,
+        destRect,
+        nullptr,
+        DirectX::Colors::White
+    );
+}
+
+//----------------------------------------------------------
+// アイコン画像の描画
+//----------------------------------------------------------
+
+void GameUI::DrawIcon(
+    ID3D11ShaderResourceView* texture,
+    const DirectX::SimpleMath::Vector2& position,
+    const DirectX::SimpleMath::Vector2& scale)
+{
+    if (!texture)return;
+
+    RECT destRect = {
+        (LONG)position.x,
+        (LONG)position.y,
+        (LONG)(position.x + scale.x),
+        (LONG)(position.y + scale.y)
+    };
+
+    m_spriteBatch->Draw(
+        texture,
+        destRect,
+        nullptr,
+        DirectX::Colors::White
     );
 }

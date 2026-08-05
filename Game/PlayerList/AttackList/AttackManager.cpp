@@ -146,7 +146,7 @@ void AttackManager::Update(
 				}
 				// ラッシュ（RushP）だった場合
 				else if (RushP* rushAtk = dynamic_cast<RushP*>(atk.get()))
-				{
+				{ 
 					//種類
 					type = PlayerAttackType::Rush;
 					//音

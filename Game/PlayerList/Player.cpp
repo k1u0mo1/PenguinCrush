@@ -3,7 +3,7 @@
  * @file   Player.cpp
  * @brief  プレイヤーキャラクターの制御・パラメータ管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/17
  */
 
 #include "pch.h"
@@ -42,8 +42,10 @@ Player::~Player()
 //-----------------------------------------------------------------
 
 void Player::Initialize(
-    HWND /*hwnd*/, int width, int height, Stage* stage)
+    HWND hwnd, int width, int height, Stage* stage)
 {
+    UNREFERENCED_PARAMETER(hwnd);
+
     CreateDeviceResources();
     CreateWindowSizeResources(width, height);
 
@@ -100,9 +102,11 @@ void Player::Update(
     const DirectX::Mouse::State& mouse,
     const DirectX::Mouse::ButtonStateTracker& mouseTracker,
     Stage* stage,
-    WaveManager* /*waveManager*/,
+    WaveManager* waveManager,
     Particle* particle)
 {
+    UNREFERENCED_PARAMETER(waveManager);
+
     if (!stage) return;
 
     CheckAndHandleFalling(stage, particle);
@@ -122,6 +126,7 @@ void Player::Update(
     //ふらつき中ならエフェクトを回転させる
     if (m_state == PlayerState::Dizzy)
     {
+        //ふらつきのエフェクトの現在の回転角度
         m_dizzyRotationY += DIZZY_EFFECT_ROT_SPEED * elapsedTime;
     }
 
@@ -192,8 +197,8 @@ void Player::Update(
 //-----------------------------------------------------------------
 
 void Player::Render(ID3D11DeviceContext* context,
-    DirectX::SimpleMath::Matrix& view,
-    DirectX::SimpleMath::Matrix& proj,
+    const DirectX::SimpleMath::Matrix& view,
+    const DirectX::SimpleMath::Matrix& proj,
     ShadowRenderer* shadowRenderer)
 {
     if (!m_renderer) return;
@@ -328,7 +333,7 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
     // 入力に基づく「出したい速度」を計算
     DirectX::SimpleMath::Vector3 targetVelocity = DirectX::SimpleMath::Vector3::Zero;
 
-    if (kb.W /*||kb.A || kb.D*/)
+    if (kb.W)
     {
         //走っているか？
         float currentSpeed = m_isDashing ? DASH_SPEED : MOVE_SPEED;
@@ -376,10 +381,13 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
         //ダッシュ中は足場の傾きの慣性を外す
         m_slideBehavior.Update(m_position, DirectX::SimpleMath::Vector3::Zero, slideDir, elapsedTime);
     }
+    //通常移動中
     else
     {
-        //通常は足場の傾きを付ける
+
+        //足場の傾きを付ける
         m_slideBehavior.Update(m_position, targetVelocity, slideDir, elapsedTime);
+
     }
 }
 
@@ -389,10 +397,12 @@ void Player::HandleMovement(float elapsedTime, Stage* stage, Particle* particle)
 
 void Player::HandleAttack(
     float elapsedTime,
-    const DirectX::Mouse::State& /*mouse*/,
+    const DirectX::Mouse::State& mouse,
     const DirectX::Mouse::ButtonStateTracker& mouseTracker,
     const DirectX::Keyboard::State& kb)
 {
+    UNREFERENCED_PARAMETER(mouse);
+
     //ふらつき中は攻撃できない
     if (m_state == PlayerState::Dizzy) return;
 
@@ -524,21 +534,21 @@ void Player::CreateDeviceResources()
     //効果音のロード
     //------------------------------------------------------
     //攻撃関連
-    AudioManager::GetInstance()->LoadSound("Attack", L"Resources/Sounds/P_近距離攻撃.wav");
-    AudioManager::GetInstance()->LoadSound("Dash", L"Resources/Sounds/P_突進攻撃.wav");
-    AudioManager::GetInstance()->LoadSound("Bullet", L"Resources/Sounds/P_E_遠距離攻撃.wav");
-
+    AudioManager::GetInstance()->LoadSound("Attack", L"Resources/Sounds/P_Close-Range_Attack.wav");
+    AudioManager::GetInstance()->LoadSound("Dash", L"Resources/Sounds/P_Charge_Attack.wav");
     //その他
-    AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/P_E_落水.wav");
-    AudioManager::GetInstance()->LoadSound("Heal", L"Resources/Sounds/SE_回復.wav");
+    AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/SE_Falling_Water.wav");
+    AudioManager::GetInstance()->LoadSound("Heal", L"Resources/Sounds/SE_Heal.wav");
 }
 
 //----------------------------------------------------------
 // 画面リソース
 //----------------------------------------------------------
 
-void Player::CreateWindowSizeResources(int /*width*/, int /*height*/)
+void Player::CreateWindowSizeResources(int width, int height)
 {
+    UNREFERENCED_PARAMETER(width);
+    UNREFERENCED_PARAMETER(height);
 }
 
 //----------------------------------------------------------

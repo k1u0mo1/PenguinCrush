@@ -215,24 +215,22 @@ void Game::Clear()
 // Message handlers
 void Game::OnActivated()
 {
-    // TODO: Game is becoming active window.
+    
 }
 
 void Game::OnDeactivated()
 {
-    // TODO: Game is becoming background window.
+    
 }
 
 void Game::OnSuspending()
 {
-    // TODO: Game is being power-suspended (or minimized).
+    
 }
 
 void Game::OnResuming()
 {
     m_timer.ResetElapsedTime();
-
-    // TODO: Game is being power-resumed (or returning from minimize).
 }
 
 void Game::OnWindowMoved()
@@ -274,7 +272,6 @@ void Game::OnWindowSizeChanged(int width, int height)
 
     CreateWindowSizeDependentResources();
 
-    // TODO: Game window is being resized.
 }
 
 // Properties
@@ -291,8 +288,6 @@ void Game::CreateDeviceDependentResources()
 {
     auto device = m_deviceResources->GetD3DDevice();
     auto context = m_deviceResources->GetD3DDeviceContext();
-
-    // TODO: Initialize device dependent objects here (independent of window size).
     device;
 
     //////////////////////////////////////////////////////

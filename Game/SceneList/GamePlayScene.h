@@ -3,7 +3,7 @@
  * @file   GamePlayScene.h
  * @brief  ゲーム画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/06/29
+ * @date   2026/07/29
  */
 
 #pragma once
@@ -172,7 +172,6 @@ private:
 
 	//ビュー行列
 	DirectX::SimpleMath::Matrix m_view;
-
 	//射影行列
 	DirectX::SimpleMath::Matrix m_proj;
 

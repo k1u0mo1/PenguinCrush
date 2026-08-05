@@ -48,9 +48,11 @@ Stage::~Stage()
 //----------------------------------------------------------
 
 void Stage::Initialize(
-    HWND /*window*/, int width, int height,
+    HWND window, int width, int height,
     const std::string& mapFilename)
 {
+    UNREFERENCED_PARAMETER(window);
+
     CreateDeviceResources();
     CreateWindowSizeResources(width, height);
 
@@ -223,8 +225,11 @@ bool Stage::IsInside(float x, float z) const
 // 現在のステージの傾きに基づいて、プレイヤー等が滑る方向を取得
 //----------------------------------------------------------
 
-DirectX::SimpleMath::Vector3 Stage::GetSlideDirection(float /*x*/, float /*z*/) const
+DirectX::SimpleMath::Vector3 Stage::GetSlideDirection(float x, float z) const
 {
+    UNREFERENCED_PARAMETER(x);
+    UNREFERENCED_PARAMETER(z);
+
     //個別の流氷
     for (const auto& floe : m_iceFloes)
     {
@@ -369,9 +374,11 @@ void Stage::CreateDeviceResources()
 // 画面リソース
 //----------------------------------------------------------
 
-void Stage::CreateWindowSizeResources(int /*width*/, int /*height*/)
+void Stage::CreateWindowSizeResources(int width, int height)
 {
-    // Optional: implement view-dependent resources
+    UNREFERENCED_PARAMETER(width);
+    UNREFERENCED_PARAMETER(height);
+
     // 画面サイズの取得
     RECT rect = m_deviceResources->GetOutputSize();
 
@@ -476,10 +483,12 @@ void Stage::Update(float elapsedTime, WaveManager* waveManager)
 void Stage::Render(
     ID3D11DeviceContext* context,
     const DirectX::SimpleMath::Matrix& view,
-    const DirectX::SimpleMath::Matrix& /*proj*/,
+    const DirectX::SimpleMath::Matrix& proj,
     DisplayCollision* displayCollision
 )
 {
+    UNREFERENCED_PARAMETER(proj);
+
     //光の描画
     m_stageModel->UpdateEffects([&](DirectX::IEffect* effect)
     {

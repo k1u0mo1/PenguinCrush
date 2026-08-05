@@ -3,7 +3,7 @@
  * @file   Player.h
  * @brief  プレイヤーキャラクターの制御・パラメータ管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/06
+ * @date   2026/07/17
  */
 
 #pragma once
@@ -167,8 +167,8 @@ public:
     /// <param name="proj">プロジェクション行列</param>
     /// <param name="shadowRenderer">影のポインタ</param>
     void Render(ID3D11DeviceContext* context,
-        DirectX::SimpleMath::Matrix& view,
-        DirectX::SimpleMath::Matrix& proj,
+        const DirectX::SimpleMath::Matrix& view,
+        const DirectX::SimpleMath::Matrix& proj,
         ShadowRenderer* shadowRenderer
     );
 
@@ -183,27 +183,6 @@ public:
     /// </summary>
     /// <returns>m_stage</returns>
     const Stage* GetStage() const { return m_stage; }
-
-    /// <summary>
-    /// プレイヤーが突進中かどうか
-    /// </summary>
-    /// <returns>突進中　true　突進していない　false</returns>
-    bool IsDashing() const { return m_isDashing; }
-
-    //-----------------------------------------------------------
-
-    /// <summary>
-    /// リソース
-    /// </summary>
-    void CreateDeviceResources();
-
-    /// <summary>
-    /// 画面リソース
-    /// </summary>
-    /// <param name="width">画面の幅</param>
-    /// <param name="height">画面の高さ</param>
-    void CreateWindowSizeResources(int width, int height);
-    //-----------------------------------------------------------
 
     /// <summary>
     /// プレイヤーの正面方向ベクトルを取得
@@ -230,14 +209,6 @@ public:
     std::shared_ptr<DisplayCollision> GetDisplayCollision() const { return m_displayCollision; }
 
     /// <summary>
-    /// プレイヤーに外部からノックバック
-    /// 敵ー＞プレイヤー
-    /// </summary>
-    /// <param name="direction">吹き飛ぶ方向</param>
-    /// <param name="power">吹き飛ぶ力の強さ</param>
-    void ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float power);
-
-    /// <summary>
     /// 現在のプレイヤーの移動速度を計算して取得
     /// </summary>
     /// <returns>移動速度</returns>
@@ -256,7 +227,7 @@ public:
     /// </summary>
     /// <returns>現在のスタミナ</returns>
     float GetStamina() const { return m_stats.stamina; }
-   
+
     /// <summary>
     /// 最大のスタミナを取得
     /// </summary>
@@ -264,12 +235,6 @@ public:
     float GetMaxStamina() const { return m_stats.stamina_Max; }
 
     //-------------------------------------------------
-
-    /// <summary>
-    /// プレイヤーの体力を回復
-    /// </summary>
-    /// <param name="amount">回復する量</param>
-    void Heal(float amount) { m_stats.Heal(amount); }
 
     /// <summary>
     /// 魚の当たり判定
@@ -295,6 +260,41 @@ public:
     /// <param name="pos">設定するワールド座標</param>
     void SetPosition(const DirectX::SimpleMath::Vector3& pos) { m_position = pos; }
 
+    /// <summary>
+    /// プレイヤーが突進中かどうか
+    /// </summary>
+    /// <returns>突進中　true　突進していない　false</returns>
+    bool IsDashing() const { return m_isDashing; }
+
+    //-----------------------------------------------------------
+
+    /// <summary>
+    /// リソース
+    /// </summary>
+    void CreateDeviceResources();
+
+    /// <summary>
+    /// 画面リソース
+    /// </summary>
+    /// <param name="width">画面の幅</param>
+    /// <param name="height">画面の高さ</param>
+    void CreateWindowSizeResources(int width, int height);
+    //-----------------------------------------------------------
+
+    /// <summary>
+    /// プレイヤーに外部からノックバック
+    /// 敵ー＞プレイヤー
+    /// </summary>
+    /// <param name="direction">吹き飛ぶ方向</param>
+    /// <param name="power">吹き飛ぶ力の強さ</param>
+    void ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float power);
+
+    /// <summary>
+    /// プレイヤーの体力を回復
+    /// </summary>
+    /// <param name="amount">回復する量</param>
+    void Heal(float amount) { m_stats.Heal(amount); }
+    
     /// <summary>
     /// プレイヤーの移動、ダッシュ、慣性、地形に沿った高さ補正の処理
     /// </summary>
@@ -403,6 +403,7 @@ private:
     
     //ふらつきエフェクトの現在の回転角度
     float m_dizzyRotationY = 0.0f;
+
 private:
 
     //影用のプリミティブ　板

@@ -184,8 +184,6 @@ void DisplayCollision::DrawCollisionModel(
 			context->IASetVertexBuffers(1, 1, m_instancedVB.GetAddressOf(), &stride, &offset);
 		}
 	);
-
-	
 }
 
 #ifdef _COLLISION_LINE_ON

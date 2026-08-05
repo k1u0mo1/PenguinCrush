@@ -3,7 +3,7 @@
  * @file   Particle.h
  * @brief  シェーダ用エフェクトのパーティクル管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/15
  */
 
 #pragma once
@@ -17,7 +17,15 @@
 #include <CommonStates.h>
 #include <vector>
 #include <algorithm>
+#include <memory>
+#include <functional>
+#include <unordered_map>
 
+#include "BaseParticleEmitter.h"
+
+/// <summary>
+/// シェーダ用エフェクトのパーティクル管理
+/// </summary>
 class Particle
 {
 public:
@@ -30,26 +38,10 @@ public:
 		//攻撃が当たった時の爆発
 		Explosion,
 		//ダッシュ中の後ろから線
-		Dash
+		Dash,
+		//回復
+		Heal
 	};
-
-    // パーティクル1粒の情報
-    struct ParticleInfo
-    {
-        //位置
-        DirectX::SimpleMath::Vector3 Position = DirectX::SimpleMath::Vector3::Zero;
-        //速度
-        DirectX::SimpleMath::Vector3 Velocity = DirectX::SimpleMath::Vector3::Zero;
-        //色
-        DirectX::SimpleMath::Vector4 Color = DirectX::SimpleMath::Vector4::One;
-
-        //経過時間
-		float Age ;
-        //寿命
-        float Lifetime;
-        //サイズ
-        float Size;
-    };
 
 	/// <summary>
 	/// シェーダに渡す定数バッファ用構造体
@@ -67,79 +59,6 @@ public:
 		//時間パラメータ
 		DirectX::SimpleMath::Vector4	time;
 	};
-
-	/// <summary>
-	/// パラメータの構造体
-	/// </summary>
-	struct EffectParam
-	{
-		//色
-		DirectX::SimpleMath::Vector4 color;
-		//座標
-		float posOffset;
-		//速度　最小
-		float speedMin;
-		//速度　最大
-		float speedMax;
-		//半径　最小
-		float radiusMin;
-		//半径　最大
-		float radiusMax;
-		//生存時間　最小
-		float lifetimeMin;
-		//生存時間　最大
-		float lifetimeMax;
-	};
-
-private:
-
-	//水しぶき　各エフェクトのパラメータを定理
-	static constexpr EffectParam PARAM_SPLASH =
-	{ 
-		//color
-		{ 0.8f, 0.9f, 1.0f, 1.0f },
-		//posOffset
-		0.5f,
-		//speed Min/Max
-		5.0f, 30.0f,
-		//radius Min/Max
-		0.0f, 5.0f,
-		//lifetime Min/Max
-		0.5f, 3.0f
-	};
-
-	//爆発　各エフェクトのパラメータを定理
-	static constexpr EffectParam PARAM_EXPLOSION =
-	{
-		//color
-		{ 1.0f, 0.5f, 0.2f, 1.0f },
-		//posOffset
-		0.5f,
-		//speed Min/Max
-		5.0f, 10.0f,
-		//radius Min/Max
-		0.0f, 6.0f,
-		//lifetime Min/Max
-		0.5f, 3.0f
-	};
-
-	//ダッシュ(突進)　各エフェクトのパラメータを定理
-	static constexpr EffectParam PARAM_DASH = 
-	{
-		//color
-		{ 1.0f, 1.0f, 1.0f, 0.0f },
-		//posOffset
-		0.3f,
-		//speed Min/Max
-		1.0f, 2.0f,
-		//radius Min/Max
-		0.0f, 1.0f,
-		//lifetime Min/Max
-		0.5f, 3.0f
-	};
-
-	//重力
-	static constexpr float GRAVITY = -19.6f;
 
 public:
 
@@ -171,7 +90,7 @@ public:
 	/// <summary>
 	/// パーティクルの移動・寿命計算などの更新処理
 	/// </summary>
-	/// <param name="elapsedTime">ステップタイマー</param>
+	/// <param name="elapsedTime">前フレームからの経過時間/param>
 	void Update(float elapsedTime);
 
 	/// <summary>
@@ -225,15 +144,11 @@ private:
 	DirectX::SimpleMath::Matrix m_view;
 	DirectX::SimpleMath::Matrix m_proj;
 
-	//パーティクルのリスト 要らないかも
-	std::vector<ParticleInfo> m_particles;
 
-	//パーティクル関係
-	//水しぶき用
-	std::vector<ParticleInfo> m_splashList;
-	//攻撃が当たったあとの爆発
-	std::vector<ParticleInfo> m_explosionList;
-	//ダッシュ中の線
-	std::vector<ParticleInfo> m_dashList;
+	//実行中の全てのエフェクトを管理するリスト
+	std::vector<std::unique_ptr<BaseParticleEmitter>> m_emitters;
+	//Typeをキーにしてエミッターを生成する関数を返す
+	using CreatorFunc = std::function<std::unique_ptr<BaseParticleEmitter>(DirectX::SimpleMath::Vector3, int)>;
+	std::unordered_map<Type, CreatorFunc> m_creatorMap;
 };
 

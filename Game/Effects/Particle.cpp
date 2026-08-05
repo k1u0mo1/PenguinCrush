@@ -3,7 +3,7 @@
  * @file   Particle.cpp
  * @brief  シェーダ用エフェクトのパーティクル管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/29
  */
 
 #include "pch.h"
@@ -18,6 +18,11 @@
 #include <CommonStates.h>
 #include <vector>
 #include <algorithm>
+
+#include "Game/Effects/ParticleList/SplashEmitter.h"
+#include "Game/Effects/ParticleList/ExplosionEmitter.h"
+#include "Game/Effects/ParticleList/DashEmitter.h"
+#include "Game/Effects/ParticleList/HealEmitter.h"
 
 //----------------------------------------------------------
 // 頂点シェーダへ渡す頂点データの入力レイアウト定義
@@ -38,6 +43,23 @@ Particle::Particle()
 	: 
 	m_pDR(nullptr)
 {
+	//初期化時に生成ルールを辞書に登録
+	//水しぶき
+	m_creatorMap[Type::Splash] = [](auto pos, auto count) {
+		return std::make_unique<SplashEmitter>(pos, count);
+		};
+	//爆発
+	m_creatorMap[Type::Explosion] = [](auto pos, auto count) {
+		return std::make_unique<ExplosionEmitter>(pos, count);
+		};
+	//ダッシュの煙
+	m_creatorMap[Type::Dash] = [](auto pos, auto count) {
+		return std::make_unique<DashEmitter>(pos, count);
+		};
+	//回復
+	m_creatorMap[Type::Heal] = [](auto pos, auto count) {
+		return std::make_unique<HealEmitter>(pos, count);
+		};
 }
 
 //----------------------------------------------------------
@@ -78,22 +100,13 @@ void Particle::Initialize(DX::DeviceResources* pDR)
 	CreateShader();
 
 	//画像の読み込み まだない
-	LoadTexture(L"Resources/Textures/White.png");
-	//LoadTexture(L"Resources/Textures/floor.png");
-
+	LoadTexture(L"Resources/Textures/White.png");  //０番目画像
+	LoadTexture(L"Resources/Textures/Heal.png");   //１番目画像
+	
 	//プリミティブバッチの作成
 	m_batch = std::make_unique<DirectX::PrimitiveBatch<DirectX::VertexPositionColorTexture>>(pDR->GetD3DDeviceContext());
 
 	m_states = std::make_unique<DirectX::CommonStates>(device);
-}
-
-//----------------------------------------------------------
-// ランダムヘルパー (簡易的なもの)
-//----------------------------------------------------------
-
-static float GetRandom(float min, float max)
-{
-	return min + (float)rand() / RAND_MAX * (max - min);
 }
 
 //----------------------------------------------------------
@@ -102,71 +115,16 @@ static float GetRandom(float min, float max)
 
 void Particle::Update(float elapsedTime)
 {
-	//------------------------------------
-	// 水しぶき更新
-	//------------------------------------
-
-	for (auto& p : m_splashList)
+	//全てのエミッターを更新
+	for (auto& emitter : m_emitters)
 	{
-		//速度に重力を加算
-		p.Velocity.y += GRAVITY * elapsedTime;
-
-		//位置を更新
-		p.Position += p.Velocity * elapsedTime;
-
-		//年齢を加算
-		p.Age += elapsedTime;
+		emitter->Update(elapsedTime);
 	}
-
-	// 寿命切れのパーティクルを削除
-	m_splashList.erase(
-		std::remove_if(m_splashList.begin(), m_splashList.end(),
-			[](const ParticleInfo& p) { return p.Age >= p.Lifetime; }),
-		m_splashList.end());
-
-	//------------------------------------
-	// 爆発更新
-	//------------------------------------
-
-	for (auto& p : m_explosionList)
-	{
-		// 速度に重力を加算
-		p.Velocity.y += GRAVITY * elapsedTime;
-
-		// 位置を更新
-		p.Position += p.Velocity * elapsedTime;
-
-		// 年齢を加算
-		p.Age += elapsedTime;
-	}
-
-	// 寿命切れのパーティクルを削除
-	m_explosionList.erase(
-		std::remove_if(m_explosionList.begin(), m_explosionList.end(),
-			[](const ParticleInfo& p) { return p.Age >= p.Lifetime; }),
-		m_explosionList.end());
-
-	//------------------------------------
-	// ダッシュ中の更新
-	//------------------------------------
-
-	for (auto& p : m_dashList)
-	{
-		// 速度に重力を加算
-		p.Velocity.y += GRAVITY * elapsedTime;
-
-		// 位置を更新
-		p.Position += p.Velocity * elapsedTime;
-
-		// 年齢を加算
-		p.Age += elapsedTime;
-	}
-
-	// 寿命切れのパーティクルを削除
-	m_dashList.erase(
-		std::remove_if(m_dashList.begin(), m_dashList.end(),
-			[](const ParticleInfo& p) { return p.Age >= p.Lifetime; }),
-		m_dashList.end());
+	//終了したエミッターを管理者から削除
+	m_emitters.erase(
+		std::remove_if(m_emitters.begin(), m_emitters.end(),
+			[](const std::unique_ptr<BaseParticleEmitter>& e) {return e->Isdead(); }),
+		m_emitters.end());
 }
 
 //----------------------------------------------------------
@@ -179,49 +137,13 @@ void Particle::Spawn(
 	int count,
 	float size)
 {
-	//count分ループ
-	for (int i = 0; i < count; i++)
+	UNREFERENCED_PARAMETER(size);
+
+	//辞書にTypeが登録されているかを確認して、リストに追加する
+	if (m_creatorMap.count(type))
 	{
-		//パーティクルの粒のやつ
-		ParticleInfo p;
-		p.Position = position;
-		p.Age = 0.0f;
-		p.Size = size;
-
-		//選択されたタイプに応じたパラメータの参照を受け取る
-		const EffectParam& param = 
-			(type == Type::Splash)    ? PARAM_SPLASH :
-			(type == Type::Explosion) ? PARAM_EXPLOSION : PARAM_DASH;
-
-		//共通の計算処理
-		//色
-		p.Color = param.color;
-		//発生座標
-		p.Position.x += GetRandom(-param.posOffset, param.posOffset);
-		p.Position.z += GetRandom(-param.posOffset, param.posOffset);
-
-		//速度
-		float speed = GetRandom(param.speedMin, param.speedMax);
-		//角度
-		float angle = GetRandom(0.0f, DirectX::XM_2PI);
-		//半径
-		float radius = GetRandom(param.radiusMin, param.radiusMax);
-
-		//速度計算
-		p.Velocity.x = cos(angle) * radius;
-		p.Velocity.y = speed;
-		p.Velocity.z = sin(angle) * radius;
-
-		//発生時間のランダム
-		p.Lifetime = GetRandom(param.lifetimeMin, param.lifetimeMax);
-
-		if (type == Type::Splash) m_splashList.push_back(p);
-		else if (type == Type::Explosion)m_explosionList.push_back(p);
-		else m_dashList.push_back(p);
-
-		
+		m_emitters.push_back(m_creatorMap[type](position, count));
 	}
-
 }
 
 //----------------------------------------------------------
@@ -266,7 +188,7 @@ void Particle::Render(DirectX::SimpleMath::Matrix view, DirectX::SimpleMath::Mat
 	context->OMSetBlendState(blendstate, nullptr, 0xFFFFFFFF);
 
 	//深度バッファに書き込み参照する
-	context->OMSetDepthStencilState(m_states->DepthDefault(), 0);
+	context->OMSetDepthStencilState(m_states->DepthRead(), 0);
 
 	//カリングは左周り
 	context->RSSetState(m_states->CullNone());
@@ -276,49 +198,35 @@ void Particle::Render(DirectX::SimpleMath::Matrix view, DirectX::SimpleMath::Mat
 	context->GSSetShader(m_geometryShader.Get(), nullptr, 0);
 	context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
-	//ピクセルシェーダにテクスチャを登録する。
-	for (int i = 0; i < m_texture.size(); i++)
-	{
-		context->PSSetShaderResources(i, 1, m_texture[i].GetAddressOf());
-	}
+	////ピクセルシェーダにテクスチャを登録する。
+	//for (int i = 0; i < m_texture.size(); i++)
+	//{
+	//	context->PSSetShaderResources(i, 1, m_texture[i].GetAddressOf());
+	//}
 
 	//インプットレイアウトの登録
 	context->IASetInputLayout(m_inputLayout.Get());
 
 	//板ポリゴンを描画
-	m_batch->Begin();
+	//m_batch->Begin();
 	
-	// エフェクト描画用
-	auto DrawParticleList = [&](const std::vector<ParticleInfo>& list)
+	//エミッターごとに画像をセットし描画をする
+	for (auto& emitter : m_emitters)
+	{
+		//指定したテクスチャの番号を取得
+		int texIndex = emitter->GetTextureUndex();
+
+		if (texIndex >= 0 && texIndex < static_cast<int>(m_texture.size()))
 		{
-			for (const auto& p : list)
-			{
-				float ratio = p.Age / p.Lifetime;
-				float alpha = 1.0f - ratio;
-				if (alpha < 0.0f) alpha = 0.0f;
+			context->PSSetShaderResources(0, 1, m_texture[texIndex].GetAddressOf());
+		}
 
-				DirectX::SimpleMath::Vector4 color = p.Color;
-				color.w = alpha;
+		m_batch->Begin();
+		emitter->Render(m_batch.get());
+		m_batch->End();
+	}
 
-				DirectX::VertexPositionColorTexture v(
-					p.Position,
-					color,
-					DirectX::SimpleMath::Vector2(p.Size, 0.0f)
-				);
-
-				// 描画
-				m_batch->Draw(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST, &v, 1);
-			}
-		};
-
-	// 水しぶきを描画
-	DrawParticleList(m_splashList);
-	// 爆発を描画
-	DrawParticleList(m_explosionList);
-	// ダッシュ中を描画
-	DrawParticleList(m_dashList);
-
-	m_batch->End();
+	//m_batch->End();
 
 	//	シェーダの登録を解除しておく
 	context->VSSetShader(nullptr, nullptr, 0);

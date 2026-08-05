@@ -3,7 +3,7 @@
  * @file   Wave.h
  * @brief  水面の波を動的に生成・描画し、物理的な高さや傾きを提供するギミッククラス
  * @author 國田知睦
- * @date   2026/07/06
+ * @date   2026/07/16
  */
 
 #include "pch.h"
@@ -25,8 +25,10 @@ Wave::Wave(DX::DeviceResources* deviceResources)
 // 波の初期化
 //----------------------------------------------------------
 
-void Wave::Initialize(HWND /*hwnd*/, int width, int height)
+void Wave::Initialize(HWND hwnd, int width, int height)
 {
+    UNREFERENCED_PARAMETER(hwnd);
+
     CreateDeviceResources();
     CreateWindowSizeResources(width, height);
 }
@@ -259,9 +261,12 @@ void Wave::CreateDeviceResources()
 // 画面リソース
 //----------------------------------------------------------
 
-void Wave::CreateWindowSizeResources(int /*width*/, int /*height*/)
+void Wave::CreateWindowSizeResources(int width, int height)
 {
-    // // 画面サイズの取得
+    UNREFERENCED_PARAMETER(width);
+    UNREFERENCED_PARAMETER(height);
+
+    // 画面サイズの取得
     RECT rect = m_deviceResources->GetOutputSize();
 
     // 射影行列の作成

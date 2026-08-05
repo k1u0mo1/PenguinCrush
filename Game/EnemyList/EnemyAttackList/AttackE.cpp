@@ -3,7 +3,7 @@
  * @file   Attack.cpp
  * @brief  ìGÇÃãﬂãóó£çUåÇÉNÉâÉX
  * @author ö†ìcímñr
- * @date   2026/07/01
+ * @date   2026/07/16
  */
 
 #include "pch.h"
@@ -78,10 +78,14 @@ void AttackE::Update(float deltaTime)
 //----------------------------------------------------------
 
 void AttackE::Render(
-	ID3D11DeviceContext* /*context*/,
-	const DirectX::SimpleMath::Matrix& /*view*/,
-	const DirectX::SimpleMath::Matrix& /*proj*/)
+	ID3D11DeviceContext* context,
+	const DirectX::SimpleMath::Matrix& view,
+	const DirectX::SimpleMath::Matrix& proj)
 {
+	UNREFERENCED_PARAMETER(context);
+	UNREFERENCED_PARAMETER(view);
+	UNREFERENCED_PARAMETER(proj);
+
 	if (!m_attackModel)return;
 
 	DirectX::SimpleMath::Matrix world =

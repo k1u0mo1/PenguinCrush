@@ -3,7 +3,7 @@
  * @file   Rain.cpp
  * @brief  天候(雨)のクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/16
  */
 
 #include "pch.h"
@@ -48,7 +48,11 @@ void Rain::Initialize(ID3D11Device* device)
 // 描画（オーバーライド）
 //----------------------------------------------------------
 
-void Rain::Render(ID3D11DeviceContext* context, const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& proj, const DirectX::SimpleMath::Vector3& camPos)
+void Rain::Render(
+    ID3D11DeviceContext* context,
+    const DirectX::SimpleMath::Matrix& view,
+    const DirectX::SimpleMath::Matrix& proj,
+    const DirectX::SimpleMath::Vector3& camPos)
 {
     //定数バッファの更新
     CBWeather cb;
@@ -75,20 +79,20 @@ void Rain::Render(ID3D11DeviceContext* context, const DirectX::SimpleMath::Matri
     context->VSSetConstantBuffers(0, 1, m_constBuffer.GetAddressOf());
     context->GSSetConstantBuffers(0, 1, m_constBuffer.GetAddressOf());
 
-    // 雨専用の設定
+    //雨専用の設定
     context->IASetInputLayout(m_layout.Get());
     context->VSSetShader(m_vs.Get(), nullptr, 0);
     context->GSSetShader(m_gs.Get(), nullptr, 0);
     context->PSSetShader(m_ps.Get(), nullptr, 0);
 
-    // ブレンドステート
+    //ブレンドステート
     context->OMSetBlendState(m_states->NonPremultiplied(), nullptr, 0xFFFFFFFF);
     context->OMSetDepthStencilState(m_states->DepthRead(), 0);
     context->RSSetState(m_states->CullNone());
 
-    // 描画
+    //描画
     context->Draw(RAIN_PARTICLE_COUNT, 0);
 
-    // 後片付け
+    //後片付け
     context->GSSetShader(nullptr, nullptr, 0);
 }

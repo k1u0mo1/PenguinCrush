@@ -52,13 +52,13 @@ public:
 	/// 衝突判定の中心座標を取得
 	/// </summary>
 	/// <returns>中心座標を示すベクトルへの参照</returns>
-	const DirectX::SimpleMath::Vector3& GetCenter() const;
+	DirectX::SimpleMath::Vector3 GetCenter() const;
 
 	/// <summary>
 	/// 衝突判定の各軸方向のサイズ（Extents / 半幅）を取得
 	/// </summary>
 	/// <returns>サイズを示すベクトルへの参照</returns>
-	const DirectX::SimpleMath::Vector3& GetExtents() const;
+	DirectX::SimpleMath::Vector3 GetExtents() const;
 
 private:
 

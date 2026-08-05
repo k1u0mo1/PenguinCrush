@@ -3,15 +3,12 @@
  * @file   TransitionMask.cpp
  * @brief  シーン切り替えの管理を行うクラス
  * @author 國田知睦
- * @date   2026/06/08
+ * @date   2026/07/16
  */
-
 
 #include "pch.h"
 #include "TransitionMask.h"
 #include "ReadData.h"
-
-using namespace DirectX;
 
 //-----------------------------------------------------------------
 // トランジションマスクを初期化
@@ -21,13 +18,14 @@ TransitionMask::TransitionMask(
 	ID3D11Device* device,
 	ID3D11DeviceContext* context, 
 	float interval)
-	: m_interval(interval)
-	, m_rate(0.0f)
-	, m_open(true)
-	, m_request()
+	:
+	m_interval(interval),
+	m_rate(0.0f),
+	m_open(true),
+	m_request()
 {
 	//スプライトバッチの作成
-	m_spriteBatch = std::make_unique<SpriteBatch>(context);
+	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(context);
 
 	{
 		D3D11_TEXTURE2D_DESC desc = {};
@@ -65,7 +63,7 @@ TransitionMask::TransitionMask(
 	 
 	//マスク用テクスチャの作成
 	DX::ThrowIfFailed(
-		CreateDDSTextureFromFile
+		DirectX::CreateDDSTextureFromFile
 		(
 			device,
 			L"Resources/Textures/FadeMask.dds",
@@ -128,7 +126,7 @@ void TransitionMask::Draw(
 	context->Unmap(m_constantBuffer.Get(), 0);
 
 	m_spriteBatch->Begin(
-		SpriteSortMode_Immediate,
+		DirectX::SpriteSortMode_Immediate,
 		states->NonPremultiplied(),
 		nullptr,
 		nullptr,

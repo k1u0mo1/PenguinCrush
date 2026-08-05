@@ -3,7 +3,7 @@
  * @file   ShadowRenderer.cpp
  * @brief  ゲーム全体のキャラクターやオブジェクトの丸影を描画するクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/16
  */
 
 #include "pch.h"
@@ -24,9 +24,11 @@ struct VertexData
 
 ShadowRenderer::ShadowRenderer(
 	ID3D11Device* device,
-	ID3D11DeviceContext* /*context*/
+	ID3D11DeviceContext* context
 )
 {
+	UNREFERENCED_PARAMETER(context);
+
 	//-------------------------------------------------------
 	//影用テクスチャの読み込み 
 	//-------------------------------------------------------

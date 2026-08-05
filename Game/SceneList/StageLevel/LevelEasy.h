@@ -3,7 +3,7 @@
  * @file   LevelEasy.h
  * @brief  イージーステージの管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/16
  */
 
 #pragma once
@@ -47,11 +47,10 @@ public:
 		StageManager* stageManager,
 		EnemyManager* enemyManager,
 		FishManager* fishManager,
-        std::shared_ptr<DisplayCollision> /*displayCollision*/
+        std::shared_ptr<DisplayCollision> displayCollision
 	)override
 	{
-        //ステージ共通の初期化
-        //LevelBase::Initialize(deviceResources, stageManager, enemyManager, fishManager, displayCollision);
+        UNREFERENCED_PARAMETER(displayCollision);
 
         //---------------------------------------
         // 個別のステージの登録

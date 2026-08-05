@@ -3,7 +3,7 @@
  * @file   DebugCamera.cpp
  * @brief  確認用デバッグカメラの動きの管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/16
  */
 
 #include "pch.h"
@@ -213,7 +213,9 @@ void DebugCamera::UpdateTarget(const DirectX::SimpleMath::Vector3& playerPos)
 // 切り替えた時にCamera情報をもらっておく
 //--------------------------------------------------------------------------------------
 
-void DebugCamera::SetFromOtherCamera(const DirectX::SimpleMath::Vector3& eye, const DirectX::SimpleMath::Vector3& target)
+void DebugCamera::SetFromOtherCamera(
+	const DirectX::SimpleMath::Vector3& eye,
+	const DirectX::SimpleMath::Vector3& target)
 {
 	m_eye = eye;
 	m_target = target;

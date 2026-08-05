@@ -3,7 +3,7 @@
  * @file   LevelTutorial.h
  * @brief  チュートリアルステージの管理とUI表示を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/16
  */
 
 #pragma once
@@ -62,10 +62,11 @@ public:
 		StageManager* stageManager,
 		EnemyManager* enemyManager,
 		FishManager* fishManager,
-		/*GimmickManager* gimmickManager,*/
-		std::shared_ptr<DisplayCollision> /*displayCollision*/
+		std::shared_ptr<DisplayCollision> displayCollision
 	)override
 	{
+		UNREFERENCED_PARAMETER(displayCollision);
+
 		auto device = deviceResources->GetD3DDevice();
 		auto context = deviceResources->GetD3DDeviceContext();
 
@@ -129,8 +130,10 @@ public:
 	/// </summary>
 	/// <param name="dt">前フレームからの経過時間</param>
 	/// <param name="resources">ユーザーリソース</param>
-	void Update(float /*dt*/, UserResources* resources) override
+	void Update(float dt, UserResources* resources) override
 	{
+		UNREFERENCED_PARAMETER(dt);
+
 		//キーボード用
 		auto input = resources->GetInputManager();
 
@@ -175,7 +178,6 @@ public:
 			m_spriteBatch->Draw(m_textureUI.Get(), DirectX::SimpleMath::Vector2(0, 0));
 
 			m_spriteBatch->End();
-
 		}
 	}
 };

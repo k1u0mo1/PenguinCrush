@@ -3,26 +3,24 @@
  * @file   SelectScene.h
  * @brief  選択画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/07/10
+ * @date   2026/07/29
  */
 
 #pragma once
 
-//使用クラス----------------
 #include "pch.h"
 #include "UserResources.h"
 #include "Library/SceneManager.h"
-//--------------------------
-
 //波
 #include "Game/GimmickList/WaveManager.h"
-
 //モデル
 #include "Model.h"
 #include "Effects.h"
 #include <CommonStates.h>
 
 #include "Game/SceneList/GamePlayScene.h"
+//スカイドーム
+#include "Game/ObjectList/SkyDome.h"
 
 /// <summary>
 /// 選択画面の初期化・更新・描画を管理するクラス
@@ -30,6 +28,7 @@
 class SelectScene : public Scene<UserResources>
 {
 private:
+
 	//ステージの配置するY座標
 	static constexpr float STAGE_POS_Y = 3.0f;
 	//ステージの配置の半径
@@ -179,7 +178,6 @@ private:
 
 	//ビュー行列
 	DirectX::SimpleMath::Matrix m_view;
-
 	//射影行列
 	DirectX::SimpleMath::Matrix m_proj;
 
@@ -195,7 +193,6 @@ private:
 	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
 	// 描画ステート
 	std::unique_ptr<DirectX::CommonStates> m_states;
-
 	
 	//アニメーション用のタイマー
 	float m_animationTimer = 0.0f;
@@ -214,6 +211,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureWaveUI;
 	//クリアマークのテクスチャ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureClearMark;
+
+	//スカイドーム
+	std::unique_ptr<SkyDome> m_skyDome;
 
 private:
 	//シーン移動中のフラグ

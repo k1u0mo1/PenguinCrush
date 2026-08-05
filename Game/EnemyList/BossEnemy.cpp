@@ -3,7 +3,7 @@
  * @file   BossEnemy.cpp
  * @brief  ボスの管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/17
  */
 
 #include "pch.h"
@@ -76,9 +76,9 @@ void BossEnemy::Initialize()
     m_states = std::make_unique<DirectX::CommonStates>(device);
 
     //音の読み込み
-    AudioManager::GetInstance()->LoadSound("AttackE", L"Resources/Sounds/E_近距離攻撃.wav");
-    AudioManager::GetInstance()->LoadSound("DashE", L"Resources/Sounds/E_突進攻撃.wav");
-    AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/P_E_落水.wav");
+    AudioManager::GetInstance()->LoadSound("AttackE", L"Resources/Sounds/E_Close-Range_Attack.wav");
+    AudioManager::GetInstance()->LoadSound("DashE", L"Resources/Sounds/E_Charge_Attack.wav");
+    AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/SE_Falling_Water.wav");
 
     //エフェクト系
     //煙の生成と初期化
@@ -96,7 +96,8 @@ void BossEnemy::Initialize()
 // ボスのAI、物理挙動、状態遷移を更新
 //----------------------------------------------------------
 
-void BossEnemy::Update(float deltaTime,
+void BossEnemy::Update(
+    float deltaTime,
     const DirectX::SimpleMath::Vector3& playerPosition,
     Stage* stage,
     Particle* particle,
@@ -314,9 +315,11 @@ void BossEnemy::UpdateAI(
     float dt,
     const DirectX::SimpleMath::Vector3& playerPos,
     Stage* stage,
-    Particle* /*particle*/,
+    Particle* particle,
     EnemyManager* enemyManager)
 {
+    UNREFERENCED_PARAMETER(particle);
+
 	//攻撃のクールダウンタイマーを減らす
     if (m_meleeTimer > 0.0f) m_meleeTimer -= dt;
     if (m_rushTimer > 0.0f)  m_rushTimer -= dt;

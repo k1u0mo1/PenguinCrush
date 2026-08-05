@@ -3,15 +3,15 @@
  * @file   ModelCollision.cpp
  * @brief  ゲームのモデルの衝突判定を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/16
  */
 
 #include "pch.h"
 #include "ModelCollision.h"
 
- //----------------------------------------------------------
- // 別の衝突判定オブジェクトと衝突しているか判定
- //----------------------------------------------------------
+//----------------------------------------------------------
+// 別の衝突判定オブジェクトと衝突しているか判定
+//----------------------------------------------------------
 
 bool ModelCollision::Intersects(const ModelCollision& other) const
 {
@@ -39,7 +39,7 @@ DirectX::SimpleMath::Vector3 ModelCollision::GetAABBMax() const
 // 衝突判定の中心座標を取得
 //----------------------------------------------------------
 
-const DirectX::SimpleMath::Vector3& ModelCollision::GetCenter() const
+DirectX::SimpleMath::Vector3 ModelCollision::GetCenter() const
 {
 	return m_boundingOrientedBox.Center;
 }
@@ -47,7 +47,7 @@ const DirectX::SimpleMath::Vector3& ModelCollision::GetCenter() const
 // 衝突判定の中心座標を取得
 //----------------------------------------------------------
 
-const DirectX::SimpleMath::Vector3& ModelCollision::GetExtents() const
+DirectX::SimpleMath::Vector3 ModelCollision::GetExtents() const
 {
 	return m_boundingOrientedBox.Extents;
 }
@@ -87,10 +87,11 @@ ModelCollisionSphere::ModelCollisionSphere(DirectX::Model* pModel)
 void ModelCollisionSphere::UpdateBoundingInfo(
 	DirectX::SimpleMath::Vector3 position,
 	DirectX::SimpleMath::Quaternion rotate,
-	DirectX::SimpleMath::Vector3 /*scale*/
+	DirectX::SimpleMath::Vector3 scale
 )
 {
 	UNREFERENCED_PARAMETER(rotate);
+	UNREFERENCED_PARAMETER(scale);
 
 	for (int i = 0; i < m_srcSpheres.size(); i++)
 	{
@@ -168,10 +169,11 @@ ModelCollisionBox::ModelCollisionBox(DirectX::Model* pModel)
 void ModelCollisionBox::UpdateBoundingInfo(
 	DirectX::SimpleMath::Vector3 position,
 	DirectX::SimpleMath::Quaternion rotate,
-	DirectX::SimpleMath::Vector3 /*scale*/
+	DirectX::SimpleMath::Vector3 scale
 )
 {
 	UNREFERENCED_PARAMETER(rotate);
+	UNREFERENCED_PARAMETER(scale);
 
 	for (int i = 0; i < m_srcBoxes.size(); i++)
 	{
@@ -284,9 +286,11 @@ ModelCollisionOrientedBox::ModelCollisionOrientedBox(DirectX::Model* pModel)
 void ModelCollisionOrientedBox::UpdateBoundingInfo(
 	DirectX::SimpleMath::Vector3 position,
 	DirectX::SimpleMath::Quaternion rotate,
-	DirectX::SimpleMath::Vector3 /*scale*/
+	DirectX::SimpleMath::Vector3 scale
 )
 {
+	UNREFERENCED_PARAMETER(scale);
+
 	for (int i = 0; i < m_srcBoxes.size(); i++)
 	{
 		DirectX::BoundingOrientedBox dst;

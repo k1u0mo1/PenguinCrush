@@ -97,7 +97,6 @@ protected:
 	//—‰ºƒ_ƒ[ƒW‚ğ—^‚¦‚é’‡‰î‚·‚é‚½‚ß‚ÌŠÖ”
 	virtual void ExecuteFallDamage()
 	{
-		
 	}
 
 	//…–Ê‚Ì‚‚³‚ğ•Ô‚·

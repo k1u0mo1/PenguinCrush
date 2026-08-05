@@ -3,7 +3,7 @@
  * @file   NormalEnemy.cpp
  * @brief  通常敵の管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/17
  */
 
 #include "pch.h"
@@ -62,8 +62,8 @@ void NormalEnemy::Initialize()
 	m_states = std::make_unique< DirectX::DX11::CommonStates>(device);
 
 	//サウンドの読み込み
-	AudioManager::GetInstance()->LoadSound("AttackE", L"Resources/Sounds/E_近距離攻撃.wav");
-	AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/P_E_落水.wav");
+	AudioManager::GetInstance()->LoadSound("AttackE", L"Resources/Sounds/E_Close-Range_Attack.wav");
+	AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/SE_Falling_Water.wav");
 }
 
 //----------------------------------------------------------
@@ -115,9 +115,11 @@ void NormalEnemy::UpdateAI(
 	float dt,
 	const DirectX::SimpleMath::Vector3& playerPos,
 	Stage* stage,
-	Particle* /*particle*/, 
+	Particle* particle, 
 	EnemyManager* enemyManager)
 {
+	UNREFERENCED_PARAMETER(particle);
+
 	//攻撃のクールダウンタイマーを減らす
 	if (m_meleeAttackCooldownTimer > 0.0f)
 	{
@@ -265,8 +267,10 @@ void NormalEnemy::Render(
 //----------------------------------------------------------
 
 void NormalEnemy::TakeDamage(
-	float amount, PlayerAttackType /*type*/)
+	float amount, PlayerAttackType type)
 {
+	UNREFERENCED_PARAMETER(type);
+
 	if (IsDead())return;
 	//体力を減らす
 	m_hp -= amount;

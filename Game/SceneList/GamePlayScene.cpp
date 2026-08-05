@@ -3,7 +3,7 @@
  * @file   GamePlayScene.cpp
  * @brief  ゲーム画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/06/29
+ * @date   2026/07/29
  */
 
 #include "pch.h"
@@ -128,8 +128,7 @@ void GamePlayScene::Update(float elapsedTime)
 	m_hitStop->HitStopUpdate(elapsedTime);
 	//ヒットストップが有効なときは時間を止める
 	float hitStopFactor = 
-		m_hitStop->IsHitStopActive() ? 
-		HIT_STOP_TIME_SCALE : NORMAL_TIME_SCALE;
+		m_hitStop->IsHitStopActive() ? HIT_STOP_TIME_SCALE : NORMAL_TIME_SCALE;
 
 	//-------------------------------------------------
 	//ボタン系
@@ -289,6 +288,7 @@ void GamePlayScene::Update(float elapsedTime)
 	//-------------------------------------------------
 	if (m_player && !m_player->IsDead())
 	{
+		//プレイヤーの毎フレームの更新処理
 		m_player->Update(
 			elapsedTime * hitStopFactor,
 			input->mouse,
@@ -307,7 +307,7 @@ void GamePlayScene::Update(float elapsedTime)
 	if(m_fishManager && m_player)
 	{
 		//魚のスポーンタイマーの更新とプレイヤーとの当たり判定
-		m_fishManager->Update(elapsedTime, m_player.get());
+		m_fishManager->Update(elapsedTime, m_player.get(),m_particle.get());
 	}
 
 	//-------------------------------------------------
@@ -387,12 +387,6 @@ void GamePlayScene::Render()
 	}
 
 	//-------------------------------------------------
-	//シェーダの描画
-	//-------------------------------------------------
-	//3D空間へのパーティクル描画処理
-	m_particle->Render(view, m_proj);
-
-	//-------------------------------------------------
 	//スカイドームの描画
 	//-------------------------------------------------
 	if (m_skyDome)
@@ -461,6 +455,13 @@ void GamePlayScene::Render()
 		//ステージの描画
 		m_currentLevel->Render(context, view, m_proj, camPos);
 	}
+
+	//-------------------------------------------------
+	//シェーダの描画
+	//-------------------------------------------------
+	//3D空間へのパーティクル描画処理
+	m_particle->Render(view, m_proj);
+
 	//-------------------------------------------------
 	//UIの描画 (プレイヤーと敵)
 	//-------------------------------------------------
@@ -490,6 +491,8 @@ void GamePlayScene::Render()
 	}
 
 	m_spriteBatch->End();
+
+	
 }
 
 //-----------------------------------------------------------------
@@ -561,8 +564,10 @@ void GamePlayScene::CreateDeviceDependentResources()
 	//-------------------------------------------------
 	//テクスチャの読み込み
 	//-------------------------------------------------
-	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Try.png", nullptr, m_textureButtonUI1.GetAddressOf());
-	DirectX::CreateWICTextureFromFile(device, L"Resources\\Textures\\Back.png", nullptr, m_textureButtonUI2.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(
+		device, L"Resources\\Textures\\Try.png", nullptr, m_textureButtonUI1.GetAddressOf());
+	DirectX::CreateWICTextureFromFile(
+		device, L"Resources\\Textures\\Back.png", nullptr, m_textureButtonUI2.GetAddressOf());
 	//-------------------------------------------------
 	//ステージとステージレベルの構築
 	//-------------------------------------------------
@@ -644,7 +649,7 @@ void GamePlayScene::CreateWindowSizeDependentResources()
 	//敵 一旦初期化
 	m_enemyManager->Initialize(m_deviceResources, nullptr, m_displayCollision);
 
-	//ステージレベルの初期化
+	//ステージの初期化、各マネージャーを受け取りステージ固有の配置
 	if (m_currentLevel)
 	{
 		m_currentLevel->Initialize(

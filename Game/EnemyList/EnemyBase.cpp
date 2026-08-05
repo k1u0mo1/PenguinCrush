@@ -6,7 +6,6 @@
  * @date   2026/07/01
  */
 
-
 #include "pch.h"
 #include "EnemyBase.h"
 #include "Game/Collision/ModelCollision.h"

@@ -3,7 +3,7 @@
  * @file   EnemyRenderer.cpp
  * @brief  敵の描画関連の管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/16
  */
 
 #include "pch.h"
@@ -48,15 +48,18 @@ void EnemyRenderer::Initialize(ID3D11Device* device)
 void EnemyRenderer::Render(
     ID3D11DeviceContext* context,
     const DirectX::SimpleMath::Vector3& position,
-    const DirectX::SimpleMath::Vector3& /*forward*/,
+    const DirectX::SimpleMath::Vector3& forward,
     EnemyState state,
-    float /*dizzyRotationY*/, 
+    float dizzyRotationY, 
     const DirectX::SimpleMath::Matrix& rotationMatrix,
     const DirectX::SimpleMath::Matrix& view,
     const DirectX::SimpleMath::Matrix& proj,
     Stage* stage, 
     ShadowRenderer* shadowRenderer)
 {
+    UNREFERENCED_PARAMETER(forward);
+    UNREFERENCED_PARAMETER(dizzyRotationY);
+
 	//状態によって描画するモデルを切り替える
     DirectX::Model* currentModel = nullptr;
     switch (state)

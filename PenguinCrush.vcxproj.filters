@@ -68,6 +68,9 @@
     <Filter Include="Game\Common\ObjectCharacter">
       <UniqueIdentifier>{8d4fa02a-d8ef-48c2-be92-8248b051f143}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game\Effects\ParticleList">
+      <UniqueIdentifier>{5a94700a-cf39-44ee-9232-312f85c078e7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -256,6 +259,21 @@
     <ClInclude Include="Game\SceneList\StageLevel\LevelHard.h">
       <Filter>Game\SceneList\StageLevel</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Effects\BaseParticleEmitter.h">
+      <Filter>Game\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Effects\ParticleList\SplashEmitter.h">
+      <Filter>Game\Effects\ParticleList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Effects\ParticleList\DashEmitter.h">
+      <Filter>Game\Effects\ParticleList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Effects\ParticleList\ExplosionEmitter.h">
+      <Filter>Game\Effects\ParticleList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Effects\ParticleList\HealEmitter.h">
+      <Filter>Game\Effects\ParticleList</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -395,6 +413,18 @@
     </ClCompile>
     <ClCompile Include="Game\SceneList\GamePlayScene.cpp">
       <Filter>Game\SceneList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Effects\ParticleList\SplashEmitter.cpp">
+      <Filter>Game\Effects\ParticleList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Effects\ParticleList\DashEmitter.cpp">
+      <Filter>Game\Effects\ParticleList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Effects\ParticleList\ExplosionEmitter.cpp">
+      <Filter>Game\Effects\ParticleList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Effects\ParticleList\HealEmitter.cpp">
+      <Filter>Game\Effects\ParticleList</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

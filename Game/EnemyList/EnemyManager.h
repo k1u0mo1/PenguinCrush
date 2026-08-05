@@ -55,19 +55,16 @@ private:
     static constexpr float DASH_HEIGHT = 1.5f;
 
     //エフェクトの生成数
-    static constexpr int HIT_EFFECT_COUNT = 50;
+    static constexpr int HIT_EFFECT_COUNT = 100;
     //エフェクトのサイズ
-    static constexpr float HIT_EFFECT_SIZE = 0.1f;
+    static constexpr float HIT_EFFECT_SIZE = 0.5f;
     //突進エフェクト生成数
     static constexpr int DASH_EFFECT_COUNT = 1;
     //突進エフェクトサイズ
     static constexpr float DASH_EFFECT_SIZE = 0.3f;
     //攻撃エフェクト生成時の高さ
-    static constexpr float HIT_EFFECT_HEIGHT_OFFSET = 1.0f;
-    //ヒット時のエフェクト生成数
-    static constexpr int ATTACK_HIT_EFFECT_COUNT = 10;
-    //ヒット時のエフェクトサイズ
-    static constexpr float ATTACK_HIT_EFFECT_SIZE = 0.1f;
+    static constexpr float HIT_EFFECT_HEIGHT_OFFSET = 2.0f;
+    
     //------------------------------------------------------
     //その他のシステム関連
     //------------------------------------------------------

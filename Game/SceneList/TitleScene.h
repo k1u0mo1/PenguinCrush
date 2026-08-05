@@ -70,7 +70,6 @@ private:
 	//後方のクリップ面
 	static constexpr float CAMERA_FAR = 1000.0f;
 
-
 //継承シーン関数
 public:
 

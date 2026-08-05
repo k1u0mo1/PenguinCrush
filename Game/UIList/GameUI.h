@@ -3,7 +3,7 @@
  * @file   GameUI.h
  * @brief  画面のプレイヤーと敵のUIを表示を管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/29
  */
 
 #pragma once
@@ -22,11 +22,22 @@ private:
 
     //テクスチャのパス
     const wchar_t* TEX_PATH_WHITE= L"Resources\\Textures\\White.png";
+    const wchar_t* TEX_PATH_PLAYER_FRAME= L"Resources\\Textures\\UI_Parameter\\PlayerHP_Frame.png";
+    const wchar_t* TEX_PATH_ENEMY_FRAME= L"Resources\\Textures\\UI_Parameter\\EnemyHP_Frame.png";
+
+    const wchar_t* TEX_PATH_HP_ICON = L"Resources\\Textures\\UI_Parameter\\HP.png";
+    const wchar_t* TEX_PATH_STAMINA_ICON = L"Resources\\Textures\\UI_Parameter\\Stamina.png";
 
     //プレイヤーUIの配置パラメータ
     const float   PLAYER_UI_X = 50.0f;
     const DirectX::SimpleMath::Vector2 PLAYER_HP_SIZE      = DirectX::SimpleMath::Vector2(300.0f, 30.0f);
     const DirectX::SimpleMath::Vector2 PLAYER_STAMINA_SIZE = DirectX::SimpleMath::Vector2(200.0f, 20.0f);
+
+    //アイコンのサイズ
+    const DirectX::SimpleMath::Vector2 ICON_HP_SIZE = DirectX::SimpleMath::Vector2(30.0f, 30.0f);
+    const DirectX::SimpleMath::Vector2 ICON_STAMINA_SIZE = DirectX::SimpleMath::Vector2(20.0f, 20.0f);
+    //バーとアイコンの間隔
+    const float ICON_MARGIN = 1.0f;
 
     //プレイヤーの最大体力
     const float PLAYER_MAX_HP = 300.0f;
@@ -85,6 +96,30 @@ private:
         const DirectX::SimpleMath::Vector2& scale
     );
 
+    /// <summary>
+    /// 指定された位置とサイズで枠を描画する内部関数
+    /// </summary>
+    /// <param name="texture">テクスチャの情報</param>
+    /// <param name="position">描画する左上の座標</param>
+    /// <param name="scale">枠のサイズ</param>
+    void DrawFrame(
+        ID3D11ShaderResourceView* texture,
+        const DirectX::SimpleMath::Vector2& position,
+        const DirectX::SimpleMath::Vector2& scale
+    );
+
+    /// <summary>
+    /// アイコン画像の描画
+    /// </summary>
+    /// <param name="texture">テクスチャの情報</param>
+    /// <param name="position">描画する左上の座標</param>
+    /// <param name="scale">サイズ</param>
+    void DrawIcon(
+        ID3D11ShaderResourceView* texture,
+        const DirectX::SimpleMath::Vector2& position,
+        const DirectX::SimpleMath::Vector2& scale
+    );
+
 private:
 
     DX::DeviceResources* m_deviceResources;
@@ -95,5 +130,9 @@ private:
 
     // テクスチャ
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texPlayerFrame;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texEnemyFrame;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texHPIcon;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texStaminaIcon;
 };
 

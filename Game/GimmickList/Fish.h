@@ -3,7 +3,7 @@
  * @file   Fish.h
  * @brief  魚オブジェクト
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/07/16
  */
 
 #pragma once
@@ -144,9 +144,9 @@ public:
     bool IsAlive() const;
 
     /// <summary>
-    /// 弾が当たった際などに呼ばれ、魚を消滅
+    /// プレイヤーと当たった際などに呼ばれ、魚を消滅
     /// </summary>
-    void BulletKill();
+    void FishDelete();
 
     // コピー禁止
     Fish(const Fish&) = delete;
@@ -204,7 +204,6 @@ private:
     float m_fishHeightOffset;
     //重力
     DirectX::SimpleMath::Vector3 m_velocity = DirectX::SimpleMath::Vector3::Zero;
-    
     
     //当たり判定Sphere
     DirectX::BoundingSphere m_sphere;

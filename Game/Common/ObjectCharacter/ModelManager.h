@@ -31,7 +31,6 @@ public:
 	/// <param name="device">デバイス</param>
 	void Initialize(ID3D11Device* device);
 
-
 	/// <summary>
 	/// モデルのポインタを渡すゲッター
 	/// </summary>
