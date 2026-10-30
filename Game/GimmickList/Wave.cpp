@@ -3,12 +3,17 @@
  * @file   Wave.h
  * @brief  水面の波を動的に生成・描画し、物理的な高さや傾きを提供するギミッククラス
  * @author 國田知睦
- * @date   2026/07/16
+ * @date   2026/10/28
  */
 
 #include "pch.h"
+#include <fstream>
+#include <sstream>
+
 #include "Wave.h"
 #include <Game/Common/ReadData.h>
+
+#include "Tool/ImGui/imgui.h"
 
 //----------------------------------------------------------
 // 波のコンストラクタ
@@ -31,6 +36,9 @@ void Wave::Initialize(HWND hwnd, int width, int height)
 
     CreateDeviceResources();
     CreateWindowSizeResources(width, height);
+
+    //波のパラメータの保存データがあれば自動で読み込み
+    LoadParameters("wave_config.json");
 }
 
 //----------------------------------------------------------
@@ -53,9 +61,13 @@ void Wave::Render(
     const DirectX::SimpleMath::Matrix& proj)
 {
 	//波のスケール　ドットモードなら1.0f、通常モードなら定数で指定したスケール
-    float scaleX = m_isDotMode ? 1.0f : WAVE_SCALE_X;
+    /*float scaleX = m_isDotMode ? 1.0f : WAVE_SCALE_X;
     float scaleY = m_isDotMode ? 1.0f : WAVE_SCALE_Y;
-    float scaleZ = m_isDotMode ? 1.0f : WAVE_SCALE_Z;
+    float scaleZ = m_isDotMode ? 1.0f : WAVE_SCALE_Z;*/
+
+    float scaleX = WAVE_SCALE_X;
+    float scaleY = WAVE_SCALE_Y;
+    float scaleZ = WAVE_SCALE_Z;
 
     //波のサイズと座標
     DirectX::SimpleMath::Matrix world =
@@ -70,22 +82,38 @@ void Wave::Render(
         cb->matWorld = world.Transpose();
         cb->matView = view.Transpose();
         cb->matProj = proj.Transpose();
+
         cb->time    = m_time;
 		//ドットモードなら1、通常モードなら0をシェーダに送る
         cb->isCubeMode = m_isDotMode ? 1 : 0;
 
         //シェーダに波の細かさを送る
-        cb->waveFrequency = 0.15f; 
+        cb->waveFrequency = m_uiFrequency; 
         //シェーダに波の高さを送る
-        cb->waveAmplitude = 2.5f;
+        cb->waveAmplitude =  m_uiAmplitude;
+        //シェーダに波の速さを送る
+        cb->waveSpeed     =  m_uiSpeed;
+        //波の尖り具合を送る
+        cb->waveSharpness =  m_uiSharpness;
+
         //シェーダに波の大きさを送る
-        cb->cubeScale = 3.0f;
+        cb->cubeScale = m_uiCubeScale;
         //シェーダにグリッドの幅を送る
         cb->gridWidth = 200;
-        //シェーダに波の速さを送る
-        cb->waveSpeed = 1.0f;
-        //置物
-        cb->padding = 0.0f;
+
+        //色データ
+        cb->deepColor = DirectX::SimpleMath::Vector4(
+            m_waterColorDeep[0],
+            m_waterColorDeep[1],
+            m_waterColorDeep[2],
+            m_waterColorDeep[3]
+        );
+        cb->shallowColor = DirectX::SimpleMath::Vector4(
+            m_waterColorShallow[0],
+            m_waterColorShallow[1],
+            m_waterColorShallow[2],
+            m_waterColorShallow[3]
+        );
 		
         //マッピングを解除してGPUに渡す
         context->Unmap(m_constantBuffer.Get(), 0);
@@ -95,6 +123,9 @@ void Wave::Render(
     context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
     context->VSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
     context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
+
+    context->PSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
+
     //定数バッファをセット
     context->IASetInputLayout(m_inputLayout.Get());
     //カリング設定（無効）
@@ -134,6 +165,154 @@ void Wave::Render(
         //まとめて描画
         context->DrawIndexed(m_indexCount, 0, 0);
     }
+
+    
+}
+
+//----------------------------------------------------------
+// パラメータ調整
+//----------------------------------------------------------
+
+void Wave::RenderUI()
+{
+#ifdef _DEBUG
+
+    if (!m_showUI)return;
+
+    //GUIウィンドウの開始
+    ImGui::Begin("Wave Parameter Inspector");
+
+    ImGui::Text("Mode Select");
+    if (ImGui::RadioButton("Mesh Wave", !m_isDotMode))
+    {
+        m_isDotMode = false;
+    }
+
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Cube Wave", m_isDotMode))
+    {
+        m_isDotMode = true;
+    }
+
+    ImGui::Separator();
+    ImGui::Text("Dot WaveSetting");
+    ImGui::SliderFloat("Cube Scale", &m_uiCubeScale, 1.0f, 5.0f);
+
+    ImGui::Text("Physical Parameters");
+
+    //スライダーで数値を動かせるようにする
+    ImGui::SliderFloat("Frequency", &m_uiFrequency, 0.05f, 1.0f);
+    ImGui::SliderFloat("Amplitude", &m_uiAmplitude, 0.5f,  5.0f);
+    ImGui::SliderFloat("Speed",     &m_uiSpeed,     0.1f,  3.0f);
+    ImGui::SliderFloat("Sharpness", &m_uiSharpness, 1.0f,  4.0f);
+    ImGui::ColorEdit4("Deep Water Color", m_waterColorDeep);
+    ImGui::ColorEdit4("Shallow Water Color", m_waterColorShallow);
+    
+
+    //パラメータを保存
+    if (ImGui::Button("Save Config"))
+    {
+        SaveParameters("wave_config.json");
+    }
+    ImGui::SameLine();
+    //パラメータを読み込み
+    if (ImGui::Button("Load Config"))
+    {
+        LoadParameters("wave_config.json");
+    }
+    ImGui::SameLine();
+
+    //パラメータをリセット
+    if (ImGui::Button("Reset to Default"))
+    {
+        m_uiFrequency = 0.25f;
+        m_uiAmplitude =  3.5f;
+        m_uiSpeed     =  1.2f;
+        m_uiSharpness =  2.2f;
+    }
+
+    ImGui::End();
+
+#endif
+}
+
+//----------------------------------------------------------
+// 波のパラメータテキストファイルに保存する
+//----------------------------------------------------------
+
+bool Wave::SaveParameters(const std::string& filePath) const
+{
+    std::ofstream file(filePath);
+    if (!file.is_open())
+    {
+        return false;
+    }
+
+    //数値の書き出し
+    file << "{\n";
+    file << " \"Frequency\":" << m_uiFrequency << ",\n";
+    file << " \"Amplitude\":" << m_uiAmplitude << ",\n";
+    file << " \"Speed\":"     << m_uiSpeed     << ",\n";
+    file << " \"Sharpness\":" << m_uiSharpness << "\n";
+    file << "}\n";
+
+    file.close();
+    return true;
+}
+
+//----------------------------------------------------------
+// 波のパラメータテキストファイルから読み込み
+//----------------------------------------------------------
+
+bool Wave::LoadParameters(const std::string& filePath)
+{
+    std::ifstream file(filePath);
+    if (!file.is_open())
+    {
+        //ファイルが存在していなければ初期値
+        return false;
+    }
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        //コロンや':'の位置を探す
+        size_t colonPos = line.find(':');
+        if (colonPos != std::string::npos)
+        {
+            //コロンより後ろの文字の文字列を取り出す
+            std::string valueStr = line.substr(colonPos + 1);
+
+            try
+            {
+                //簡易テキストの解析
+                if (line.find("Frequency") != std::string::npos)
+                {
+                    m_uiFrequency = std::stof(valueStr);
+                }
+                else if (line.find("Amplitude") != std::string::npos)
+                {
+                    m_uiAmplitude = std::stof(valueStr);
+                }
+                else if (line.find("Speed") != std::string::npos)
+                {
+                    m_uiSpeed = std::stof(valueStr);
+                }
+                else if (line.find("Sharpness") != std::string::npos)
+                {
+                    m_uiSharpness = std::stof(valueStr);
+                }
+            }
+            catch(...)
+            {
+
+            }
+        }
+        
+    }
+
+    file.close();
+    return true;
 }
 
 //----------------------------------------------------------
@@ -320,44 +499,6 @@ void Wave::CreateCubeBuffer()
     D3D11_SUBRESOURCE_DATA cubeIndexSubresourceData = {};
     cubeIndexSubresourceData.pSysMem = ci;
     DX::ThrowIfFailed(device->CreateBuffer(&CubeIndexBufferDesc, &cubeIndexSubresourceData, m_cubeIndexBuffer.ReleaseAndGetAddressOf()));
-}
-
-//----------------------------------------------------------
-// 波の更新
-//----------------------------------------------------------
-//毎フレーム、頂点をYをsinとcosで揺らす
-//波を座標０を中心にするためのやつ 高さ計算修正
-
-void Wave::UpdateWaveVertices()
-{
-    //波の中心を原点にするためのオフセット
-    const float offsetX = (GRID_WIDTH - 1) * GRID_SPACING * 0.5f;
-    const float offsetZ = (GRID_WIDTH - 1) * GRID_SPACING * 0.5f;
-    //波の頂点を更新
-    for (int z = 0; z < GRID_HEIGHT; z++)
-    {
-        for (int x = 0; x < GRID_WIDTH; x++)
-        {
-            size_t index = static_cast<size_t>(z * GRID_WIDTH + x);
-
-            auto& vertex = m_waveVertices[index];
-            //グリッド座標をワールド座標に変換
-            float fx = static_cast<float>(x);
-            float fz = static_cast<float>(z);
-
-            //ヘルパー関数で計算したものを使用
-            float y = CalculateHeight(fx, fz, m_time);
-            //ワールド座標に変換してオフセットを引く
-            vertex.position = DirectX::SimpleMath::Vector3(
-                fx * GRID_SPACING - offsetX,
-                y,
-                fz * GRID_SPACING - offsetZ
-            );
-
-            //ヘルパー関数で色を決める
-            vertex.color = CalculateColor(y);
-        }
-    }
 }
 
 void Wave::OnDeviceLost() {}

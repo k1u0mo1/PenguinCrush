@@ -3,7 +3,7 @@
  * @file   GamePlayScene.cpp
  * @brief  ゲーム画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/07/29
+ * @date   2026/10/23
  */
 
 #include "pch.h"
@@ -31,6 +31,8 @@
 #include "Game/Common/ObjectCharacter/HitStop.h"
 #include "Game/Common/ObjectCharacter/ModelManager.h"
 
+#include "Tool/ImGui/imgui.h"
+
 GamePlayScene::StageType GamePlayScene::NextStageType =
 GamePlayScene::StageType::EASY;
 
@@ -41,9 +43,9 @@ GamePlayScene::StageType::EASY;
 GamePlayScene::GamePlayScene()
 	: 
 	m_deviceResources{},
-	m_isFinished(false),
+	/*m_isFinished(false),
 	m_isStageClear(false),
-	m_finishTimer(FINISH_WAIT_TIME),
+	m_finishTimer(FINISH_WAIT_TIME),*/
 	m_isDebugVisible(false),
 	m_isPaused(false),
 	m_hitStop()
@@ -70,10 +72,10 @@ void GamePlayScene::Initialize()
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 	
-	//終わったか
-	m_isFinished = false;
-	//クリアしたか
-	m_isStageClear = false;
+	////終わったか
+	//m_isFinished = false;
+	////クリアしたか
+	//m_isStageClear = false;
 	//デバックを表示・非表示
 	m_isDebugVisible = false;
 	//現在、一時停止中か
@@ -85,8 +87,12 @@ void GamePlayScene::Initialize()
 
 	//演出の時間
 	m_openingTimer = 0.0f;
-	//終わったときに何秒後に
-	m_finishTimer = FINISH_WAIT_TIME;
+	////終わったときに何秒後に
+	//m_finishTimer = FINISH_WAIT_TIME;
+
+	//勝敗判定の生成と初期化
+	m_gameJudge = std::make_unique<GameJudge>();
+	m_gameJudge->Reset();
 
 	//オープニング演出のセットアップ
 	auto boss = m_enemyManager->GetBossEnemy();
@@ -143,6 +149,15 @@ void GamePlayScene::Update(float elapsedTime)
 	{
 		return;
 	}
+	//[F1]でUIを切り替える
+	if (input->kbTracker.pressed.D2)
+	{
+		if (m_waveManager)
+		{
+			m_waveManager->ToggleUI();
+		}
+	}
+
 	//-------------------------------------------------
 	//シーン
 	//-------------------------------------------------
@@ -184,73 +199,28 @@ void GamePlayScene::Update(float elapsedTime)
 	//-------------------------------------------------
 	//勝敗の更新
 	//-------------------------------------------------
-	if (m_isFinished)
-	{
-		//勝敗がついた後のシーンタイマーの減算
-		m_finishTimer -= elapsedTime;
-		if (m_finishTimer <= 0.0f)
-		{
-			//リザルトシーンへ
-			ChangeScene<ResultScene>();
-		}
-		return;
-	}
+	
+	m_gameJudge->Update(elapsedTime, m_player.get(), m_enemyManager.get(),m_isOpening);
 
-	//プレイヤーがやられたとき
-	if (m_player && m_player->IsDead())
+	//勝敗が決まった瞬間に１度だけフェードアウト
+	if (m_gameJudge->ShouldChangeScene() && !m_isChangingScene)
 	{
-		//終了フラグ
-		m_isFinished = true;
-		//「負け」
-		GetUserResources()->SetGameClear(false);
-		//シーン切り替えON
 		m_isChangingScene = true;
-		//フェード演出
-		transitionMask->Close();
-		return;
-	}
 
-	//-------------------------------------------------
-	//敵の全滅orボスのクリア判定
-	//-------------------------------------------------
-	if (m_enemyManager)
-	{
-		//ボスが存在しているステージ
-		if (m_enemyManager->HasBoss())
+		//クリア状況をユーザーリソースへ反映
+		GetUserResources()->SetGameClear(m_gameJudge->IsStageClear());
+		if (m_gameJudge->IsStageClear())
 		{
-			//ボスを渡す
-			BossEnemy* boss = m_enemyManager->GetBoss();
-			if (boss && boss->IsDead())
-			{
-				//終了フラグ（プレイヤー勝ち）
-				m_isStageClear = true;
-			}
-		}
-		else
-		{
-			//生きている敵が０体か
-			if (!m_isOpening && m_enemyManager->GetActiveEnemies().empty())
-			{
-				//終了フラグ（プレイヤー勝ち）
-				m_isStageClear = true;
-			}
-		}
-
-		//クリア条件を満たしているか
-		if (m_isStageClear)
-		{
-			//選択画面のクリアフラグを立てる
+			//ステージ解放フラグを立てる
 			SelectScene::s_isClearedList[(int)NextStageType] = true;
-			//終了フラグ
-			m_isFinished = true;
-			//「勝ち」
-			GetUserResources()->SetGameClear(true);
-			//シーン切り替えON
-			m_isChangingScene = true;
-			//フェード演出
-			transitionMask->Close();
-			return;
 		}
+		transitionMask->Close();
+	}
+	//勝敗後の演出タイマーが完了したらリザルトシーンへ
+	if (m_gameJudge->ShouldChangeScene())
+	{
+		ChangeScene<ResultScene>();
+		return;
 	}
 
 	//-------------------------------------------------
@@ -400,8 +370,25 @@ void GamePlayScene::Render()
 	//-------------------------------------------------
 	if (m_waveManager)
 	{
+		//波の描画
 		m_waveManager->Render(context, view, m_proj);
 	}
+
+#ifdef _DEBUG
+
+	if (m_waveManager)
+	{
+		//波の調整用パラメータの描画
+		m_waveManager->RenderUI();
+	}
+
+	//新しいデバッグウィンドウを作成
+	ImGui::Begin("Debug Window");
+	//ウィンドウの中にテキストを表示
+	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+	//ウィンドウのUI配置を終了
+	ImGui::End();
+#endif
 
 	//-------------------------------------------------
 	//ステージの描画
@@ -493,6 +480,8 @@ void GamePlayScene::Render()
 	m_spriteBatch->End();
 
 	
+
+
 }
 
 //-----------------------------------------------------------------
@@ -531,6 +520,7 @@ void GamePlayScene::CreateDeviceDependentResources()
 	m_displayCollision = std::make_shared<DisplayCollision>(device, context);
 	//表示切り替え用の関数
 	m_displayCollision->SetVisible(false);
+	//m_displayCollision->SetVisible(true);
 
 	//-------------------------------------------------
 	//マネージャーとオブジェクト系の生成
@@ -628,7 +618,9 @@ void GamePlayScene::CreateWindowSizeDependentResources()
 	//カーソルの非表示
 	if (m_currentCamera == CameraType::Player)
 	{
-		m_playerCamera->HideCursor();
+		//m_playerCamera->HideCursor();
+
+		ShowCursor(TRUE);
 	}
 
 	//-------------------------------------------------
@@ -711,10 +703,12 @@ void GamePlayScene::SceneChange()
 	{
 		//各ステージのクリアフラグ配列
 		SelectScene::s_isClearedList[(int)NextStageType] = true;
-		//ステージクリアをON
-		m_isStageClear = true;
-		//シーンの切り替え 
-		ChangeScene<ResultScene>();
+
+		//勝利フラグをセットして強制的に遷移移動
+		GetUserResources()->SetGameClear(true);
+		m_isChangingScene = true;
+		transitionMask->Close();
+
 	}
 	//[T]で戻る
 	if (input->IsCancelAction())
@@ -739,6 +733,12 @@ void GamePlayScene::SceneChange()
 
 bool GamePlayScene::UpdateCamera()
 {
+	if (ImGui::GetIO().WantCaptureMouse)
+	{
+		ShowCursor(TRUE);
+		return false;
+	}
+
 	auto input = GetUserResources()->GetInputManager();
 	// [1] でカメラを切り替える
 	if (input->kbTracker.pressed.D1)

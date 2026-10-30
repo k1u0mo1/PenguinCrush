@@ -71,6 +71,15 @@
     <Filter Include="Game\Effects\ParticleList">
       <UniqueIdentifier>{5a94700a-cf39-44ee-9232-312f85c078e7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tool">
+      <UniqueIdentifier>{80b8ca1a-d414-45c0-9766-b3caf944ef07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tool\ImGui">
+      <UniqueIdentifier>{4fc05f58-8499-4375-b642-dee9ca4054d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\GameLogic">
+      <UniqueIdentifier>{c02bc5ca-fdce-479c-9afb-567a317189a0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -274,6 +283,42 @@
     <ClInclude Include="Game\Effects\ParticleList\HealEmitter.h">
       <Filter>Game\Effects\ParticleList</Filter>
     </ClInclude>
+    <ClInclude Include="Tool\ImGui\imconfig.h">
+      <Filter>Tool\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\ImGui\imgui.h">
+      <Filter>Tool\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\ImGui\imgui_impl_dx11.h">
+      <Filter>Tool\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\ImGui\imgui_impl_win32.h">
+      <Filter>Tool\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\ImGui\imgui_internal.h">
+      <Filter>Tool\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\ImGui\imstb_rectpack.h">
+      <Filter>Tool\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\ImGui\imstb_textedit.h">
+      <Filter>Tool\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\ImGui\imstb_truetype.h">
+      <Filter>Tool\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\EnemyList\EnemyAttackList\ColdAuraE.h">
+      <Filter>Game\EnemyList\EnemyAttackList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\PlayerList\PlayerAttackType.h">
+      <Filter>Game\PlayerList</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameLogic\GameJudge.h">
+      <Filter>Game\GameLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Effects\ParticleList\DashWarningEmitter.h">
+      <Filter>Game\Effects\ParticleList</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -424,6 +469,36 @@
       <Filter>Game\Effects\ParticleList</Filter>
     </ClCompile>
     <ClCompile Include="Game\Effects\ParticleList\HealEmitter.cpp">
+      <Filter>Game\Effects\ParticleList</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui.cpp">
+      <Filter>Tool\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui_demo.cpp">
+      <Filter>Tool\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui_draw.cpp">
+      <Filter>Tool\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui_impl_dx11.cpp">
+      <Filter>Tool\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui_impl_win32.cpp">
+      <Filter>Tool\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui_tables.cpp">
+      <Filter>Tool\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui_widgets.cpp">
+      <Filter>Tool\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\EnemyList\EnemyAttackList\ColdAuraE.cpp">
+      <Filter>Game\EnemyList\EnemyAttackList</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameLogic\GameJudge.cpp">
+      <Filter>Game\GameLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Effects\ParticleList\DashWarningEmitter.cpp">
       <Filter>Game\Effects\ParticleList</Filter>
     </ClCompile>
   </ItemGroup>

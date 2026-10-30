@@ -3,7 +3,7 @@
  * @file   BossEnemy.h
  * @brief  ボスの管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/10/26
  */
 
 #pragma once
@@ -61,17 +61,12 @@ private:
     //------------------------------------------------------
     //ダメージ＆戦闘関連
     //------------------------------------------------------
-
-    //回避が発動する連続被弾回数
-    static constexpr int EVADE_HIT_THRESHOLD = 3;
-    //回避が発動しなかったらリセット
-    static constexpr int EVADE_NOHIT_THRESHOLD = 1;
-    //回避状態の持続時間
-    static constexpr float EVADE_DURATION = 0.5f;
     //何回で気絶
 	static constexpr int STUN_HIT_THRESHOLD = 5;
     //気絶時間
-	static constexpr float STUN_TIME = 10.0f;
+	static constexpr float STUN_TIME = 5.0f; 
+    //気絶中の回転速度
+    static constexpr float DIZZY_ROTATION_SPEED = 5.0f;
 
     //------------------------------------------------------
     //描画＆エフェクト関連
@@ -124,6 +119,11 @@ public:
     /// </summary>
     /// <returns>現在のEnemyState　m_state</returns>
     EnemyState GetState() const { return m_state; }
+
+    /// <summary>
+    /// 落下等で攻撃や気絶などの状態をリセット
+    /// </summary>
+    void ResetState();
 
     /// <summary>
     /// ボスにダメージを与え、連続攻撃による回避判定
@@ -187,11 +187,11 @@ public:
         const DirectX::SimpleMath::Matrix& proj
     )override;
 
-    /// <summary>
+    /*/// <summary>
     /// ボスが倒されたかどうか
     /// </summary>
     /// <returns>ボスのHPが0以下なら true</returns>
-    bool IsDead() const { return m_hp <= 0; }
+    bool IsDead() const { return m_hp <= 0; }*/
 
     /// <summary>
     /// 現在のワールド座標を取得
@@ -256,15 +256,31 @@ private:
         EnemyManager* enemyManager
     )override;
 
-
     /// <summary>
     /// 敵の物理演算と移動
     /// </summary>
     /// <param name="stage">ステージのポインタ</param>
     /// <param name="dt">前フレームからの経過時間</param>
 	/// <param name="particle">パーティクル発生用マネージャー</param>
-    void UpdatePhysics(Stage* stage, float dt, Particle* particle = nullptr);
+    void UpdatePhysics(Stage* stage, float dt, Particle* particle );
     
+    /// <summary>
+    /// タイマーの更新
+    /// </summary>
+    /// <param name="deltaTime">前フレームからの経過時間</param>
+    void UpdateEnemyTimers(float deltaTime);
+
+    /// <summary>
+    /// 敵のパーティクルを更新
+    /// </summary>
+    /// <param name="deltaTime">前フレームからの経過時間</param>
+    void UpdateEnemyParticle(float deltaTime);
+
+    /// <summary>
+    /// コリジョン更新
+    /// </summary>
+    void UpdateEnemyCollision();
+
 protected:
 
     /// <summary>
@@ -302,6 +318,12 @@ protected:
     {
         // ボスも同じようにダメージ関数を呼ぶ
         TakeDamage(GetFallDamage(), PlayerAttackType::None);
+
+        if (m_state != EnemyState::Dying)
+        {
+            //落下したら気絶・攻撃　をリセット
+            ResetState();
+        }
     }
 
 private:
@@ -322,16 +344,10 @@ private:
 private:
 
     //プレイヤーの原因の状態
-    EnemyState m_state = EnemyState::Opening;
+    //EnemyState m_state = EnemyState::Opening;
 
     //モデルの切り替えている時間
     float m_stateTimer = 0.0f;
-    //最後に食らった攻撃
-    PlayerAttackType m_lastAttackType = PlayerAttackType::None;
-    //連続で同じ攻撃かどうかカウントする
-    int m_consecutiveHitCount = 0;
-    //回避時の移動ベクトル
-    DirectX::SimpleMath::Vector3 m_avoidVelocity = { 0,0,0 };
     //目標とする移動速度を保持
     DirectX::SimpleMath::Vector3 m_targetVelocity = DirectX::SimpleMath::Vector3::Zero;
     //プレイヤーの攻撃を数える

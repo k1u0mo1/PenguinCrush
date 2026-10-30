@@ -3,7 +3,7 @@
  * @file   AttackManager.cpp
  * @brief  攻撃の管理クラス
  * @author 國田知睦
- * @date   2026/07/10
+ * @date   2026/10/23
  */
 
 #include "pch.h"
@@ -105,10 +105,6 @@ void AttackManager::Update(
 			//衝突判定が成功した場合
 			if (atkCol->Intersects(enemyCol))
 			{
-				//ノックバック方向の計算 (攻撃源 -> ターゲット)
-				DirectX::SimpleMath::Vector3 attackPos = atk->GetPosition();
-				DirectX::SimpleMath::Vector3 targetPos = enemy->GetPosition();
-
 				//ターゲットを攻撃源から押し返すベクトル
 				DirectX::SimpleMath::Vector3 knockbackDirection = atk->GetForward();
 				knockbackDirection.Normalize();
@@ -133,37 +129,10 @@ void AttackManager::Update(
 				//ノックバック
 				enemy->ApplyKnockback(knockbackDirection, basePower);
 				
-				//攻撃の種類を判別する変数
-				PlayerAttackType type = PlayerAttackType::None;
-				
-				// 近接攻撃（AttackP）だった場合
-				if (dynamic_cast<AttackP*>(atk.get()))
-				{
-					//種類
-					type = PlayerAttackType::Attack;
-					//音
-					AudioManager::GetInstance()->Play("Attack");
-				}
-				// ラッシュ（RushP）だった場合
-				else if (RushP* rushAtk = dynamic_cast<RushP*>(atk.get()))
-				{ 
-					//種類
-					type = PlayerAttackType::Rush;
-					//音
-					AudioManager::GetInstance()->Play("Dash");
-
-					//敵に攻撃が当たったらプレイヤーにも与える
-					Player* hitPlayer = rushAtk->GetPlayer();
-
-					//プレイヤーがnullptrじゃない時　ノックバックを与える
-					if (hitPlayer != nullptr)
-					{
-						//プレイヤーの向いている方向とは逆のベクトルを計算
-						DirectX::SimpleMath::Vector3 bounceDir = -hitPlayer->GetForward();
-						//プレイヤーにノックバックを与える
-						hitPlayer->ApplyKnockback(bounceDir, RUSH_KNOCKBACK_POWER);
-					}
-				}
+				//攻撃が当たった際にどの攻撃かによって効果音を変える
+				AudioManager::GetInstance()->Play(atk->GetHitSEName());
+				//
+				enemy->TakeDamage(atk->GetDamage(), atk->GetAttackType());
 
 				if (hitStop)
 				{
@@ -171,10 +140,10 @@ void AttackManager::Update(
 					hitStop->StartHitStop(HIT_STOP_DURATION); 
 				}
 
-				//判別した種類で攻撃
-				enemy->TakeDamage(ATTACK_DAMAGE, type);
 				//攻撃を消す
 				atk->SetDead();
+
+				break;
 			}
 		}
 	}

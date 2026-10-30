@@ -16,6 +16,7 @@
 //攻撃関連--------------------
 #include <Game/EnemyList/EnemyAttackList/AttackE.h>
 #include <Game/EnemyList/EnemyAttackList/RushE.h>
+#include <Game/EnemyList/EnemyAttackList/ColdAuraE.h>
 //----------------------------
 #include "Game/EnemyList/EnemyBaseParameter.h"
 
@@ -64,7 +65,11 @@ private:
     static constexpr float DASH_EFFECT_SIZE = 0.3f;
     //攻撃エフェクト生成時の高さ
     static constexpr float HIT_EFFECT_HEIGHT_OFFSET = 2.0f;
-    
+    //パーティクルサイズ
+    static constexpr int COLD_AURA_PARTICLE_COUNT = 15;
+    //クールダウン
+    static constexpr float COOLDOWN_WARMING_TIME = 0.3f;
+
     //------------------------------------------------------
     //その他のシステム関連
     //------------------------------------------------------
@@ -151,7 +156,8 @@ public:
     /// <param name="playerPos">プレイヤーの現在の座標</param>
     void DoBossAttack(
         float deltaTime, 
-        const DirectX::SimpleMath::Vector3& playerPos);
+        const DirectX::SimpleMath::Vector3& playerPos,
+        Particle* particle=nullptr);
 
     /// <summary>
     /// 指定したHPでボスをステージに出現
@@ -185,6 +191,16 @@ public:
 	/// <param name="forward">攻撃の前方ベクトル</param>
 	void RequestRushE(
         EnemyBase* enemy,
+        const DirectX::SimpleMath::Vector3& forward,
+        Particle* particle=nullptr);
+
+    /// <summary>
+    /// 敵の範囲攻撃を生成
+    /// </summary>
+    /// <param name="enemy">攻撃を生成する敵のポインタ</param>
+    /// <param name="forward">攻撃の前方ベクトル</param>
+    void RequestColdAuraE(
+        EnemyBase* enemy,
         const DirectX::SimpleMath::Vector3& forward);
 
 private:
@@ -199,6 +215,8 @@ private:
     DX::DeviceResources* m_deviceResources = nullptr;
     Stage* m_stage = nullptr;
 
+    Particle* m_particle = nullptr;
+
     //敵のリスト
 	std::vector<std::unique_ptr<EnemyBase>> m_enemies;
     // DisplayCollision（全攻撃で共有）
@@ -210,6 +228,7 @@ private:
     //攻撃関連
     std::vector<std::unique_ptr<AttackE>> m_attacks;
     std::vector<std::unique_ptr<RushE>>  m_rush;
+    std::vector<std::unique_ptr<ColdAuraE>> m_coldAura;
     //ステート
     std::unique_ptr<DirectX::CommonStates> m_states;
 };

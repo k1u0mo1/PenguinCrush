@@ -68,6 +68,16 @@ ModelCollision::ModelCollision(CollisionType type)
 // コンストラクタ
 //----------------------------------------------------------
 
+ModelCollisionSphere::ModelCollisionSphere()
+	:
+	ModelCollision(ModelCollision::CollisionType::Sphere)
+{
+	DirectX::BoundingSphere sphere;
+	sphere.Center = DirectX::SimpleMath::Vector3::Zero;
+	sphere.Radius = 1.0f;
+	m_dstSpheres.push_back(sphere);
+}
+
 ModelCollisionSphere::ModelCollisionSphere(DirectX::Model* pModel)
 	: 
 	ModelCollision(ModelCollision::CollisionType::Sphere)
@@ -78,6 +88,44 @@ ModelCollisionSphere::ModelCollisionSphere(DirectX::Model* pModel)
 	}
 	// ワールド空間内のコリジョン情報を保存するワークを確保する
 	m_dstSpheres.resize(pModel->meshes.size());
+}
+
+//----------------------------------------------------------
+// 中心座標を設定
+//----------------------------------------------------------
+
+void ModelCollisionSphere::SetCenter(const DirectX::SimpleMath::Vector3& center)
+{
+	if (m_dstSpheres.empty())
+	{
+		m_dstSpheres.push_back(DirectX::BoundingSphere(center, 1.0f));
+	}
+	else
+	{
+		for (auto& sphere : m_dstSpheres)
+		{
+			sphere.Center = center;
+		}
+	}
+}
+
+//----------------------------------------------------------
+// 半径を設定
+//----------------------------------------------------------
+
+void ModelCollisionSphere::SetRadius(float radius)
+{
+	if (m_dstSpheres.empty())
+	{
+		m_dstSpheres.push_back(DirectX::BoundingSphere(DirectX::SimpleMath::Vector3::Zero, radius));
+	}
+	else
+	{
+		for (auto& sphere : m_dstSpheres)
+		{
+			sphere.Radius = radius;
+		}
+	}
 }
 
 //----------------------------------------------------------
@@ -364,6 +412,7 @@ void ModelCollisionOrientedBox::SetCenter(const DirectX::SimpleMath::Vector3& ce
 		box.Center = center;
 	}
 }
+
 //----------------------------------------------------------
 // サイズを直接設定
 //----------------------------------------------------------

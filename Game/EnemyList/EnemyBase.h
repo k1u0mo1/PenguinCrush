@@ -4,7 +4,7 @@
  * @file   EnemyBase.h
  * @brief  “G‚ÌŠÇ—‚ğs‚¤Šî’êƒNƒ‰ƒX
  * @author š “c’m–r
- * @date   2026/07/01
+ * @date   2026/10/28
  */
 
 #pragma once
@@ -13,6 +13,8 @@
 #include "Game/Common/ObjectCharacter/CharacterBase.h"
 #include "Game/EnemyList/EnemyBaseParameter.h"
 #include "Game/EnemyList/EnemyAI.h"
+
+#include "Game/PlayerList/PlayerAttackType.h"
 
 class Stage;
 class Particle;
@@ -28,17 +30,11 @@ enum class EnemyState
 	Idle,
 	Attack,
 	Rush,
-	Avoid,
+	ColdAura,
 	Dizzy,
-	Down
+	Dying
 };
 
-enum class PlayerAttackType
-{
-	None,
-	Attack, // ‹ßÚ
-	Rush    // “Ëi
-};
 
 /// <summary>
 /// “G‚ÌŠî’êƒNƒ‰ƒX
@@ -64,6 +60,13 @@ protected:
 	//Šm”F‚·‚éŠÔŠu‚ÌŠÔ
 	static constexpr float CHECK_INTERVAL = 2.0f;
 
+protected:
+	//‚â‚ç‚ê‚½‚Æ‚«‚Ìƒ^ƒCƒ}[
+	float m_dyingTimer = 0.0f;
+	//›•b‚©‚¯‚Ä“|‚ê‚é
+	static constexpr float DYING_DURATION = 3.0f;
+	//“G‚Ìó‘Ô‚ğŠÇ—‚·‚é•Ï”
+	EnemyState m_state = EnemyState::Idle;
 public:
 
 	/// <summary>
@@ -113,8 +116,11 @@ public:
 	/// <summary>
 	/// “G‚ª“|‚³‚ê‚½‚©‚Ç‚¤‚©
 	/// </summary>
-	/// <returns>“G‚ÌHP‚ª0ˆÈ‰º‚È‚ç true</returns>
-	virtual bool IsDead() const  { return m_hp <= 0.0f; }
+	/// <returns>HP‚ª0ˆÈ‰º‚©‚Â€–S‰‰oŠÔ‚ªŒo‰ß‚µ‚Ä‚¢‚ê‚Î true</returns>
+	virtual bool IsDead() const
+	{ 
+		return (m_hp <= 0.0f && m_dyingTimer >= DYING_DURATION);
+	}
 
 	/// <summary>
 	/// “G‚ÌˆÊ’u‚ğ‹­§“I‚Éİ’è
@@ -161,6 +167,24 @@ public:
 	/// </summary>
 	/// <returns>“G‚Ìƒpƒ‰ƒ[ƒ^</returns>
 	const EnemyBaseParameter& GetParam() const { return m_param; }
+
+	/// <summary>
+	/// “G‚ÌŒ»İ‚Ìó‘Ô‚ğæ“¾
+	/// </summary>
+	/// <returns>Œ»İ‚ÌEnemyState</returns>
+	EnemyState GetState() const { return m_state; }
+
+	/// <summary>
+	/// “G‚ÌŒ»İ‚ÌHP‚ğæ“¾
+	/// </summary>
+	/// <returns>Œ»İ‚ÌHP</returns>
+	float GetHP() const { return m_hp; }
+
+	/// <summary>
+	/// “G‚ÌÅ‘åHP‚ğæ“¾
+	/// </summary>
+	/// <returns>Å‘åHP</returns>
+	float GetMaxHP() const { return m_maxHp; }
 
 protected:
 

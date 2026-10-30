@@ -2,7 +2,7 @@
  * @file   Fish.cpp
  * @brief  魚オブジェクト
  * @author 國田知睦
- * @date   2026/07/16
+ * @date   2026/10/02
  */
 
 #include "pch.h"
@@ -92,37 +92,47 @@ void Fish::Update(
 
     if (stage->IsInside(m_position.x, m_position.z))
     {
-        //高さ調整
-        m_fishHeightOffset = 0.0f;
+        
+        float target = stageY + FISH_HEIGHT_OFFSET;
+
         //魚がステージよりも下に落ちたときに補正する
-        if (m_position.y <= stageY - m_fishHeightOffset)
+        if (m_position.y <= target)
         {
-            m_position.y = stageY + m_fishHeightOffset;
+            //位置を地面に合わせる
+            m_position.y = target;
 
             //落ちてきたとき
             if (m_velocity.y < 0)
             {
                 //地面に当たったら跳ねるように
                 m_velocity.y = -m_velocity.y * FISH_JUMP_STRENGTH;
-            }
 
-            //ペタペタ跳ねる演出
-            //速度が下がると再度跳ねる
-            if (abs(m_velocity.y) < FISH_JUMP_HEIGHT)
-            {
-                //確率で小さく跳ねる
-                if (rand() % JUMP_PROBABILITY_MAX < JUMP_PROBABILITY_MIN)
+                //ペタペタ跳ねる演出
+                //速度が下がると再度跳ねる
+                if (abs(m_velocity.y) < FISH_JUMP_HEIGHT)
                 {
-                    //跳ねる高さをランダムにする
-                    m_velocity.y = JUMP_FORCE_MIN + (randomVal * JUMP_POWER_VARIANCE);
+                    //確率で小さく跳ねる
+                    if (rand() % JUMP_PROBABILITY_MAX < JUMP_PROBABILITY_MIN)
+                    {
+                        //跳ねる高さをランダムにする
+                        m_velocity.y = JUMP_FORCE_MIN + (randomVal * JUMP_POWER_VARIANCE);
 
-                    //高さだけでなく位置もずらす
-                    m_position.x += (randomVal - JUMP_OFFSET_X_SLIDE) * JUMP_OFFSET_X_MUL;
+                        //高さだけでなく位置もずらす
+                        m_position.x += (randomVal - JUMP_OFFSET_X_SLIDE) * JUMP_OFFSET_X_MUL;
+                    }
+                    else
+                    {
+                        //跳ねないとき
+                        m_velocity.y = 0;
+                    }
                 }
-                else
+            }
+            else
+            {
+				//地面に当たったときに下方向の速度が残っていたら0にする
+                if (m_velocity.y < 0.0f)
                 {
-                    //跳ねないとき
-                    m_velocity.y = 0;
+                    m_velocity.y = 0.0f;
                 }
             }
         }
@@ -185,7 +195,6 @@ void Fish::Render(
         //取得した地面の高さをセット
         shadowPos.y = groundY;
 
-        
         //ステージの傾き
         float rotX = stage->GetRotateX();
         float rotZ = stage->GetRotateZ();

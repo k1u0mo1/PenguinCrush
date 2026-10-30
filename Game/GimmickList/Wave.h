@@ -3,7 +3,7 @@
  * @file   Wave.h
  * @brief  水面の波を動的に生成・描画し、物理的な高さや傾きを提供するギミッククラス
  * @author 國田知睦
- * @date   2026/07/06
+ * @date   2026/10/19
  */
 
 #pragma once
@@ -36,18 +36,26 @@ struct WaveConstantBuffer
     float time;
     //波の高さ
     int isCubeMode;
+
     //波の細かさ
     float waveFrequency;
     //波の高さ
     float waveAmplitude;
+    //全体の波の速さ
+    float waveSpeed;
+	//波のとがり具合
+    float waveSharpness;
+
     //キューブの大きさ
     float cubeScale;
     //グリッドの幅
     int gridWidth;
-    //全体の波の速さ
-    float waveSpeed;
-    //置物 16の倍数に揃える
-    float padding;
+
+    //カラー 深い海の色
+    DirectX::SimpleMath::Vector4 deepColor;
+    //カラー 波の頂点・浅い色
+    DirectX::SimpleMath::Vector4 shallowColor;
+
 };
 
 /// <summary>
@@ -86,29 +94,29 @@ private:
     //立方体の頂点数
     static constexpr UINT CUBE_SIZE = 8;
 
-    //波1の速度
-    static constexpr float WAVE1_SPEED = 1.0f;
+    ////波1の速度
+    //static constexpr float WAVE1_SPEED = 1.0f;
 
-    //波2の細かさ
-    static constexpr float WAVE2_FREQ_SCALE = 1.5f;
-    //波2の速度
-    static constexpr float WAVE2_SPEED = 1.2f;
-    //波2の高さ
-    static constexpr float WAVE2_AMP_SCALE = 0.5f;
+    ////波2の細かさ
+    //static constexpr float WAVE2_FREQ_SCALE = 1.5f;
+    ////波2の速度
+    //static constexpr float WAVE2_SPEED = 1.2f;
+    ////波2の高さ
+    //static constexpr float WAVE2_AMP_SCALE = 0.5f;
 
-    //波3の細かさ
-    static constexpr float WAVE3_FREQ_SCALE = 0.5f;   
-    //波3の動く速度
-    static constexpr float WAVE3_SPEED = 1.0f;   
-    //波3の高さ
-    static constexpr float WAVE3_AMP_SCALE = 0.25f;  
+    ////波3の細かさ
+    //static constexpr float WAVE3_FREQ_SCALE = 0.5f;   
+    ////波3の動く速度
+    //static constexpr float WAVE3_SPEED = 1.0f;   
+    ////波3の高さ
+    //static constexpr float WAVE3_AMP_SCALE = 0.25f;  
 
-    //波4の細かさ
-    static constexpr float WAVE4_FREQ_SCALE = 0.25f;  
-    //波4の動く速度
-    static constexpr float WAVE4_SPEED = 0.5f;  
-    //波4の高さ（振幅）の倍率
-    static constexpr float WAVE4_AMP_SCALE = 0.5f;   
+    ////波4の細かさ
+    //static constexpr float WAVE4_FREQ_SCALE = 0.25f;  
+    ////波4の動く速度
+    //static constexpr float WAVE4_SPEED = 0.5f;  
+    ////波4の高さ（振幅）の倍率
+    //static constexpr float WAVE4_AMP_SCALE = 0.5f;   
 
     //波の傾き計算用のオフセット
     static constexpr float GRADIENT_CALC_OFFSET = 0.1f;
@@ -132,22 +140,12 @@ private:
 
     //形状と解像度に関する定数-------------
     //高さ
-    static constexpr int GRID_WIDTH = 100;
-    static constexpr int GRID_HEIGHT = 100;
+    static constexpr int GRID_WIDTH = 200;
+    static constexpr int GRID_HEIGHT = 200;
     //間隔
     static constexpr float GRID_SPACING = 0.5f;
 
-    //波の物理挙動に関する定数-------------
-    //波の細かさ
-    static constexpr float WAVE_FREQUENCY = 0.15f;
-    //時間経過の速さ
-    static constexpr float WAVE_SPEED = 0.02f;
-    //波の高さ 
-    static constexpr float WAVE_AMPLIYUDE = 1.5f;
-    //波を配置する高さ
-    static constexpr float WORLD_Y = -2.0f;
-    //波のスケール
-    static constexpr float WORLD_SCALE = 10.0f;
+    
     
     /// <summary>
     /// 波の高さ Y を計算 
@@ -165,43 +163,41 @@ private:
         //頂点のインデックスをワールド座標のスケールに合わせる
         float localX = x * GRID_SPACING;
         float localZ = z * GRID_SPACING;
-        //-------------------------------------------
-        //複数の波の計算を合成してリアルな波にする
-        //-------------------------------------------
 
-        //波１　ベースとなる揺れが大きくゆったり
-        float waveSlowly = sinf(localX * WAVE_FREQUENCY + time * WAVE1_SPEED);
-        //波２　少し細かく動きが速い
-        float waveQuick = cosf(localZ * WAVE_AMPLIYUDE * WAVE2_FREQ_SCALE + time * WAVE2_SPEED) * WAVE2_AMP_SCALE;
-        //波３　斜めの方向へ細かい波
-        float waveSlanting = sinf((localX + localZ) * WAVE3_FREQ_SCALE + time * WAVE3_SPEED) * WAVE3_AMP_SCALE;
-        //波４　逆斜めの方向の細かい波
-        float waveReverse = cosf((localX - localZ)   * WAVE4_FREQ_SCALE + time * WAVE4_SPEED) * WAVE4_AMP_SCALE;
-        //すべての波を合成
-        float wave = waveSlowly + waveQuick + (waveSlanting - waveReverse);
+        float t = time * m_uiSpeed;
+        DirectX::SimpleMath::Vector2 P(localX, localZ);
+        //float2 P(localX, localZ);
+        
+        float totalY = 0.0f;
 
-        //波を返す
-        return wave * WAVE_AMPLIYUDE ;
+        //GerstnerWaveのY成分を加算するラムダ式
+        auto AddGersrnerY = [&](
+            DirectX::SimpleMath::Vector2 dir,
+            float steepness, float wavelength,
+            float speed)
+            {
+                float k = 2.0f * 3.1415f / wavelength;
+                float c = sqrtf(9.8f / k);
+                DirectX::SimpleMath::Vector2 d = dir;
+                d.Normalize();
+                float f = k * (d.x * P.x + d.y * P.y - c * t * speed);
+                float a = steepness / k;
+
+                totalY += a * sinf(f);
+            };
+
+        //４つの波を合成
+        AddGersrnerY(DirectX::SimpleMath::Vector2(0.866f, 0.500f), m_uiSharpness * 0.15f, 20.0f / m_uiFrequency, m_uiSpeed);
+        AddGersrnerY(DirectX::SimpleMath::Vector2(-0.707f, -0.707f), m_uiSharpness * 0.12f, 12.0f / m_uiFrequency, m_uiSpeed * 1.2f);
+        AddGersrnerY(DirectX::SimpleMath::Vector2(-0.500f, 0.866f), m_uiSharpness * 0.08f, 8.0f / m_uiFrequency, m_uiSpeed * 1.5f);
+        AddGersrnerY(DirectX::SimpleMath::Vector2(0.965f, -0.258f), m_uiSharpness * 0.05f, 4.0f / m_uiFrequency, m_uiSpeed * 2.0f);
+       
+        return totalY * m_uiAmplitude;
+
+	
     }
 
-    /// <summary>
-    /// 高さから色を計算
-    /// </summary>
-    /// <param name="y">現在の波の高さ</param>
-    /// <returns>高さに応じたRGBAカラー</returns>
-    DirectX::XMVECTOR CalculateColor(float y)const 
-    {
-        float t = (y + 1.0f) / 2.0f;
-
-        //0.0fより小さければ0.0f に、1.0fより大きければ1.0f
-        t = std::min(1.0f, std::max(0.0f, t));
-
-        //深い青から明るい水色に変わる
-        return DirectX::XMVectorLerp(
-            DirectX::Colors::DarkBlue.v,
-            DirectX::Colors::Cyan.v, t
-        );
-    }
+    
 
 public:
 
@@ -267,12 +263,36 @@ public:
     /// <summary>
     /// 波の更新
     /// </summary>
-    void UpdateWaveVertices();
+    //void UpdateWaveVertices();
 
     /// <summary>
     /// モードを反転させる
     /// </summary>
     void ToggleDotMode() { m_isDotMode = !m_isDotMode; }
+
+    /// <summary>
+    /// UIの表示・非表示
+    /// </summary>
+    void ToggleUI() { m_showUI = !m_showUI; }
+
+    /// <summary>
+    /// ImGui パラメータ調整用のUI描画
+    /// </summary>
+    void RenderUI();
+
+    /// <summary>
+    /// 波のパラメータテキストファイルに保存する
+    /// </summary>
+    /// <param name="filePath">保存先のファイルパス</param>
+    /// <returns></returns>
+    bool SaveParameters(const std::string& filePath = "wave_config.json") const;
+
+    /// <summary>
+    /// 波のパラメータテキストファイルから読み込み
+    /// </summary>
+    /// <param name="filePath">読み込み元のファイルパス</param>
+    /// <returns></returns>
+    bool LoadParameters(const std::string& filePath = "wave_config.json");
 
 private:
 
@@ -336,4 +356,18 @@ private:
     
     //波の切り替え
     bool m_isDotMode = false;
+
+    //デバッグの切り替え
+    bool m_showUI = false;
+
+    //UIで調整するパラメータ変数
+    float m_uiFrequency = 0.25f; //波の細かさ
+    float m_uiAmplitude = 3.5f;  //波の高さ
+    float m_uiSpeed     = 1.2f;  //波の速さ
+    float m_uiSharpness = 2.2f;  //波の尖り具合
+
+    float m_waterColorDeep[4] = { 0.0f,0.2f,0.5f,1.0f };//深い色
+    float m_waterColorShallow[4] = { 0.3f,0.8f,1.0f,1.0f };//高い色
+
+    float m_uiCubeScale = 3.0f;//キューブの拡大率
 };

@@ -3,7 +3,7 @@
  * @file   NormalEnemy.cpp
  * @brief  通常敵の管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/17
+ * @date   2026/10/25
  */
 
 #include "pch.h"
@@ -24,12 +24,10 @@ NormalEnemy::NormalEnemy(
 	EnemyBase(deviceResources, position, param),
 	m_deviceResources(deviceResources),
 	m_displayCollision(displayCollision),
-	m_state(EnemyState::Idle),
 	m_stateTimer(0.0f)
 {
 	//攻撃パターンの追加
 	m_attackPattern.push_back(std::make_shared<MeleeAttackPattern>());
-	m_meleeAttackCooldownTimer = 0.0f;
 
 	//個体差を出す
 	float randomScale = ENEMY_SPEED +(static_cast<float>(rand()) / RAND_MAX) * SPEED_RAND_RANGE;
@@ -77,34 +75,17 @@ void NormalEnemy::Update(
 	Particle* particle,
 	EnemyManager* enemyManager)
 {
+
 	if (IsDead())return;
 
-	//物理更新
-	if (m_stateTimer > 0.0f)
-	{
-		m_stateTimer -= deltaTime;
-		//状態の更新
-		if (m_stateTimer <= 0.0f)
-		{
-			m_state = EnemyState::Idle;
-		}
-	}
-
+	//タイマーの更新
+	UpdateNormalEnemyTimers(deltaTime);
 	//AI更新
 	UpdateAI(deltaTime, playerPosition, stage, particle, enemyManager);
 	//物理更新
-	UpdatePhysics(stage, deltaTime);
-
+	UpdatePhysics(stage, deltaTime,particle);
 	//当たり判定の更新
-	if (m_modelCollision)
-	{
-		//モデルのスケールと位置を反映させたワールド行列を作成
-		DirectX::SimpleMath::Matrix world =
-			DirectX::SimpleMath::Matrix::CreateScale(m_param.scale) *
-			DirectX::SimpleMath::Matrix::CreateTranslation(m_position);
-		//モデルの当たり判定を更新
-		m_modelCollision->UpdateBoundingInfo(world);
-	}
+	UpdateNormalEnemyCollision();
 }
 
 //----------------------------------------------------------
@@ -120,10 +101,24 @@ void NormalEnemy::UpdateAI(
 {
 	UNREFERENCED_PARAMETER(particle);
 
-	//攻撃のクールダウンタイマーを減らす
-	if (m_meleeAttackCooldownTimer > 0.0f)
+	//死亡中はAIを止める
+	if (m_state == EnemyState::Dying)
 	{
-		m_meleeAttackCooldownTimer -= dt;
+		m_targetVelocity = DirectX::SimpleMath::Vector3::Zero;
+		return;
+	}
+
+	float groundY = stage ? stage->GetGroundHeight(m_position.x, m_position.z) : 0.0f;
+	if (m_position.y > groundY + 1.0f)
+	{
+		m_targetVelocity = DirectX::SimpleMath::Vector3::Zero;
+		return;
+	}
+
+	//各攻撃パターンのクールダウンタイマーを更新
+	for(auto& pattern : m_attackPattern)
+	{
+		pattern->UpdateTimer(dt);
 	}
 
 	//ノックバック中は移動しない
@@ -177,14 +172,19 @@ void NormalEnemy::UpdateAI(
 		if (enemyManager && !m_attackPattern.empty())
 		{
 			//プレイヤーとの距離が攻撃距離以内で、クールダウンが終わっている場合は攻撃
-			if (dist < ATTACK_DISTANCE && m_meleeAttackCooldownTimer <= 0.0f)
+			for(auto& pattern : m_attackPattern)
 			{
-				//攻撃パターン
-				m_attackPattern[0]->Execute(this, forward, enemyManager);
+				//発動条件を満たしているか
+				if (pattern->CanExecute(this, dist))
+				{
+					//攻撃を実行
+					pattern->Execute(this, forward, enemyManager);
 
-				m_state = EnemyState::Attack;
-				m_stateTimer = ATTACK_STATE_DURATION;
-				m_meleeAttackCooldownTimer = ATTACK_COOLDOWN;
+					//ステートと持続時間を切り替え
+					m_state = pattern->GetState();
+					m_stateTimer = pattern->GetDuration();
+					break;
+				}
 			}
 		}
 		break;
@@ -200,10 +200,8 @@ void NormalEnemy::UpdateAI(
 
 void NormalEnemy::UpdatePhysics(Stage* stage, float dt,Particle* particle)
 {
-	//滑る床の挙動を更新
-	CharacterBase::UpdatePhysice(dt, stage);
-	//落下の判定と処理
-	CheckAndHandleFalling(stage, particle);
+	//物理計算を更新
+	CharacterBase::UpdatePhysice(dt, stage, particle);
 
 	//滑る床の挙動を管理するクラスを更新
 	if (stage)
@@ -212,9 +210,50 @@ void NormalEnemy::UpdatePhysics(Stage* stage, float dt,Particle* particle)
 		DirectX::SimpleMath::Vector3 slideDir = stage->GetSlideDirection(m_position.x, m_position.z);
 		//滑る床の挙動を更新
 		m_slideBehavior.Update(m_position, m_targetVelocity, slideDir, dt);
-		//落下の判定と処理
-		CheckAndHandleFalling(stage, nullptr);
 	}
+}
+
+//----------------------------------------------------------
+// 通常の敵のタイマー更新
+//----------------------------------------------------------
+
+void NormalEnemy::UpdateNormalEnemyTimers(float deltaTime)
+{
+	//死亡中ならタイマーを加算
+	if (m_state == EnemyState::Dying)
+	{
+		m_dyingTimer += deltaTime;
+		return;
+	}
+
+	//物理更新
+	if (m_stateTimer > 0.0f)
+	{
+		m_stateTimer -= deltaTime;
+		//状態の更新
+		if (m_stateTimer <= 0.0f)
+		{
+			m_state = EnemyState::Idle;
+		}
+	}
+}
+
+//----------------------------------------------------------
+// 通常の敵の当たり判定の更新
+//----------------------------------------------------------
+
+void NormalEnemy::UpdateNormalEnemyCollision()
+{
+	//当たり判定の更新
+	if (!m_modelCollision)return;
+	
+	//モデルのスケールと位置を反映させたワールド行列を作成
+	DirectX::SimpleMath::Matrix world =
+		DirectX::SimpleMath::Matrix::CreateScale(m_param.scale) *
+		DirectX::SimpleMath::Matrix::CreateTranslation(m_position);
+	//モデルの当たり判定を更新
+	m_modelCollision->UpdateBoundingInfo(world);
+	
 }
 
 //----------------------------------------------------------
@@ -237,10 +276,22 @@ void NormalEnemy::Render(
 
 	if (m_renderer)
 	{
+		//Dying状態ならm_dyingTimerを渡す
+		float timerParam =
+			(m_state == EnemyState::Dying) ? m_dyingTimer : 0.0f;
+
 		//モデルの描画
 		m_renderer->Render(
-			context, m_position, m_forward,m_state, 0.0f,
-			combinedTransform, view, proj, nullptr, nullptr
+			context,
+			m_position, 
+			m_forward,
+			m_state, 
+			timerParam,
+			combinedTransform,
+			view, 
+			proj,
+			nullptr,
+			nullptr
 		);
 	}
 	//当たり判定の描画
@@ -271,10 +322,17 @@ void NormalEnemy::TakeDamage(
 {
 	UNREFERENCED_PARAMETER(type);
 
-	if (IsDead())return;
+	if (IsDead() || m_state == EnemyState::Dying) return;
+
 	//体力を減らす
 	m_hp -= amount;
-	if (m_hp < 0)m_hp = 0;
+	if (m_hp <= 0) 
+	{
+		m_hp = 0;
+		//死亡演出に
+		m_state = EnemyState::Dying;
+		m_dyingTimer = 0.0f;
+	}
 }
 
 //----------------------------------------------------------
@@ -285,11 +343,12 @@ void NormalEnemy::ApplyKnockback(
 	const DirectX::SimpleMath::Vector3& direction,
 	float power)
 {
-	//敵自身が受けるノックバックの倍率
-	//後ろに飛ぶ強さ
-	m_knockbackVelocity = direction * power * m_param.receivedKnockbackPowerMultiplier;
-	//上に飛ぶ強さ
-	m_knockbackVelocity.y = m_param.receivedKnockbackUpwardForce;
-	//ノックバック後の硬直
-	m_knockbackTimer = m_param.receivedKnockbackDuration;
+	
+	CharacterBase::ApplyKnockback(
+		direction,
+		power,
+		m_param.receivedKnockbackPowerMultiplier,
+		m_param.receivedKnockbackUpwardForce,
+		m_param.receivedKnockbackDuration
+	);
 }

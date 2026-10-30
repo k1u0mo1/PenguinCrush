@@ -3,7 +3,7 @@
  * @file   StageManager.h
  * @brief  ステージを管理するマネージャークラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/10/23
  */
 
 #pragma once
@@ -11,6 +11,8 @@
 #include <unordered_map>
 #include <string>
 #include "Game/GimmickList/WaveManager.h"
+#include <Game/PlayerList/Player.h>
+#include <Game/EnemyList/EnemyBase.h>
 
 /// <summary>
 /// ステージを管理するマネージャー
@@ -53,6 +55,17 @@ public:
 	/// </summary>
 	/// <param name="wave">波のポインタ</param>
 	void Update(float elapsedTime, WaveManager* waveManager);
+
+	/// <summary>
+	/// 流氷に乗っているプレイヤー・敵を調べ、流氷の耐久値を減らす
+	/// </summary>
+	/// <param name="elapsedTime">前フレームからの経過時間</param>
+	/// <param name="player">プレイヤーのポインタ</param>
+	/// <param name="activeEnemise">敵のポインタ</param>
+	void UpdateFloeDamage(
+		float elapsedTime,
+		Player* player,
+		const std::vector<EnemyBase*>& activeEnemise) const;
 
 	/// <summary>
 	/// ステージの描画

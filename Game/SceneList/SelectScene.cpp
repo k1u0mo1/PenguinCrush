@@ -2,7 +2,7 @@
  * @file   SelectScene.cpp
  * @brief  選択画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/07/29
+ * @date   2026/10/20
  */
 
 #include "pch.h"
@@ -74,7 +74,7 @@ void SelectScene::Update(float elapsedTime)
         }
     }
 	//カーソル移動（下キー）
-    if (input->kbTracker.pressed.Down || input->kbTracker.pressed.S)
+    if (input->kbTracker.pressed.Down || input->kbTracker.pressed.S )
     {
 		//移動音
         AudioManager::GetInstance()->Play("SE_Move",DEFAULT_SE_VOLUME);
@@ -110,11 +110,29 @@ void SelectScene::Update(float elapsedTime)
     {
         ChangeScene<TitleScene>();
     }
+    // ----------------------------------------------------
+    // デバッグ機能　決定（エンターキー）一括解放
+    // ----------------------------------------------------
+    
+    if (input->kbTracker.pressed.Enter)
+    {
+        //全ステージ解放
+        for (int i = 0; i < (int)GamePlayScene::StageType::COUNT; i++)
+        {
+            s_isClearedList[i] = true;
 
+            //決定音を鳴らす・そのまま選択中のステージへ進入
+            AudioManager::GetInstance()->Play("SE_Click", DEFAULT_SE_CLICK_VOLUME);
+            m_isChangingScene = true;
+            transitionMask->Close();
+            GamePlayScene::NextStageType = m_stageList[m_currentCursor].type;
+            return;
+        }
+    }
     // ----------------------------------------------------
-    // 決定（エンターキー）
+    // 決定（スペースキー）
     // ----------------------------------------------------
-    if (input->kbTracker.pressed.Enter || input->kbTracker.pressed.Space)
+    if (input->kbTracker.pressed.Space)
     {
         //現在カーソルの位置はステージが解放がされているか？
         if (IsStageUnlocked(m_currentCursor))

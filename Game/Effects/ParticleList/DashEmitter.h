@@ -1,7 +1,7 @@
 
 /**
  * @file   DashEmitter.h
- * @brief  落下した際の水しぶき専用　パーティクルクラス
+ * @brief  突進の後ろから出る専用　パーティクルクラス
  * @author 國田知睦
  * @date   2026/07/15
  */
@@ -11,7 +11,7 @@
 #include <SimpleMath.h>
 
 /// <summary>
-/// 水しぶき専用のエミッタークラス
+/// 突進の後ろから出る専用のエミッタークラス
 /// </summary>
 class DashEmitter : public BaseParticleEmitter
 {

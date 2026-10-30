@@ -2,7 +2,7 @@
  * @file   RushE.cpp
  * @brief  敵の突進攻撃クラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/10/27
  */
 
 #include "pch.h"
@@ -10,6 +10,7 @@
 #include "Game/EnemyList/BossEnemy.h"
 #include "Game/EnemyList/EnemyBase.h"
 #include <Effects.h>
+#include <Game/Common/ObjectCharacter/ModelManager.h>
 
 //----------------------------------------------------------
 // 敵の突進攻撃を生成
@@ -19,13 +20,16 @@ RushE::RushE(
 	DX::DeviceResources* deviceResources,
 	EnemyBase* enemy,
 	const DirectX::SimpleMath::Vector3& forward,
-	std::shared_ptr<DisplayCollision> displayCollision)
+	std::shared_ptr<DisplayCollision> displayCollision,
+	Particle* particle)
 	: 
 	m_deviceResources(deviceResources),
 	m_forward(forward),
 	m_lifetime(0.0f),
 	m_displayCollision(displayCollision),
-	m_enemy(enemy)
+	m_enemy(enemy),
+	m_particle(particle)
+
 {
 	//ボスの位置に当たり判定を作る
 	m_position = m_enemy->GetPosition();
@@ -44,22 +48,45 @@ RushE::RushE(
 void RushE::Update(float deltaTime)
 {
 	m_lifetime += deltaTime;
-	
-	//敵の向きをプレイヤーの方に向ける
-	float angle = atan2(m_forward.x, m_forward.z);
-	m_enemy->SetRotationY(angle);
 
-	//ボスを滑らせる(移動)
-	DirectX::SimpleMath::Vector3 currentPos = m_enemy->GetPosition();
-	//ボスの前方に出す
-	DirectX::SimpleMath::Vector3 nextPos = currentPos + m_forward * RUSH_SPEED * deltaTime;
+	//溜め（突進前）
+	if (m_lifetime < CHARGE_TIME)
+	{
+		//プレイヤーの方向を向く
+		float angle = atan2(m_forward.x, m_forward.z);
+		m_enemy->SetRotationY(angle);
+		m_position = m_enemy->GetPosition();
 
-	//ボスの位置を更新
-	m_enemy->SetPosition(nextPos);
+		if (m_particle)
+		{
+			//溜め時間
+			float loopProgress = fmodf(m_lifetime * PREVIEW_PROGRESS_SPEED, 1.0f);
+			//発生位置　未来の進む位置
+			DirectX::SimpleMath::Vector3 spawnPos =
+				m_position + m_forward * (PREVIEW_LINE_LENGTH * loopProgress);
+			//足元より少し上に配置
+			spawnPos.y += PREVIEW_SPAWN_HEIGHT_OFFSET;
 
-	//当たり判定もボスに追従
-	m_position = nextPos;
-	//コリジョン
+			//パーティクルの生成
+			m_particle->Spawn(
+				Particle::Type::DashWarning,
+				spawnPos,
+				PREVIEW_PARTICLE_COUNT,		//粒子の数
+				PREVIEW_PARTICLE_SIZE		//サイズ
+			);
+		}
+
+	}
+	//突進
+	else
+	{
+		DirectX::SimpleMath::Vector3 currentPos = m_enemy->GetPosition();
+		DirectX::SimpleMath::Vector3 nextPos = currentPos + m_forward * RUSH_SPEED * deltaTime;
+
+		m_enemy->SetPosition(nextPos);
+		m_position = nextPos;
+	}
+
 	if (m_collision)
 	{
 		m_collision->SetCenter(m_position);
@@ -75,31 +102,11 @@ void RushE::Render(
 	const DirectX::SimpleMath::Matrix& view,
 	const DirectX::SimpleMath::Matrix& proj)
 {
-	//合成
-	DirectX::SimpleMath::Matrix world =
-		DirectX::SimpleMath::Matrix::CreateScale(SCALE_SIZE) *
-		DirectX::SimpleMath::Matrix::CreateTranslation(m_position);
+	UNREFERENCED_PARAMETER(context);
+	UNREFERENCED_PARAMETER(view);
+	UNREFERENCED_PARAMETER(proj);
 
-	// デバッグ描画 OBB → BoundingBox
-	if (m_collision && m_displayCollision)
-	{
-		DirectX::BoundingBox box;
-		box.Center = m_collision->GetCenter();
-		box.Extents = m_collision->GetExtents();
-
-		m_displayCollision->AddBoundingBox(box, DirectX::Colors::White);
-	}
-
-	// デバッグ用の当たり判定表示だけ残す
-	if (m_collision && m_displayCollision)
-	{
-		m_collision->AddDisplayCollision(m_displayCollision.get());
-		// 赤色で攻撃判定を表示
-		m_displayCollision->DrawCollision(
-			context, m_states.get(), view, proj,
-			DirectX::Colors::Red, DirectX::Colors::DarkRed, DEBUG_COLLISION_LINE_THICKNESS
-		);
-	}
+	
 }
 
 //----------------------------------------------------------

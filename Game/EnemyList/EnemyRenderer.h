@@ -25,7 +25,7 @@ private:
 	//ふらつき時の揺れる最大角度
     static constexpr float DIZZY_SWAY_ANGLE = 0.2f;  
 	//ふらつきエフェクトの高さ
-    static constexpr float DIZZY_EFFECT_OFFSET_Y = 2.5f;
+    static constexpr float DIZZY_EFFECT_OFFSET_Y = 5.5f;
 
     //影の描画パラメータ
     static constexpr float SHADOW_DEFAULT_SCALE = 1.0f;

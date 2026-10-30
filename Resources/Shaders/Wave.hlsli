@@ -3,7 +3,7 @@
  * @file   Wave.hlsli
  * @brief  波用のシェーダ
  * @author 國田知睦
- * @date   2026/07/06
+ * @date   2026/10/14
  */
 
 //C++から毎フレーム送られてくるデータ
@@ -12,14 +12,20 @@ cbuffer ConstBuffer	: register(b0)
 	matrix matWorld;
 	matrix matView;
 	matrix matProj;
+    
     float time; //波を動かす用の時間
     int isCubeMode;//1:キューブ　0:通常の波  
+    
     float waveFrequency;
     float waveAmplitude;
+    float waveSpeed;
+    float waveSharpness;
+    
     float cubeScale;
     int gridWidth;
-    float waveSpeed;
-    float padding;
+    
+    float4 deepColor; //深い海の色
+    float4 shallowColor;//高い色
 };
 
 struct VS_INPUT

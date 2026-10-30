@@ -1,7 +1,7 @@
 
 /**
  * @file   DashEmitter.cpp
- * @brief  落下した際の水しぶき専用　パーティクルクラス
+ * @brief  突進の後ろから出る煙専用　パーティクルクラス
  * @author 國田知睦
  * @date   2026/07/15
  */

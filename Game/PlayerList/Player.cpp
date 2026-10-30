@@ -3,7 +3,7 @@
  * @file   Player.cpp
  * @brief  プレイヤーキャラクターの制御・パラメータ管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/17
+ * @date   2026/10/25
  */
 
 #include "pch.h"
@@ -85,6 +85,8 @@ void Player::Initialize(
     m_isDashing = false;
     //クールタイマー
     m_attackCoolTime = 0.0f;
+	//ふらつきの回転角度
+    m_dizzyRotationY = 0.0f;
 
     //ステータスのリセット
     //体力
@@ -109,87 +111,24 @@ void Player::Update(
 
     if (!stage) return;
 
-    CheckAndHandleFalling(stage, particle);
     //キーボードの状態を取得
     auto kb = DirectX::Keyboard::Get().GetState();
 
-    // 状態タイマーの更新
-    if (m_stateTimer > 0.0f)
-    {
-        m_stateTimer -= elapsedTime;
-        if (m_stateTimer <= 0.0f)
-        {
-            m_state = PlayerState::Idle;
-        }
-    }
-
-    //ふらつき中ならエフェクトを回転させる
-    if (m_state == PlayerState::Dizzy)
-    {
-        //ふらつきのエフェクトの現在の回転角度
-        m_dizzyRotationY += DIZZY_EFFECT_ROT_SPEED * elapsedTime;
-    }
-
-    //クールタイムを減らす
-    if (m_attackCoolTime > 0.0f)
-    {
-        m_attackCoolTime -= elapsedTime;
-    }
+    //時間とタイマーの更新
+    UpdateTimers(elapsedTime);
 
     //移動
     HandleMovement(elapsedTime, stage, particle);
-    //ノックバック処理
-    CharacterBase::UpdatePhysice(elapsedTime, m_stage);
+    //物理計算処理
+    CharacterBase::UpdatePhysice(elapsedTime, m_stage, particle);
     //攻撃
     HandleAttack(elapsedTime, mouse, mouseTracker, kb);
     //スタミナ回復
     UpdateStamina(elapsedTime);
+	
     
-	//落下してステージの下に到達した場合の処理
-    if(m_position.y< STAGE_BOUNDARY_Y)
-    {
-        //効果音
-        AudioManager::GetInstance()->Play("Fall");
-        if (particle)
-        {
-            // 水面の高さに合わせて発生位置
-            DirectX::SimpleMath::Vector3 splashPos = m_position;
-            splashPos.y = 0.0f;
-            //水しぶき
-            particle->Spawn(Particle::Type::Splash, splashPos, SPLASH_OF_WATER);
-        }
-
-		//安全なリスポーン位置の検索
-        DirectX::SimpleMath::Vector3 safePosition;
-        if (m_stage && m_stage->FindSafeRespawnPosition(RESPAWN_HEIGHT, STAGE_BOUNDARY_Y, safePosition))
-        {
-			//安全な位置が見つかった場合はそこにリスポーン
-            m_position = safePosition;
-        }
-        else
-        {
-			//安全な位置が見つからない場合は、リスポーン高さに固定してリスポーン
-            m_position = DirectX::SimpleMath::Vector3(0.0f, RESPAWN_HEIGHT, 0.0f);
-        }
-
-		//落下したときの速度をリセット
-        m_velocity = DirectX::SimpleMath::Vector3::Zero;
-		//ノックバックもリセット
-        m_knockbackVelocity = DirectX::SimpleMath::Vector3::Zero;
-
-		//HPを減らすなどのペナルティ処理
-        m_stats.TakeDamage(FALL_DAMAGE);
-	}
-
-    // コリジョン情報の更新を追加
-    if (m_collision)
-    {
-		//ワールド行列を計算してコリジョンに渡す
-        DirectX::SimpleMath::Matrix world = 
-            DirectX::SimpleMath::Matrix::CreateWorld(m_position, m_forward, DirectX::SimpleMath::Vector3::Up);
-
-        m_collision->UpdateBoundingInfo(world);
-    }
+	//コリジョンの更新
+    UpdateCollision();
 }
 
 //-----------------------------------------------------------------
@@ -239,9 +178,12 @@ void Player::ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float
 {
     //ノックバック
     CharacterBase::ApplyKnockback(
-        direction, power * KNOCKBACK_POWER_SCALE,
+        direction,
+        power,
+        KNOCKBACK_POWER_SCALE,
         KNOCKBACK_UP_FORCE, 
-        KNOCKBACK_DURATION);
+        KNOCKBACK_DURATION
+    );
 
     // ノックバック中はダッシュを解除
     m_isDashing = false;
@@ -252,6 +194,8 @@ void Player::ApplyKnockback(const DirectX::SimpleMath::Vector3& direction, float
         //ふらつき状態を呼び出す
         ApplyDizzy();
     }
+
+    
 }
 
 //-----------------------------------------------------------------
@@ -422,10 +366,11 @@ void Player::HandleAttack(
         m_stateTimer = STATE_TIMER_ATTACK;
 		//攻撃処理
         if (m_attackManager)
+        {
             m_attackManager->Attack(this);
-
-		//スタミナを消費
-        m_stats.UseStamina(STAMINA_COST_ATTACK);
+            //スタミナを消費
+            m_stats.UseStamina(STAMINA_COST_ATTACK);
+        }
     }
 
     // ラッシュ攻撃（ダッシュ中）
@@ -436,6 +381,10 @@ void Player::HandleAttack(
         {
             m_state = PlayerState::Idle;
             m_attackCoolTime = ATTACK_COOLDOWN;
+            //滑る慣性を設定
+            DirectX::SimpleMath::Vector3 rushInertia = m_forward * TURN_SPEED;
+            SetSlideInertia(rushInertia);
+
             return;
         }
         // Rush継続中の処理
@@ -493,8 +442,105 @@ void Player::ApplyDizzy()
 //プレイヤーにダメージ 攻撃を受けたときにHPを減らす
 //-----------------------------------------------------------------
 
+void Player::UpdateTimers(float elapsedTime)
+{
+    // 状態タイマーの更新
+    if (m_stateTimer > 0.0f)
+    {
+        m_stateTimer -= elapsedTime;
+        if (m_stateTimer <= 0.0f)
+        {
+            m_state = PlayerState::Idle;
+        }
+    }
+
+    //ふらつき中ならエフェクトを回転させる
+    if (m_state == PlayerState::Dizzy)
+    {
+        //ふらつきのエフェクトの現在の回転角度
+        m_dizzyRotationY += DIZZY_EFFECT_ROT_SPEED * elapsedTime;
+    }
+
+    //クールタイムを減らす
+    if (m_attackCoolTime > 0.0f)
+    {
+        m_attackCoolTime -= elapsedTime;
+    }
+    //無敵タイマーの減算
+    if (m_invincibleTimer > 0.0f)
+    {
+        m_invincibleTimer -= elapsedTime;
+    }
+}
+
+//-----------------------------------------------------------------
+//落下してステージの下に到達した場合の処理
+//-----------------------------------------------------------------
+
+void Player::HandleFallAndRespawn(Particle* particle)
+{
+    //落下してステージの下に到達した場合の処理
+    
+    if (m_position.y >= STAGE_BOUNDARY_Y)return;
+    
+    //効果音
+    AudioManager::GetInstance()->Play("Fall");
+    if (particle)
+    {
+        // 水面の高さに合わせて発生位置
+        DirectX::SimpleMath::Vector3 splashPos = m_position;
+        splashPos.y = 0.0f;
+        //水しぶき
+        particle->Spawn(Particle::Type::Splash, splashPos, SPLASH_OF_WATER);
+    }
+
+    //安全なリスポーン位置の検索
+    DirectX::SimpleMath::Vector3 safePosition;
+    if (m_stage && m_stage->FindSafeRespawnPosition(RESPAWN_HEIGHT, STAGE_BOUNDARY_Y, safePosition))
+    {
+        //安全な位置が見つかった場合はそこにリスポーン
+        m_position = safePosition;
+    }
+    else
+    {
+        //安全な位置が見つからない場合は、リスポーン高さに固定してリスポーン
+        m_position = DirectX::SimpleMath::Vector3(0.0f, RESPAWN_HEIGHT, 0.0f);
+    }
+
+    //落下したときの速度をリセット
+    m_velocity = DirectX::SimpleMath::Vector3::Zero;
+    //ノックバックもリセット
+    m_knockbackVelocity = DirectX::SimpleMath::Vector3::Zero;
+
+    //HPを減らすなどのペナルティ処理
+    m_stats.TakeDamage(FALL_DAMAGE);
+    
+}
+
+//-----------------------------------------------------------------
+//コリジョンの更新  プレイヤーの座標や向きに合わせてコリジョンを更新する
+//-----------------------------------------------------------------
+
+void Player::UpdateCollision()
+{
+    if (!m_collision)return;
+    
+    //ワールド行列を計算してコリジョンに渡す
+    DirectX::SimpleMath::Matrix world =
+        DirectX::SimpleMath::Matrix::CreateWorld(m_position, m_forward, DirectX::SimpleMath::Vector3::Up);
+
+    m_collision->UpdateBoundingInfo(world);
+}
+
+//-----------------------------------------------------------------
+//プレイヤーにダメージ 攻撃を受けたときにHPを減らす
+//-----------------------------------------------------------------
+
 void Player::TakeDamage(float amount)
 {
+    //無敵時間中ならダメージ処理を行わない
+    if (m_invincibleTimer > 0.0f)return;
+
     //HPを減らす
     m_stats.hp -= amount;
 
@@ -503,6 +549,9 @@ void Player::TakeDamage(float amount)
     {
         m_stats.hp = 0.0f;
     }
+
+    //ダメージを受けたら無敵タイマーをセット
+    m_invincibleTimer = INVINCIBLE_DURARION;
 }
 
 //----------------------------------------------------------
@@ -517,14 +566,7 @@ void Player::CreateDeviceResources()
     //ステートの作成
     //------------------------------------------------------
     m_states = std::make_unique<DirectX::CommonStates>(device);
-    //------------------------------------------------------
-    //コリジョンの生成
-    //------------------------------------------------------
-    if (m_model)
-    {
-        //当たり判定
-        m_collision = std::make_unique<ModelCollisionOrientedBox>(m_model.get());
-    }
+    
     //------------------------------------------------------
     //影用のテクスチャの読み込み
     //------------------------------------------------------

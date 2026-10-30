@@ -277,10 +277,27 @@ private:
 public:
 
 	/// <summary>
+	/// デフォルトコンストラクタ
+	/// </summary>
+	ModelCollisionSphere();
+
+	/// <summary>
 	/// コンストラクタ
 	/// </summary>
 	/// <param name="pModel">コリジョン生成の元になる3Dモデルデータへのポインタ</param>
 	ModelCollisionSphere(DirectX::Model* pModel);
+
+	/// <summary>
+	/// 中心座標を設定
+	/// </summary>
+	/// <param name="center">中心</param>
+	void SetCenter(const DirectX::SimpleMath::Vector3& center);
+
+	/// <summary>
+	/// 半径を設定
+	/// </summary>
+	/// <param name="radius">半径</param>
+	void SetRadius(float radius);
 
 	/// <summary>
 	/// 衝突判定情報の更新

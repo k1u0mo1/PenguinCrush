@@ -2,7 +2,7 @@
  * @file   Game.cpp
  * @brief  ゲーム
  * @author 國田知睦
- * @date   2026/06/23
+ * @date   2026/10/15
  */
 
 #include "pch.h"
@@ -38,6 +38,10 @@ Game::Game() noexcept(false)
 
 Game::~Game()
 {
+    //ImGuiの解放
+    FinalizeImGui();
+
+
     AudioManager::GetInstance()->Suspend();
 
     //シーンマネージャーを明示的に解放する
@@ -56,31 +60,31 @@ void Game::Initialize(HWND window, int width, int height)
     // オーディオ初期化
     AudioManager::GetInstance()->Initialize();
 
-
-
     m_deviceResources->SetWindow(window, width, height);
+
+    //入力関連のマネージャーの初期化
+    m_inputManager = std::make_unique<InputManager>();
 
     m_deviceResources->CreateDeviceResources();
     CreateDeviceDependentResources();
 
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
-
-    //////////////////////////////////////////////////////////
+    
+    //ImGuiの初期化
+    InitializeImGui(window);
 
     //マウスカーソルを消す
-    ShowCursor(FALSE);
+    ShowCursor(TRUE);
+    //ShowCursor(FALSE);
 
 
+    //すべてのリソースを準備してから最初のシーンをセット
+    m_userResources->SetInputManager(m_inputManager.get());
+    
     //どのシーンにするか
     m_sceneManager->SetScene<TitleScene>();
-   
-    //入力関連のマネージャーの初期化
-    m_inputManager = std::make_unique<InputManager>();
     
-    m_userResources->SetInputManager(m_inputManager.get());
-     
-    ////////////////////////////////////////////////////////
 }
 
 #pragma region Frame Update
@@ -101,6 +105,11 @@ void Game::Update(DX::StepTimer const& timer)
     float elapsedTime = float(timer.GetElapsedSeconds());
 
     elapsedTime;
+
+    //ImGuiの新規フレームの準備
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
 
     ///////////////////////////////////////////////////
 
@@ -179,6 +188,9 @@ void Game::Render()
     //m_debugFont->Render(m_states.get());
     ////----------------------------------------------
 
+    //ImGuiのレンダーデータの生成と描画
+    ImGui::Render();
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 
     ///////////////////////////////////////////////////////////////////
@@ -330,6 +342,39 @@ void Game::CreateDeviceDependentResources()
 void Game::CreateWindowSizeDependentResources()
 {
     m_sceneManager->CreateWindowSizeDependentResources();
+}
+
+
+void Game::InitializeImGui(HWND window)
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    //日本語フォントの読み込み設定
+    io.Fonts->AddFontFromFileTTF(
+        "C:\\Windows\\Fonts\\meiryo.ttc",
+        18.0f,
+        nullptr,
+        io.Fonts->GetGlyphRangesJapanese()
+    );
+
+    //スタイルの設定(色)
+    ImGui::StyleColorsDark();
+
+    //プラットフォーム・レンダラー　バックエンドの初期化
+    ImGui_ImplWin32_Init(window);
+    ImGui_ImplDX11_Init(
+        m_deviceResources->GetD3DDevice(), 
+        m_deviceResources->GetD3DDeviceContext()
+    );
+}
+
+void Game::FinalizeImGui()
+{
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
 }
 
 void Game::OnDeviceLost()

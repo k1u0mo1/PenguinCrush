@@ -3,7 +3,7 @@
  * @file   AttackManager.h
  * @brief  攻撃の管理クラス
  * @author 國田知睦
- * @date   2026/07/10
+ * @date   2026/10/23
  */
 
 #pragma once
@@ -29,12 +29,10 @@ private:
 	//エフェクトのサイズ
 	static constexpr float HIT_EFFECT_SIZE = 0.5f;
 	
-	//ダメージ量
-	static constexpr float ATTACK_DAMAGE = 100.0f;
 	//ダッシュのノックバックの強さ
 	static constexpr float RUSH_KNOCKBACK_POWER = 10.0f;
 	//ヒットストップの時間
-	static constexpr float HIT_STOP_DURATION = 0.1f;
+	static constexpr float HIT_STOP_DURATION = 0.2f;
 
 public: 
 	

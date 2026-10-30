@@ -31,6 +31,17 @@ protected:
 	//水面の基本的な高さ
 	static constexpr float WATER_SURFACE_Y = 0.0f;
 
+	//デフォルトの受けるノックバック倍率
+	static constexpr float DEFAULT_KNOCKBACK_MULTIPLIER = 1.0f;
+	//デフォルトの上方向への力
+	static constexpr float DEFAULT_KNOCKBACK_UPWARD_FORCE = 8.0f;
+	//デフォルトのノックバックの硬直時間
+	static constexpr float DEFAULT_KNOCKBACK_DURATION = 0.5f;
+
+	//リスポーン位置のランダム分散用
+	static constexpr float RESPAWN_OFFSET_RANGE = 3.0f;
+	static constexpr float RESPAWN_RANGE = 0.5f;
+
 public:
 	
 	/// <summary>
@@ -60,20 +71,23 @@ public:
 	/// </summary>
 	/// <param name="dt">経過時間</param>
 	/// <param name="stage">ステージオブジェクトのポインタ</param>
-	void UpdatePhysice(float dt, Stage* stage);
+	/// <param name="particle">パーティクのポインタ</param>
+	void UpdatePhysice(float dt, Stage* stage, Particle* particle);
 
 	/// <summary>
-	/// ノックバック
+	/// ノックバック計算の一括の共通処理
 	/// </summary>
-	/// <param name="direction">吹っ飛ぶ方向</param>
-	/// <param name="power">吹っ飛ぶ強さ</param>
-	/// <param name="upPower">上に浮き上がる力</param>
-	/// <param name="duration">持続時間</param>
+	/// <param name="direction">吹き飛ぶ方向</param>
+	/// <param name="power">受ける攻撃の基本の威力</param>
+	/// <param name="powerMultiplier">キャラクター固有の吹っ飛び倍率</param>
+	/// <param name="upwardForce">上方向への跳ね上げ力</param>
+	/// <param name="duration">ノックバックの硬直持続時間</param>
 	void ApplyKnockback(
 		const DirectX::SimpleMath::Vector3& direction,
 		float power,
-		float upPower,
-		float duration
+		float powerMultiplier = DEFAULT_KNOCKBACK_MULTIPLIER,
+		float upwardForce = DEFAULT_KNOCKBACK_UPWARD_FORCE,
+		float duration = DEFAULT_KNOCKBACK_DURATION
 	);
 
 	/// <summary>

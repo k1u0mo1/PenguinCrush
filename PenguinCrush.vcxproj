@@ -86,7 +86,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Tool/ImGui;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
@@ -112,7 +112,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Tool/ImGui;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
@@ -137,7 +137,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Tool/ImGui;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
@@ -167,7 +167,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Tool/ImGui;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
@@ -212,6 +212,7 @@
     <ClInclude Include="Game\Effects\BaseParticleEmitter.h" />
     <ClInclude Include="Game\Effects\Particle.h" />
     <ClInclude Include="Game\Effects\ParticleList\DashEmitter.h" />
+    <ClInclude Include="Game\Effects\ParticleList\DashWarningEmitter.h" />
     <ClInclude Include="Game\Effects\ParticleList\ExplosionEmitter.h" />
     <ClInclude Include="Game\Effects\ParticleList\HealEmitter.h" />
     <ClInclude Include="Game\Effects\ParticleList\SplashEmitter.h" />
@@ -219,6 +220,7 @@
     <ClInclude Include="Game\EnemyList\BossEnemy.h" />
     <ClInclude Include="Game\EnemyList\EnemyAI.h" />
     <ClInclude Include="Game\EnemyList\EnemyAttackList\AttackE.h" />
+    <ClInclude Include="Game\EnemyList\EnemyAttackList\ColdAuraE.h" />
     <ClInclude Include="Game\EnemyList\EnemyAttackList\EnemyAttackBase.h" />
     <ClInclude Include="Game\EnemyList\EnemyAttackList\EnemyAttackPattern.h" />
     <ClInclude Include="Game\EnemyList\EnemyAttackList\RushE.h" />
@@ -227,6 +229,7 @@
     <ClInclude Include="Game\EnemyList\EnemyManager.h" />
     <ClInclude Include="Game\EnemyList\EnemyRenderer.h" />
     <ClInclude Include="Game\EnemyList\NormalEnemy.h" />
+    <ClInclude Include="Game\GameLogic\GameJudge.h" />
     <ClInclude Include="Game\GimmickList\Fish.h" />
     <ClInclude Include="Game\GimmickList\FishManager.h" />
     <ClInclude Include="Game\GimmickList\GimmickManager.h" />
@@ -241,6 +244,7 @@
     <ClInclude Include="Game\PlayerList\AttackList\AttackP.h" />
     <ClInclude Include="Game\PlayerList\AttackList\RushP.h" />
     <ClInclude Include="Game\PlayerList\Player.h" />
+    <ClInclude Include="Game\PlayerList\PlayerAttackType.h" />
     <ClInclude Include="Game\PlayerList\PlayerRenderer.h" />
     <ClInclude Include="Game\PlayerList\PlayerStats.h" />
     <ClInclude Include="Game\SceneList\GamePlayScene.h" />
@@ -264,6 +268,14 @@
     <ClInclude Include="Library\SceneManager.h" />
     <ClInclude Include="Library\StageManager.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Tool\ImGui\imconfig.h" />
+    <ClInclude Include="Tool\ImGui\imgui.h" />
+    <ClInclude Include="Tool\ImGui\imgui_impl_dx11.h" />
+    <ClInclude Include="Tool\ImGui\imgui_impl_win32.h" />
+    <ClInclude Include="Tool\ImGui\imgui_internal.h" />
+    <ClInclude Include="Tool\ImGui\imstb_rectpack.h" />
+    <ClInclude Include="Tool\ImGui\imstb_textedit.h" />
+    <ClInclude Include="Tool\ImGui\imstb_truetype.h" />
     <ClInclude Include="UserResources.h" />
   </ItemGroup>
   <ItemGroup>
@@ -279,6 +291,7 @@
     <ClCompile Include="Game\Common\TransitionMask.cpp" />
     <ClCompile Include="Game\Effects\Particle.cpp" />
     <ClCompile Include="Game\Effects\ParticleList\DashEmitter.cpp" />
+    <ClCompile Include="Game\Effects\ParticleList\DashWarningEmitter.cpp" />
     <ClCompile Include="Game\Effects\ParticleList\ExplosionEmitter.cpp" />
     <ClCompile Include="Game\Effects\ParticleList\HealEmitter.cpp" />
     <ClCompile Include="Game\Effects\ParticleList\SplashEmitter.cpp" />
@@ -286,12 +299,14 @@
     <ClCompile Include="Game\EnemyList\BossEnemy.cpp" />
     <ClCompile Include="Game\EnemyList\EnemyAI.cpp" />
     <ClCompile Include="Game\EnemyList\EnemyAttackList\AttackE.cpp" />
+    <ClCompile Include="Game\EnemyList\EnemyAttackList\ColdAuraE.cpp" />
     <ClCompile Include="Game\EnemyList\EnemyAttackList\EnemyAttackPattern.cpp" />
     <ClCompile Include="Game\EnemyList\EnemyAttackList\RushE.cpp" />
     <ClCompile Include="Game\EnemyList\EnemyBase.cpp" />
     <ClCompile Include="Game\EnemyList\EnemyManager.cpp" />
     <ClCompile Include="Game\EnemyList\EnemyRenderer.cpp" />
     <ClCompile Include="Game\EnemyList\NormalEnemy.cpp" />
+    <ClCompile Include="Game\GameLogic\GameJudge.cpp" />
     <ClCompile Include="Game\GimmickList\Fish.cpp" />
     <ClCompile Include="Game\GimmickList\FishManager.cpp" />
     <ClCompile Include="Game\GimmickList\SlideBehavior.cpp" />
@@ -323,6 +338,48 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui_demo.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui_draw.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui_impl_dx11.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui_impl_win32.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui_tables.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Tool\ImGui\imgui_widgets.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

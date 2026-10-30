@@ -3,7 +3,7 @@
  * @file   WaveManager.h
  * @brief  波の生成と描画を管理するマネージャークラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/10/19
  */
 
 #pragma once
@@ -52,10 +52,27 @@ public:
 		const DirectX::SimpleMath::Matrix& proj
 	);
 
+
+	/// <summary>
+	/// ImGuiによる波パラメータ調整用の描画
+	/// </summary>
+	void RenderUI()
+	{
+		if (m_wave)
+		{
+			m_wave->RenderUI();
+		}
+	}
+
 	/// <summary>
 	/// 波のモードを切り替える　全シーンに影響する
 	/// </summary>
 	void ToggleMode();
+
+	/// <summary>
+	/// UIを表示・非表示を切り替える
+	/// </summary>
+	void ToggleUI();
 
 	/// <summary>
 	/// 現在の波のモードを取得　trueなら立方体、falseなら通常の波

@@ -3,7 +3,7 @@
  * @file   Particle.cpp
  * @brief  シェーダ用エフェクトのパーティクル管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/29
+ * @date   2026/10/28
  */
 
 #include "pch.h"
@@ -23,6 +23,7 @@
 #include "Game/Effects/ParticleList/ExplosionEmitter.h"
 #include "Game/Effects/ParticleList/DashEmitter.h"
 #include "Game/Effects/ParticleList/HealEmitter.h"
+#include "Game/Effects/ParticleList/DashWarningEmitter.h"
 
 //----------------------------------------------------------
 // 頂点シェーダへ渡す頂点データの入力レイアウト定義
@@ -52,9 +53,13 @@ Particle::Particle()
 	m_creatorMap[Type::Explosion] = [](auto pos, auto count) {
 		return std::make_unique<ExplosionEmitter>(pos, count);
 		};
-	//ダッシュの煙
+	//ダッシュの煙 白
 	m_creatorMap[Type::Dash] = [](auto pos, auto count) {
 		return std::make_unique<DashEmitter>(pos, count);
+		};
+	//ダッシュ予兆の煙　赤
+	m_creatorMap[Type::DashWarning] = [](auto pos, auto count) {
+		return std::make_unique<DashWarningEmitter>(pos, count);
 		};
 	//回復
 	m_creatorMap[Type::Heal] = [](auto pos, auto count) {
@@ -197,12 +202,6 @@ void Particle::Render(DirectX::SimpleMath::Matrix view, DirectX::SimpleMath::Mat
 	context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 	context->GSSetShader(m_geometryShader.Get(), nullptr, 0);
 	context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
-
-	////ピクセルシェーダにテクスチャを登録する。
-	//for (int i = 0; i < m_texture.size(); i++)
-	//{
-	//	context->PSSetShaderResources(i, 1, m_texture[i].GetAddressOf());
-	//}
 
 	//インプットレイアウトの登録
 	context->IASetInputLayout(m_inputLayout.Get());

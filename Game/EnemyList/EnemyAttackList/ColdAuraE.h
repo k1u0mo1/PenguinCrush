@@ -1,0 +1,157 @@
+/**
+ * @file   ColdAuraE.h
+ * @brief  敵の範囲攻撃クラス
+ * @author 國田知睦
+ * @date   2026/10/26
+ */
+
+#pragma once
+#include "pch.h"
+#include "Game/Common/DeviceResources.h"
+#include "Game/Common/StepTimer.h"
+#include "Game/Camera/PlayerCamera.h"
+#include "Game/Collision/DisplayCollision.h"
+#include "Game/Collision/ModelCollision.h"
+#include "Game/EnemyList/EnemyAttackList/EnemyAttackBase.h"
+#include "Game/Effects/Smoke.h"
+
+class EnemyBase;
+
+class ColdAuraE : public EnemyAttackBase
+{
+private:
+
+    //------------------------------------------------------
+    //攻撃関連
+    //------------------------------------------------------
+
+    //突進攻撃のダメージ量
+    static constexpr float ATTACK_DAMAGE = 30.0f;
+    //ノックバックの力
+    static constexpr float KNOCKBACK_POWER = 4.0f;
+    //移動速度
+    static constexpr float RUSH_SPEED = 30.0f;
+    //攻撃半径
+    static constexpr float AURA_RADIUS = 5.0f;
+    //○秒だけ判定させる
+    static constexpr float MAX_LIFETIME = 1.5f;
+    //予兆時間
+    static constexpr float CHARGE_TIME = 0.6f;
+
+    //------------------------------------------------------
+    //サイズ関連
+    //------------------------------------------------------
+
+    //当たり判定のサイズ
+    static constexpr float DEFAULT_BOUNDING_SIZE = 0.3f;
+    //コリジョンの当たり判定のサイズ
+    static constexpr DirectX::SimpleMath::Vector3 COLLISION_SIZE =
+        DirectX::SimpleMath::Vector3(1.0f, 1.5f, 1.0f);
+    //デバックの当たり判定の線の太さ
+    static constexpr float DEBUG_COLLISION_LINE_THICKNESS = 0.5f;
+    //サイズ
+    static constexpr float SCALE_SIZE = 1.0f;
+
+public:
+
+    /// <summary>
+    /// 敵の突進攻撃を生成
+    /// </summary>
+    /// <param name="deviceResources">デバイスリソース</param>
+    /// <param name="boss">突進させるボスのポインタ</param>
+    /// <param name="forward">突進する方向ベクトル</param>
+    /// <param name="displayCollision">デバッグ描画用</param>
+    ColdAuraE(
+        DX::DeviceResources* deviceResources,
+        EnemyBase* enemy,
+        const DirectX::SimpleMath::Vector3& forward,
+        std::shared_ptr<DisplayCollision> displayCollision);
+
+    /// <summary>
+    /// デストラクタ
+    /// </summary>
+    ~ColdAuraE() override = default;
+
+    /// <summary>
+    /// ボスの向きと座標を更新、突進させる
+    /// </summary>
+    /// <param name="deltaTime">前フレームからの経過時間</param>
+    void Update(float deltaTime) override;
+
+    /// <summary>
+    /// 攻撃判定を描画
+    /// </summary>
+    /// <param name="context">デバイスコンテキスト</param>
+    /// <param name="view">ビュー行列</param>
+    /// <param name="proj">プロジェクション行列</param>
+    void Render(
+        ID3D11DeviceContext* context,
+        const DirectX::SimpleMath::Matrix& view,
+        const DirectX::SimpleMath::Matrix& proj)override;
+
+    /// <summary>
+    /// 攻撃の寿命が尽きたかどうか
+    /// </summary>
+    /// <returns>寿命（MAX_LIFETIME）を超えていれば</returns>
+    bool IsDead() const override { return m_lifetime >= MAX_LIFETIME; }
+
+    /// <summary>
+    /// 攻撃を強制的に終了
+    /// </summary>
+    void SetDead() override { m_isDead = true; }
+
+    /// <summary>
+    /// 攻撃が当たった時のノックバック力を取得
+    /// 敵ー＞プレイヤー
+    /// </summary>
+    /// <returns>ノックバック力</returns>
+    float GetKnockbackPower() const override { return KNOCKBACK_POWER; }
+
+    /// <summary>
+    /// 当たり判定を取得
+    /// </summary>
+    /// <returns>モデルコリジョンのポインタ</returns>
+    ModelCollision* GetCollision() const override { return m_collision.get(); }
+
+    /// <summary>
+    /// 攻撃判定の現在のワールド座標を取得
+    /// </summary>
+    /// <returns>現在の座標</returns>
+    DirectX::SimpleMath::Vector3 GetPosition() const override { return m_position; }
+
+    /// <summary>
+    /// 攻撃の進行方向ベクトルを取得
+    /// </summary>
+    /// <returns></returns>
+    DirectX::SimpleMath::Vector3 GetForward() const override { return DirectX::SimpleMath::Vector3::Zero;}
+
+    /// <summary>
+    /// 突進攻撃のダメージ量を取得
+    /// </summary>
+    /// <returns>ダメージ量</returns>
+    float GetDamage() const override { return ATTACK_DAMAGE; }
+    
+private:
+    //デバイスリソース
+    DX::DeviceResources* m_deviceResources;
+    //突進モデル
+    std::shared_ptr<DirectX::Model> m_rushModel;
+    //座標
+    DirectX::SimpleMath::Vector3 m_position;
+    
+    std::unique_ptr<DirectX::CommonStates> m_states;
+
+    //長さ
+    float m_lifetime = 0.0f;
+    bool m_isDead = false;
+
+    //当たり判定
+    std::unique_ptr<ModelCollisionSphere> m_collision;
+    std::shared_ptr<DisplayCollision> m_displayCollision;
+
+    //攻撃を行う敵のポインタ
+    EnemyBase* m_enemy;
+
+    //冷気
+    std::unique_ptr<Smoke> m_smokeEffect;
+};

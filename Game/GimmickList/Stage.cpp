@@ -2,7 +2,7 @@
  * @file   Stage.cpp
  * @brief  ゲームの足場（ステージ）を管理・描画するクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/10/26
  */
 
 #include "pch.h"
@@ -328,24 +328,36 @@ void Stage::ApplyDamegeToFloe(float elapsedTime, float x, float z)
 
 bool Stage::FindSafeRespawnPosition(float respawnHeight, float boundaryY, DirectX::SimpleMath::Vector3& outPos) const
 {
-	//ステージ全体をグリッド状にチェックしていく
-    for (float checkX = RESPAWN_SEARCH_MIN; checkX <= RESPAWN_SEARCH_MAX; checkX += RESPAWN_SEARCH_STEP)
-    {
-        for(float checkZ = RESPAWN_SEARCH_MIN; checkZ <= RESPAWN_SEARCH_MAX; checkZ += RESPAWN_SEARCH_STEP)
-        {
-            //調べている場所の足場の高さを取得
-			float groundY = GetGroundHeight(checkX, checkZ);
+    UNREFERENCED_PARAMETER(boundaryY);
 
-			//足場の高さが安全な位置より高いか？
-            if (groundY > boundaryY)
-            {
-				//安全な位置が見つかったので、そこにリスポーンさせる
-                outPos = DirectX::SimpleMath::Vector3(checkX, respawnHeight, checkZ);
-                return true;
-            }
-		}
+    //まだ沈んでいない安全な流氷リスト
+    std::vector<DirectX::SimpleMath::Vector3> safeFloePositions;
+
+    for (const auto& floe : m_iceFloes)
+    {
+        //沈んでいない・流氷のHPが残っている対象
+        if (!floe.isFallen && floe.hp > 0.0f && floe.position.y > FALL_LIMIT_Y)
+        {
+            //周囲の流氷が落ちて孤立になっていないか
+            safeFloePositions.push_back(floe.position);
+        }
     }
-	//安全な位置が見つからなかった
+
+    //安全な流氷が存在する場合
+    if (!safeFloePositions.empty())
+    {
+        //生き残っている流氷の中からランダムに１つ選ぶ
+        int randomIndex = rand() % safeFloePositions.size();
+        DirectX::SimpleMath::Vector3 chosenPos = safeFloePositions[randomIndex];
+
+        //リスポーン用の高さに差し替える
+        outPos = DirectX::SimpleMath::Vector3(chosenPos.x, respawnHeight, chosenPos.z);
+        return true;
+    }
+
+    //万が一すべての流氷が落ちている場合
+    outPos = DirectX::SimpleMath::Vector3(0.0f, respawnHeight, 0.0f);
+
     return false;
 }
 
@@ -443,6 +455,14 @@ void Stage::Update(float elapsedTime, WaveManager* waveManager)
         float blendFactor = WAVE_BLEND_FACTOR;
         //高さのブレンド
         idealPos.y = (idealPos.y * (1.0f - blendFactor)) + (localWaveY * blendFactor);
+        
+        ////波の貫通防止
+        //constexpr float MIN_CLEARANCE = 1.5f;
+        //if (idealPos.y < localWaveY * MIN_CLEARANCE)
+        //{
+        //    idealPos.y = localWaveY + MIN_CLEARANCE;
+        //}
+
         //傾きのブレンド
         float finalRotateX = (m_rotateX * (1.0f - blendFactor)) + (localSlope.x * blendFactor);
         float finalRotateZ = (m_rotateZ * (1.0f - blendFactor)) + (localSlope.y * blendFactor);

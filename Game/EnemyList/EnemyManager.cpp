@@ -3,7 +3,7 @@
  * @file   EnemyManager.cpp
  * @brief  敵関連をまとめる管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/10/27
  */
 
 #include "pch.h"
@@ -63,6 +63,9 @@ void EnemyManager::Initialize(
 void EnemyManager::Update(
     float dt,  Player* player, Particle* particle)
 {
+    //受け取ったパーティクルを保持
+    m_particle = particle;
+
 	//敵の更新
     for (auto& enemy : m_enemies)
     {
@@ -90,23 +93,54 @@ void EnemyManager::Update(
         m_rush[i]->Update(dt);
 
         BossEnemy* boss = GetBossEnemy();
-        // 突進エフェクト
-        if (particle && boss)
+
+        if (boss != nullptr)
         {
-            // 現在のボスの位置を取得
-            DirectX::SimpleMath::Vector3 pos = boss->GetPosition();
-            
-            pos.y += DASH_HEIGHT;
-           
-            //エフェクト生成
-            particle->Spawn(
-                Particle::Type::Dash,
-                pos,
-                DASH_EFFECT_COUNT,
-                DASH_EFFECT_SIZE);
+            //落下で状態を変更する
+            if (boss->GetState() == EnemyState::Idle)
+            {
+                //即座に破壊
+                m_rush[i]->SetDead();
+                continue;
+            }
+
+            // 突進エフェクト
+            if (particle && boss)
+            {
+                // 現在のボスの位置を取得
+                DirectX::SimpleMath::Vector3 pos = boss->GetPosition();
+
+                pos.y += DASH_HEIGHT;
+
+                //エフェクト生成
+                particle->Spawn(
+                    Particle::Type::Dash,
+                    pos,
+                    DASH_EFFECT_COUNT,
+                    DASH_EFFECT_SIZE);
+            }
         }
     }
     
+    //範囲攻撃
+    for (size_t i = 0; i < m_coldAura.size(); i++)
+    {
+        m_coldAura[i]->Update(dt);
+
+        if (particle)
+        {
+            DirectX::SimpleMath::Vector3 auraPos = m_coldAura[i]->GetPosition();
+            auraPos.y = 0.2f;
+
+            particle->Spawn(
+                Particle::Type::Splash,
+                auraPos,
+                COLD_AURA_PARTICLE_COUNT,
+                COOLDOWN_WARMING_TIME
+            );
+        }
+    }
+
     //-----------------------------------------------
     // 敵の攻撃とプレイヤーの衝突判定＋ダメージ処理
     //-----------------------------------------------
@@ -177,8 +211,38 @@ void EnemyManager::Update(
                 rush->SetDead();
             }
         }
+
+        for (auto& aura : m_coldAura)
+        {
+            if (aura->GetCollision()->Intersects(player->GetCollision()))
+            {
+                DirectX::SimpleMath::Vector3 knockbackDir = player->GetPosition() - aura->GetPosition();
+                knockbackDir.y = 0.0f;
+
+                if (knockbackDir.LengthSquared() > VECTOR_EPSILON)
+                {
+                    knockbackDir.Normalize();
+                }
+
+                player->ApplyKnockback(knockbackDir, aura->GetKnockbackPower());
+
+                if (particle)
+                {
+                    DirectX::SimpleMath::Vector3 hitPos = player->GetPosition();
+                    hitPos.y += HIT_EFFECT_HEIGHT_OFFSET;
+                    particle->Spawn(
+                        Particle::Type::Explosion,hitPos,
+                        HIT_EFFECT_COUNT,
+                        HIT_EFFECT_SIZE);
+                }
+                //ダメージ適用
+                player->TakeDamage(aura->GetDamage());
+            }
+        }
     }
     
+    
+
     //--------------------------------
     // 生存判定：死んだものを削除
     //--------------------------------
@@ -187,16 +251,22 @@ void EnemyManager::Update(
         std::remove_if(m_enemies.begin(), m_enemies.end(),
             [](std::unique_ptr<EnemyBase>& e) { return e->IsDead(); }),
 		m_enemies.end());
-    //やられた攻撃
+    //攻撃
     m_attacks.erase(
         std::remove_if(m_attacks.begin(), m_attacks.end(),
             [](std::unique_ptr<AttackE>& a) { return a->IsDead(); }),
         m_attacks.end());
-    //やられた突進
+    //突進
     m_rush.erase(
         std::remove_if(m_rush.begin(), m_rush.end(),
             [](std::unique_ptr<RushE>& r) { return r->IsDead(); }),
         m_rush.end());
+    //範囲攻撃
+    m_coldAura.erase(
+        std::remove_if(m_coldAura.begin(), m_coldAura.end(),
+            [](std::unique_ptr<ColdAuraE>& c) {return c->IsDead(); }),
+        m_coldAura.end());
+
 }
 
 //----------------------------------------------------------
@@ -216,28 +286,33 @@ void EnemyManager::Render(
         enemy->Render(context, view, proj);
 	}
     
-    BossEnemy* boss = GetBossEnemy();
+    
     //敵の影の描画
-    if (boss && shadowRenderer)
+    if (m_stage && shadowRenderer)
     {
-        //ボスの現在位置を取得
-        DirectX::SimpleMath::Vector3 shadowPos = boss->GetPosition();
+        
+        for (auto& enemy : m_enemies)
+        {
+            if (!enemy || enemy->IsDead()) continue;
 
-        //ステージの傾きを取得
-        float rotX = m_stage->GetRotateX();
-        float rotZ = m_stage->GetRotateZ();
+            DirectX::SimpleMath::Vector3 shadowPos = enemy->GetPosition();
 
-        //影を描画
-        shadowRenderer->Render(
-            context,
-            m_states.get(),
-            view,
-            proj,
-            shadowPos,
-            SHADOW_SCALE,
-            rotX,
-            rotZ
-        );
+            //ステージの傾きを取得
+            float rotX = m_stage->GetRotateX();
+            float rotZ = m_stage->GetRotateZ();
+
+            //影を描画
+            shadowRenderer->Render(
+                context,
+                m_states.get(),
+                view,
+                proj,
+                shadowPos,
+                SHADOW_SCALE,
+                rotX,
+                rotZ
+            );
+        }
     }
 
     //各攻撃の描画
@@ -249,6 +324,11 @@ void EnemyManager::Render(
     for (auto& r : m_rush)
     {
         r->Render(context, view, proj);
+    }
+
+    for (auto& aura : m_coldAura)
+    {
+        aura->Render(context, view, proj);
     }
 }
 
@@ -271,7 +351,7 @@ std::vector<EnemyBase*> EnemyManager::GetActiveEnemies()const
     //生きている敵をリストに追加
     for (auto& enemy : m_enemies)
     {
-        if (!enemy->IsDead())
+        if (enemy->GetHP()>0.0f&&enemy->GetState()!=EnemyState::Dying)
         {
             enemies.push_back(enemy.get());
         }
@@ -285,7 +365,8 @@ std::vector<EnemyBase*> EnemyManager::GetActiveEnemies()const
 
 void EnemyManager::DoBossAttack(
     float dt, 
-    const DirectX::SimpleMath::Vector3& playerPos
+    const DirectX::SimpleMath::Vector3& playerPos,
+    Particle* particle
     )
 {
     BossEnemy* boss = GetBossEnemy();
@@ -331,7 +412,8 @@ void EnemyManager::DoBossAttack(
             m_deviceResources,
             boss,
             forward,
-            m_displayCol
+            m_displayCol,
+            particle
         )
         );
         //モデル
@@ -449,17 +531,37 @@ void EnemyManager::RequestAttackE(
 
 void EnemyManager::RequestRushE(
     EnemyBase* enemy,
-    const DirectX::SimpleMath::Vector3& forward)
+    const DirectX::SimpleMath::Vector3& forward,
+    Particle* particle)
 {
+    //引数のparticlenullptrなら保持しているm_particleを使う
+    Particle* p = (particle != nullptr) ? particle : m_particle;
+
 	//突進
     m_rush.push_back(
         std::make_unique<RushE>(
-        m_deviceResources,
-        enemy,
-        forward,
-        m_displayCol
-    )
-	);
+            m_deviceResources,
+            enemy,
+            forward,
+            m_displayCol,
+            p
+        )
+    );
+}
+
+void EnemyManager::RequestColdAuraE(
+    EnemyBase* enemy, 
+    const DirectX::SimpleMath::Vector3& forward)
+{
+    //範囲攻撃
+    m_coldAura.push_back(
+        std::make_unique<ColdAuraE>(
+            m_deviceResources,
+            enemy,
+            forward,
+            m_displayCol
+        )
+    );
 }
 
 //----------------------------------------------------------

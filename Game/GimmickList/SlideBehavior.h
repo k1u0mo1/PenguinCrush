@@ -3,7 +3,7 @@
  * @file   SlideBehavior.h
  * @brief  滑る挙動のコンポーネントクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/08/17
  */
 
 #pragma once
@@ -22,7 +22,7 @@ private:
 	//加速度
 	static constexpr float ACCELERATION_FORCE = 0.5f;
 	//摩擦力
-	static constexpr float FRICTION_FORCE = 2.0f;
+	static constexpr float FRICTION_FORCE = 0.8f;
 	//最小の値の大きさ
 	static constexpr float VELOCITY_THRESHOLD = 0.01f;
 
@@ -43,6 +43,12 @@ public:
 		const DirectX::SimpleMath::Vector3& slideDir,
 		float elapsedTime);
 	
+	/// <summary>
+	/// 慣性速度を直接セットする
+	/// </summary>
+	/// <param name="inertia">設定する慣性速度</param>
+	void SetInertia(const DirectX::SimpleMath::Vector3 inertia) { m_slidingInertia = inertia; }
+
 private:
 	
 	//自発的な移動に対する慣性

@@ -2,7 +2,7 @@
  * @file   Game.h
  * @brief  ƒQ[ƒ€
  * @author š “c’m–r
- * @date   2026/06/23
+ * @date   2026/10/15
  */
 
 #pragma once
@@ -20,6 +20,11 @@
 #include "Library/InputManager.h"
 
 #include <memory>
+
+//ImGui
+#include "Tool/ImGui/imgui.h"
+#include "Tool/ImGui/imgui_impl_win32.h"
+#include "Tool/ImGui/imgui_impl_dx11.h"
 
 
 class Game final : public DX::IDeviceNotify
@@ -66,6 +71,20 @@ private:
 
     void CreateDeviceDependentResources();
     void CreateWindowSizeDependentResources();
+
+    //ImGui
+
+    /// <summary>
+    /// ImGui‚Ì‰Šú‰»
+    /// </summary>
+    /// <param name="window">‰æ–Ê</param>
+    void InitializeImGui(HWND window);
+
+    /// <summary>
+    /// ”jŠüƒwƒ‹ƒp[ŠÖ”
+    /// </summary>
+    void FinalizeImGui();
+
 
 private:
 

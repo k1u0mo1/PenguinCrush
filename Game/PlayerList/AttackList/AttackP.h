@@ -3,7 +3,7 @@
  * @file   AttackP.h
  * @brief  プレイヤーの近距離攻撃を管理するクラス
  * @author 國田知睦
- * @date   2026/06/04
+ * @date   2026/10/23
  */
 
 #pragma once
@@ -23,7 +23,7 @@ class AttackP:public AttackBase
 private:
 
     //攻撃したときのダメージ量
-    static constexpr float ATTACK_DAMAGE = 15.0f;
+    static constexpr float ATTACK_DAMAGE = 150.0f;
     //敵を弾き飛ばすノックバック力
     static constexpr float KNOCKBACK_POWER = 15.0f;
     //攻撃判定が消えるまでの時間
@@ -111,12 +111,6 @@ public:
     DirectX::SimpleMath::Vector3 GetPosition() const override { return m_position; }
 
     /// <summary>
-    /// 当たり判定を返す
-    /// </summary>
-    /// <returns>モデルコリジョンのポインタ</returns>
-    ModelCollision* GetCollision() { return m_collision.get(); }
-
-    /// <summary>
     /// 攻撃の当たり判定を直接取得
     /// </summary>
     /// <returns>当たり判定のバウンディングボックス</returns>
@@ -127,6 +121,18 @@ public:
     /// </summary>
     /// <returns>ダメージ量</returns>
     float GetDamage() const override { return ATTACK_DAMAGE; }
+
+    /// <summary>
+    /// プレイヤーの攻撃タイプを取得
+    /// </summary>
+    /// <returns>プレイヤーの攻撃タイプ</returns>
+    PlayerAttackType GetAttackType() const override { return PlayerAttackType::Attack; }
+
+    /// <summary>
+    /// 攻撃時の効果音名を取得
+    /// </summary>
+    /// <returns>攻撃時の効果音名</returns>
+    const char* GetHitSEName()const override { return "Attack"; }
 
 private:
     //デバイスリソース

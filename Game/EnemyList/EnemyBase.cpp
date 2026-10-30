@@ -3,7 +3,7 @@
  * @file   EnemyBase.cpp
  * @brief  敵の管理を行う基底クラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/10/28
  */
 
 #include "pch.h"
@@ -55,10 +55,19 @@ void EnemyBase::Update(
 	EnemyManager* enemyManager
 )
 {
+	//死亡演出はタイマーを進めるだけで移動やAIを停止する
+	if (m_state == EnemyState::Dying)
+	{
+		m_dyingTimer += dt;
+		return;
+	}
+
+	//落下の判定と処理
+	CheckAndHandleFalling(stage, particle);
 	//AIの思考処理
 	UpdateAI(dt, playerPos, stage, particle, enemyManager);
 	//物理演算と移動処理
-	UpdatePhysice(dt, stage);
+	UpdatePhysice(dt, stage, particle);
 }
 
 //----------------------------------------------------------
@@ -118,9 +127,13 @@ void EnemyBase::CheckAndHandleFalling(
 
 		m_hp -= FALL_DAMAGE;
 
-		if (m_hp < 0)
+		if (m_hp <= 0)
 		{
 			m_hp = 0.0f;
+
+			//落下でやられたときも死亡演出ステートに遷移
+			m_state = EnemyState::Dying;
+			m_dyingTimer = 0.0f;
 		}
 
 		AudioManager::GetInstance()->Play("Fall");

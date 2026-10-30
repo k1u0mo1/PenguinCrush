@@ -2,7 +2,7 @@
  * @file   RushE.h
  * @brief  敵の突進攻撃クラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/10/27
  */
 
 #pragma once
@@ -15,6 +15,7 @@
 #include "Game/EnemyList/EnemyAttackList/EnemyAttackBase.h"
 
 class EnemyBase;
+class Particle;
 
 class RushE : public EnemyAttackBase
 {
@@ -28,12 +29,25 @@ private:
     static constexpr float ATTACK_DAMAGE = 30.0f;
     //ノックバックの力
     static constexpr float KNOCKBACK_POWER = 25.0f;
+
     //移動速度
     static constexpr float RUSH_SPEED = 30.0f;
+    //突進判定の全体の生存時間
+    static constexpr float MAX_LIFETIME = 2.0f;
+    //溜め時間
+    static constexpr float CHARGE_TIME = 0.8f;
 
-    //○秒だけ判定させる
-    static constexpr float MAX_LIFETIME = 1.5f;
-
+    //突進距離・線の描画長さ
+    static constexpr float PREVIEW_LINE_LENGTH = 25.0f;
+    static constexpr float RUSH_PREVIEW_WIDTH = 1.5f;
+    //進捗アニメーション速度
+    static constexpr float PREVIEW_PROGRESS_SPEED = 5.0f; 
+    //足元からのY軸オフセット
+    static constexpr float PREVIEW_SPAWN_HEIGHT_OFFSET = 1.5f;
+    //予兆パーティクル生成数
+    static constexpr int   PREVIEW_PARTICLE_COUNT = 5;
+    //予兆パーティクルサイズ
+    static constexpr float PREVIEW_PARTICLE_SIZE = 3.0f;
     //------------------------------------------------------
     //サイズ関連
     //------------------------------------------------------
@@ -48,6 +62,7 @@ private:
     //サイズ
     static constexpr float SCALE_SIZE = 1.0f;
 
+
 public:
 
     /// <summary>
@@ -61,7 +76,8 @@ public:
         DX::DeviceResources* deviceResources,
         EnemyBase* enemy,
         const DirectX::SimpleMath::Vector3& forward,
-        std::shared_ptr<DisplayCollision> displayCollision);
+        std::shared_ptr<DisplayCollision> displayCollision,
+        Particle* particle=nullptr);
 
     /// <summary>
     /// ボスの向きと座標を更新、突進させる
@@ -133,8 +149,6 @@ private:
 private:
     //デバイスリソース
     DX::DeviceResources* m_deviceResources;
-    //突進モデル
-    std::shared_ptr<DirectX::Model> m_rushModel;
     //座標
     DirectX::SimpleMath::Vector3 m_position;
     //方向（前方）
@@ -150,4 +164,7 @@ private:
 
     //攻撃を行う敵のポインタ
     EnemyBase* m_enemy;
+
+    //パーティクルポインタを保持
+    Particle* m_particle = nullptr;
 };

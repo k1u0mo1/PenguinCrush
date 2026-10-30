@@ -3,7 +3,7 @@
  * @file   RushP.cpp
  * @brief  プレイヤーの突進攻撃を管理するクラスの実装
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/10/23
  */
 
 #include "pch.h"

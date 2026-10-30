@@ -87,6 +87,38 @@ void StageManager::Update(float elapsedTime, WaveManager* waveManager)
 }
 
 //----------------------------------------------------------
+// ステージの耐久値の更新
+//----------------------------------------------------------
+
+void StageManager::UpdateFloeDamage(
+    float elapsedTime, 
+    Player* player,
+    const std::vector<EnemyBase*>& activeEnemise) const
+{
+    Stage* currentStage = GetCurrentStage();
+
+    if (!currentStage)return;
+
+    //プレイヤーの足元の流氷ダメージ
+    if (player && !player->IsDead())
+    {
+        //プレイヤーの座標を貰う
+        DirectX::SimpleMath::Vector3 playerPos = player->GetPosition();
+        currentStage->ApplyDamegeToFloe(elapsedTime, playerPos.x, playerPos.z);
+    }
+    //生きている敵の足元の流氷ダメージ
+    for (EnemyBase* enemy : activeEnemise)
+    {
+        if (!enemy || enemy->IsDead())continue;
+
+        //敵の座標を貰う
+        DirectX::SimpleMath::Vector3 enemyPos = enemy->GetPosition();
+        currentStage->ApplyDamegeToFloe(elapsedTime, enemyPos.x, enemyPos.z);
+    }
+
+}
+
+//----------------------------------------------------------
 // ステージの描画
 //----------------------------------------------------------
 

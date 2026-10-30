@@ -5,6 +5,9 @@
 #include "pch.h"
 #include "Game.h"
 
+#include "Tool/ImGui/imgui.h"
+#include "Tool/ImGui/imgui_impl_win32.h"
+
 using namespace DirectX;
 
 #ifdef __clang__
@@ -150,9 +153,19 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     return static_cast<int>(msg.wParam);
 }
 
+//外部を呼ぶための関数
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 // Windows procedure
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+
+    //ImGuiにマウスやキーボードの入力を渡す処理
+    if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+    {
+        return true;
+    }
+
     static bool s_in_sizemove = false;
     static bool s_in_suspend = false;
     static bool s_minimized = false;

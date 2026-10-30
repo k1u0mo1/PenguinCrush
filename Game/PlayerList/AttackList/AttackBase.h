@@ -3,7 +3,7 @@
  * @file   AttackBase.h
  * @brief  プレイヤーの攻撃のベースとなるクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/10/23
  */
 
 //攻撃の基底クラス-------------------------------
@@ -13,6 +13,8 @@
 #include <memory>
 #include <SimpleMath.h>
 #include <d3d11.h>
+
+#include "Game/PlayerList/PlayerAttackType.h"
 
 class ModelCollision;
 
@@ -84,6 +86,18 @@ public:
 	/// <returns>攻撃の基本ダメージ量</returns>
 	virtual float GetDamage() const = 0;
 
+	/// <summary>
+	/// 攻撃タイプを取得
+	/// </summary>
+	/// <returns>プレイヤーの攻撃タイプ</returns>
+	virtual PlayerAttackType GetAttackType() const = 0;
+
+	/// <summary>
+	/// ヒット時の効果音名を取得
+	/// </summary>
+	/// <returns>ヒット時の効果音名</returns>
+	virtual const char* GetHitSEName() const = 0;
+
 protected:
 
 	/// <summary>
@@ -94,8 +108,6 @@ protected:
 
 private:
 
-	//ノックバックを保持
-	float m_knockbackPower = 0.0f;
 	//ベクトル
 	DirectX::SimpleMath::Vector3 m_forward = DirectX::SimpleMath::Vector3::UnitZ;
 };

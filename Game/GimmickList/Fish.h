@@ -3,7 +3,7 @@
  * @file   Fish.h
  * @brief  魚オブジェクト
  * @author 國田知睦
- * @date   2026/07/16
+ * @date   2026/10/02
  */
 
 #pragma once
@@ -46,6 +46,9 @@ private:
 
     //影の大きさ
 	static constexpr float SHADOW_SCALE = 1.5f;
+
+    //地面との距離
+	static constexpr float FISH_HEIGHT_OFFSET = 0.5f;
 
     //------------------------------------------------------
     //動き関連

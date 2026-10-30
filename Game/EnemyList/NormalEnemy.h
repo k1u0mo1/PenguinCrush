@@ -3,7 +3,7 @@
  * @file   NormalEnemy.h
  * @brief  通常敵の管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/10/22
  */
 
 #pragma once
@@ -39,14 +39,10 @@ private:
 	//水しぶきの粒子数
 	static constexpr float SPLASH_PARTICLE_COUNT = 20.0f;
 
-	//攻撃する距離
-	static constexpr float ATTACK_DISTANCE = 2.0f;
 	//復活する時の判定の高さ
 	static constexpr float RESPAWN_HEIGHT = 10.0f;
 	//攻撃ステートのタイマー
 	static constexpr float ATTACK_STATE_DURATION = 1.0f;
-	//クールダウン
-	static constexpr float ATTACK_COOLDOWN = 1.5f;
 
 	//コリジョンの透明度
 	static constexpr float COLLISION_DRAW_ALPHA_NORMAL = 0.15f;
@@ -148,7 +144,18 @@ protected:
 	/// <param name="stage">ステージ情報</param>
 	/// <param name="dt">経過時間</param>
 	/// <param name="particle">パーティクル情報</param>
-	void UpdatePhysics(Stage* stage, float dt, Particle* particle = nullptr);
+	void UpdatePhysics(Stage* stage, float dt, Particle* particle);
+
+	/// <summary>
+	/// タイマーの更新
+	/// </summary>
+	/// <param name="deltaTime">前フレームからの経過時間</param>
+	void UpdateNormalEnemyTimers(float deltaTime);
+
+	/// <summary>
+	/// コリジョン更新
+	/// </summary>
+	void UpdateNormalEnemyCollision();
 
 protected:
 
@@ -209,14 +216,13 @@ private:
 	float m_rotationY = 0.0f;
 	DirectX::SimpleMath::Vector3 m_forward = { 0.0f, 0.0f, 0.0f };
 
-	//敵の攻撃パターン
-	std::vector<std::shared_ptr<EnemyAttackPattern>> m_attackPattern;
-	float m_meleeAttackCooldownTimer = 0.0f;
-
 	//敵の状態
-	EnemyState m_state = EnemyState::Idle;
+	//EnemyState m_state = EnemyState::Idle;
 	float m_stateTimer = 0.0f;
 
 	//敵の個体差によってプレイヤーとの距離を変える
 	float m_stopDistance;
+
+	//ビヘイビアツリー用の攻撃パターン
+	std::vector<std::shared_ptr<EnemyAttackPattern>>m_attackPattern;
 };

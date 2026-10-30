@@ -3,7 +3,7 @@
  * @file   Player.h
  * @brief  プレイヤーキャラクターの制御・パラメータ管理を行うクラス
  * @author 國田知睦
- * @date   2026/07/17
+ * @date   2026/10/21
  */
 
 #pragma once
@@ -12,7 +12,6 @@
 #include <memory>
 #include "Game/Common/DeviceResources.h"
 #include "PlayerStats.h"
-#include "Game/Collision/DisplayCollision.h"
 #include "Game/GimmickList/SlideBehavior.h"
 #include "Game/Common/ObjectCharacter/CharacterBase.h"
 
@@ -24,6 +23,7 @@ class WaveManager;
 class ShadowRenderer;
 class AttackManager;
 class Animator;
+class DisplayCollision;
 class ModelCollision;
 class ModelCollisionOrientedBox;
 
@@ -95,9 +95,9 @@ private:
 	
     //ノックバック関連
     //吹っ飛ぶ強さ
-    static constexpr float KNOCKBACK_POWER_SCALE = 10.0f;
+    static constexpr float KNOCKBACK_POWER_SCALE = 5.0f;
     //吹き飛ぶ時に上方向への力
-    static constexpr float KNOCKBACK_UP_FORCE = 50.0f;
+    static constexpr float KNOCKBACK_UP_FORCE = 10.0f;
     //ノックバックの持続時間
     static constexpr float KNOCKBACK_DURATION = 0.2f;
 
@@ -111,6 +111,10 @@ private:
 	//当たり判定の線の太さ
     static constexpr float COLLISION_LINE_THICKNESS = 0.1f;
 
+    //ダメージ後の無敵タイマー
+    float m_invincibleTimer = 0.0f;
+    //無敵時間の長さ
+    static constexpr float INVINCIBLE_DURARION = 0.8f;
 public:
 
     /// <summary>
@@ -266,20 +270,12 @@ public:
     /// <returns>突進中　true　突進していない　false</returns>
     bool IsDashing() const { return m_isDashing; }
 
-    //-----------------------------------------------------------
-
     /// <summary>
-    /// リソース
+	/// SlideBehaviorの慣性を渡す
     /// </summary>
-    void CreateDeviceResources();
-
-    /// <summary>
-    /// 画面リソース
-    /// </summary>
-    /// <param name="width">画面の幅</param>
-    /// <param name="height">画面の高さ</param>
-    void CreateWindowSizeResources(int width, int height);
-    //-----------------------------------------------------------
+    /// <param name="inertia">設定する慣性速度</param>
+    void SetSlideInertia(
+        const DirectX::SimpleMath::Vector3& inertia) { m_slideBehavior.SetInertia(inertia); }
 
     /// <summary>
     /// プレイヤーに外部からノックバック
@@ -296,37 +292,27 @@ public:
     void Heal(float amount) { m_stats.Heal(amount); }
     
     /// <summary>
-    /// プレイヤーの移動、ダッシュ、慣性、地形に沿った高さ補正の処理
-    /// </summary>
-    /// <param name="elapsedTime">前フレームからの経過時間</param>
-    /// <param name="stage">>足場情報を取得するためのステージポインタ</param>
-    /// <param name="particle">突進時のエフェクト生成用マネージャー</param>
-    void HandleMovement(float elapsedTime, Stage* stage, Particle* particle);
-
-    /// <summary>
-    /// マウスとキーボード入力に応じた攻撃の処理
-    /// </summary>
-    /// <param name="elapsedTime">前フレームからの経過時間</param>
-    /// <param name="mouse">マウスの現在状態</param>
-    /// <param name="mouseTracker">マウスクリックのエッジ検出用トラッカー</param>
-    /// <param name="kb">キーボードの現在状態</param>
-    void HandleAttack(
-        float elapsedTime,
-        const DirectX::Mouse::State& mouse,
-        const DirectX::Mouse::ButtonStateTracker& mouseTracker,
-        const DirectX::Keyboard::State& kb
-    );
-
-    /// <summary>
-    /// スタミナの自然回復処理
-    /// </summary>
-    /// <param name="elapsedTime">前フレームからの経過時間</param>
-    void UpdateStamina(float elapsedTime);
-
-    /// <summary>
     /// ふらつき状態にする
     /// </summary>
     void ApplyDizzy();
+
+    /// <summary>
+    /// タイマーの更新
+    /// </summary>
+    /// <param name="elapsedTime">前フレームからの経過時間</param>
+    void UpdateTimers(float elapsedTime);
+
+    /// <summary>
+    /// パーティクルの落下処理とリスポーン（再出現）を行う。
+    /// </summary>
+    /// <param name="particle">処理対象のパーティクルへのポインタ。</param>
+    void HandleFallAndRespawn(Particle* particle);
+
+    /// <summary>
+    /// コリジョン更新
+    /// </summary>
+    void UpdateCollision();
+
 
 private:
 
@@ -359,6 +345,49 @@ private:
         TakeDamage(GetFallDamage());
     }
 
+protected:
+
+    /// <summary>
+    /// プレイヤーの移動、ダッシュ、慣性、地形に沿った高さ補正の処理
+    /// </summary>
+    /// <param name="elapsedTime">前フレームからの経過時間</param>
+    /// <param name="stage">>足場情報を取得するためのステージポインタ</param>
+    /// <param name="particle">突進時のエフェクト生成用マネージャー</param>
+    void HandleMovement(float elapsedTime, Stage* stage, Particle* particle);
+
+    /// <summary>
+    /// マウスとキーボード入力に応じた攻撃の処理
+    /// </summary>
+    /// <param name="elapsedTime">前フレームからの経過時間</param>
+    /// <param name="mouse">マウスの現在状態</param>
+    /// <param name="mouseTracker">マウスクリックのエッジ検出用トラッカー</param>
+    /// <param name="kb">キーボードの現在状態</param>
+    void HandleAttack(
+        float elapsedTime,
+        const DirectX::Mouse::State& mouse,
+        const DirectX::Mouse::ButtonStateTracker& mouseTracker,
+        const DirectX::Keyboard::State& kb
+    );
+
+    /// <summary>
+    /// スタミナの自然回復処理
+    /// </summary>
+    /// <param name="elapsedTime">前フレームからの経過時間</param>
+    void UpdateStamina(float elapsedTime);
+
+    /// <summary>
+    /// リソース
+    /// </summary>
+    void CreateDeviceResources();
+
+    /// <summary>
+    /// 画面リソース
+    /// </summary>
+    /// <param name="width">画面の幅</param>
+    /// <param name="height">画面の高さ</param>
+    void CreateWindowSizeResources(int width, int height);
+
+
 private:
     //デバイスリソース
     DX::DeviceResources* m_deviceResources;
@@ -375,16 +404,14 @@ private:
     PlayerCamera* m_camera = nullptr;
     
     std::unique_ptr<DirectX::CommonStates> m_states;
-    std::shared_ptr<DirectX::Model> m_model;
-
+    
     //プレイヤーの正面方向ベクトル
     DirectX::SimpleMath::Vector3 m_forward = { 0,0,1 };
 
     //プレイヤーが突進中か
     bool m_isDashing = false;
 
-    //Optional: スライド移動用
-    DirectX::SimpleMath::Vector3 m_slideVelocity = { 0,0,0 };
+    //スライド移動用
     SlideBehavior m_slideBehavior;
 
     //プレイヤーの現在の回転行列を保持する
@@ -406,13 +433,8 @@ private:
 
 private:
 
-    //影用のプリミティブ　板
-    std::unique_ptr<DirectX::GeometricPrimitive> m_shadowQuad;
-    //影のエフェクト
-    std::unique_ptr<DirectX::BasicEffect> m_shadowEffect;
     //影のテクスチャ
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_shadowTexture;
-    //入力レイアウト
-    Microsoft::WRL::ComPtr<ID3D11InputLayout>    m_shadowInputLayout;
+    
     Stage* m_stage = nullptr;
 };

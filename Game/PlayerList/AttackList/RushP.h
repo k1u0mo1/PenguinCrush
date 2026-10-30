@@ -3,7 +3,7 @@
  * @file   RushP.h
  * @brief  プレイヤーの突進攻撃を管理するクラスの実装
  * @author 國田知睦
- * @date   2026/07/01
+ * @date   2026/10/23
  */
 
 #pragma once
@@ -37,7 +37,7 @@ private:
     static constexpr float SCALE_SIZE = 0.8f;
     //突進方向
     static constexpr DirectX::SimpleMath::Vector3 FORWARD =
-        DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.1f);
+        DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.3f);
 
     //当たり判定のサイズ
     static constexpr DirectX::SimpleMath::Vector3 COLLISION_SIZE =
@@ -115,12 +115,6 @@ public:
     DirectX::SimpleMath::Vector3 GetPosition() const override { return m_position; }
 
     /// <summary>
-    /// 当たり判定を返す
-    /// </summary>
-    /// <returns>当たり判定のポインタ</returns>
-    ModelCollision* GetCollision() { return m_collision.get(); }
-
-    /// <summary>
     /// 攻撃の当たり判定を直接取得
     /// </summary>
     /// <returns>攻撃判定のボックス</returns>
@@ -138,6 +132,18 @@ public:
     /// </summary>
     /// <returns>m_player</returns>
     Player* GetPlayer() const { return m_player; }
+
+    /// <summary>
+    /// プレイヤーの攻撃タイプを取得
+    /// </summary>
+    /// <returns>プレイヤーの攻撃タイプ</returns>
+    PlayerAttackType GetAttackType() const override { return PlayerAttackType::Rush; }
+
+    /// <summary>
+    /// 攻撃時の効果音名を取得
+    /// </summary>
+    /// <returns>攻撃時の効果音名</returns>
+    const char* GetHitSEName()const override { return "Dash"; }
 
 private:
     //デバイスリソース

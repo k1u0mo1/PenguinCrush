@@ -39,6 +39,8 @@ public:
 		Explosion,
 		//ダッシュ中の後ろから線
 		Dash,
+		//ダッシュ（突進）の予兆
+		DashWarning,
 		//回復
 		Heal
 	};

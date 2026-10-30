@@ -3,7 +3,7 @@
  * @file   GamePlayScene.h
  * @brief  ゲーム画面の初期化・更新・描画を管理するクラス
  * @author 國田知睦
- * @date   2026/07/29
+ * @date   2026/10/16
  */
 
 #pragma once
@@ -24,7 +24,6 @@
 #include "Game/GimmickList/WaveManager.h"
 //魚
 #include "Game/GimmickList/FishManager.h"
-//オブジェクト------------------
 //スカイドーム
 #include "Game/ObjectList/SkyDome.h"
 
@@ -47,6 +46,8 @@
 #include "Game/Effects/Particle.h"
 //影-----------------------------------------
 #include "Game/ShadowRenderer/ShadowRenderer.h"
+
+#include "Game/GameLogic/GameJudge.h"
 
 class AttackManager;
 class HitStop;
@@ -216,12 +217,16 @@ private:
 	//ゲームのUI（プレイヤーと敵）
 	std::unique_ptr<GameUI> m_gameUI;
 
-	//ゲームが終わったかどうか
-	bool m_isFinished ;
-	//クリアしたかどうか
-	bool m_isStageClear;
-	//終了時の待機タイマー
-	float m_finishTimer;
+	////ゲームが終わったかどうか
+	//bool m_isFinished ;
+	////クリアしたかどうか
+	//bool m_isStageClear;
+	////終了時の待機タイマー
+	//float m_finishTimer;
+	
+	//勝敗判定
+	std::unique_ptr<GameJudge> m_gameJudge;
+	
 	//デバック表示/非表示
 	bool m_isDebugVisible = true;
 	//コリジョンをオン/オフ
@@ -254,6 +259,9 @@ private:
 	std::unique_ptr<AudioManager> m_audioManager;
 	//影
 	std::unique_ptr<ShadowRenderer> m_shadowRenderer;
+
+	//デバッグ中はステージクリア判定を無効化する
+	bool m_isDebugDisableClear = false;
 };
 
 
