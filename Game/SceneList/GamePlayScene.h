@@ -217,12 +217,6 @@ private:
 	//ゲームのUI（プレイヤーと敵）
 	std::unique_ptr<GameUI> m_gameUI;
 
-	////ゲームが終わったかどうか
-	//bool m_isFinished ;
-	////クリアしたかどうか
-	//bool m_isStageClear;
-	////終了時の待機タイマー
-	//float m_finishTimer;
 	
 	//勝敗判定
 	std::unique_ptr<GameJudge> m_gameJudge;

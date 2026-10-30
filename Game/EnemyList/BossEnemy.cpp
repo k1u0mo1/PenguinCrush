@@ -3,7 +3,7 @@
  * @file   BossEnemy.cpp
  * @brief  ボスの管理を行うクラス
  * @author 國田知睦
- * @date   2026/10/28
+ * @date   2026/10/30
  */
 
 #include "pch.h"
@@ -80,6 +80,7 @@ void BossEnemy::Initialize()
     AudioManager::GetInstance()->LoadSound("AttackE", L"Resources/Sounds/E_Close-Range_Attack.wav");
     AudioManager::GetInstance()->LoadSound("DashE", L"Resources/Sounds/E_Charge_Attack.wav");
     AudioManager::GetInstance()->LoadSound("Fall", L"Resources/Sounds/SE_Falling_Water.wav");
+    AudioManager::GetInstance()->LoadSound("ColdAura", L"Resources/Sounds/E_Aura.wav");
 
     //エフェクト系
     //煙の生成と初期化

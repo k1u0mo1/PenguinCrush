@@ -618,9 +618,9 @@ void GamePlayScene::CreateWindowSizeDependentResources()
 	//カーソルの非表示
 	if (m_currentCamera == CameraType::Player)
 	{
-		//m_playerCamera->HideCursor();
+		m_playerCamera->HideCursor();
 
-		ShowCursor(TRUE);
+		//ShowCursor(TRUE);
 	}
 
 	//-------------------------------------------------

@@ -3,7 +3,7 @@
  * @file   EnemyManager.cpp
  * @brief  “GŠÖ˜A‚ð‚Ü‚Æ‚ß‚éŠÇ—‚ðs‚¤ƒNƒ‰ƒX
  * @author š “c’m–r
- * @date   2026/10/27
+ * @date   2026/10/30
  */
 
 #include "pch.h"
@@ -549,6 +549,10 @@ void EnemyManager::RequestRushE(
     );
 }
 
+//----------------------------------------------------------
+// “G‚Ì”ÍˆÍUŒ‚‚ð¶¬
+//----------------------------------------------------------
+
 void EnemyManager::RequestColdAuraE(
     EnemyBase* enemy, 
     const DirectX::SimpleMath::Vector3& forward)
@@ -562,6 +566,8 @@ void EnemyManager::RequestColdAuraE(
             m_displayCol
         )
     );
+
+    AudioManager::GetInstance()->Play("ColdAura");
 }
 
 //----------------------------------------------------------
